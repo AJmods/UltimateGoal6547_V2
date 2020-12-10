@@ -399,6 +399,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         double heading = pose2d.getHeading();
         StringBuilder stringBuilder = new StringBuilder();
         String posFile = stringBuilder.append(x).append(",").append(y).append(",").append(heading).toString();
+        RobotLog.v("saved POS as " + posFile + " to " + POS_FILE_NAME);
         writeFile(POS_FILE_NAME, posFile);
     }
     public Pose2d readPos() {
@@ -652,7 +653,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     }
     public void launchRing() {
         try {
-            indexer.setPosition(.5);
+            indexer.setPosition(.55);
         } catch (Exception e) {
             RobotLog.e("LAUCNH RING FAILED");
         }

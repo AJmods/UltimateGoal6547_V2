@@ -3,12 +3,15 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.arcrobotics.ftclib.geometry.Rotation2d;
+import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
+import org.firstinspires.ftc.teamcode.drivetrain.localizer.T265LocalizerRR;
 import org.firstinspires.ftc.teamcode.util.FieldConstants;
 import org.firstinspires.ftc.teamcode.util.homar.ToggleBoolean;
 import org.firstinspires.ftc.teamcode.util.homar.ToggleInt;
@@ -19,8 +22,8 @@ import org.firstinspires.ftc.teamcode.util.throwerUtil;
 This is the tele-op we use to drive the robot
  */
 @Config
-@TeleOp(name = "Meet 1 Tele-op", group = "_teleOp")
-public class Meet1Teleop extends LinearOpMode {
+@TeleOp(name = "Meet 2 Tele-op", group = "_teleOp")
+public class Meet2Teleop extends LinearOpMode {
 
     public static boolean USE_CALCULATED_VELOCITY = false;
     public static double REV_PER_SEC = 44;
@@ -50,35 +53,36 @@ public class Meet1Teleop extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException{
        // telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()); //makes telemetry output to the FTC Dashboard
-        bot = new DriveTrain6547Realsense(this);
+        bot = new DriveTrain6547Realsense(this, true);
         telemetry.update();
 
         try {
             Pose2d currentPos = bot.readPos();
             bot.setPoseEstimate(currentPos);
+            RobotLog.v("Read pos as " + currentPos.toString());
             angleZeroValue = currentPos.getHeading();
             telemetry.log().add("set POS to " + currentPos.toString());
         } catch (Exception e) {telemetry.log().add("FAILED TO READ POSITION");}
+        telemetry.log().add("DID POS THING");
         //reset POS to 0
         bot.savePos(new Pose2d(0,0,0));
 
-        telemetry.log().add("DONE INITIALING");
         telemetry.log().add("Ready to start");
 
+        waitForStart();
         telemetry.log().add("CONTROLS:");
         telemetry.log().add("Gamepad1: TOGGLE field relative: Y");
         telemetry.log().add("Gamepad1: CALABRATE feild relative: l and r bumpers");
         telemetry.log().add("Gamepad1: ROBOT SPEED modifers: X, B, A");
         telemetry.log().add("Gamepad2: INTAKE: Left and Right Triggers");
         telemetry.log().add("Gamepad2: INDEXER: A button");
-        telemetry.log().add("Gamepad2: TURN ON/OFF THROWER: X");
-
-
-        waitForStart();
+        telemetry.log().add("Gamepad2: TURN ON/OFF THROWER: LB");
 
         double speedModifer=1;
 
-        ToggleBoolean TurnOnThrower = new ToggleBoolean(true);
+        ToggleBoolean TurnOnThrower = new ToggleBoolean(false);
+
+        //T265LocalizerRR.slamra.setPose(new com.arcrobotics.ftclib.geometry.Pose2d(new Translation2d(1,1), new Rotation2d(1.57)));
 
         while (opModeIsActive()) {
 
@@ -163,9 +167,11 @@ public class Meet1Teleop extends LinearOpMode {
 
             if (bot.rightTrigger2.onPress() && !bot.isOutTaking()) {
                 bot.outtake();
-            } else if (bot.leftTrigger2.onPress() && bot.isOutTaking()) {
+            } else if (bot.rightTrigger2.onPress() && bot.isOutTaking()) {
                 bot.stopIntake();
             }
+
+           // if (bot.rightBumper2.onPress()) bot.setPoseEstimate(new Pose2d(1,1,Math.toRadians(90)));
 
 //            if (gamepad2.left_bumper && gamepad2.right_bumper) {
 //                powerShot.toggle();

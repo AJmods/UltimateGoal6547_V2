@@ -22,7 +22,7 @@ public class T265LocalizerRR implements Localizer {
     private Pose2d rawPose = new Pose2d();
     private T265Camera.CameraUpdate up;
 
-    private static T265Camera slamra;
+    public static T265Camera slamra;
 
     public static double slamraX = -9;
     public static double slamraY = 0;
@@ -82,6 +82,8 @@ public class T265LocalizerRR implements Localizer {
 
     @Override
     public void setPoseEstimate(@NotNull Pose2d pose2d) {
+        RobotLog.v("Set Pose to " + pose2d.toString());
+        pose2d = new Pose2d(pose2d.getX() * .0254, pose2d.getY() * .0254, pose2d.getHeading());
         slamra.setPose(new com.arcrobotics.ftclib.geometry.Pose2d(pose2d.getX(), pose2d.getY(), new Rotation2d(pose2d.getHeading())));
 //        pose2d = new Pose2d(pose2d.getX(),pose2d.getY(),0);
 //        RobotLog.v("SETING POSE ESTIMATE TO " + pose2d.toString());
