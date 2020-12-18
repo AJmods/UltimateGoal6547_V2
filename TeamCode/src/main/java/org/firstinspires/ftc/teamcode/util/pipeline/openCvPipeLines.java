@@ -207,7 +207,7 @@ public class openCvPipeLines {
 
                 Imgproc.putText(input, ringCount + " RINGS", new Point(ringRect.x,ringRect.y), Imgproc.FONT_HERSHEY_COMPLEX, 2, new Scalar(0,255,0), 2);
 
-                RobotLog.v("RECT H:" + ringRect.height + ", RECT W: " + ringRect.width + ", RingCount: " + ringCount);
+                //RobotLog.v("RECT H:" + ringRect.height + ", RECT W: " + ringRect.width + ", RingCount: " + ringCount);
 //                double zeroCount = Core.countNonZero(mask);
 //
 //                double percent = zeroCount / (ringRect.height * ringRect.width);

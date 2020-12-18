@@ -52,6 +52,7 @@ public class RedLeftAutonTest extends LinearOpMode {
 
         ringCount = openCvPipeLines.RingCount.values()[enumRing];
 
+        bot.update();
         telemetry.log().add("Ready to Start");
         while (!isStarted() && !isStopRequested()) {
             ringCount = bot.getRingCount();
@@ -59,43 +60,53 @@ public class RedLeftAutonTest extends LinearOpMode {
             telemetry.update();
         }
         waitForStart();
+        bot.stopOpenCV();
 
         //bot.lowerWobvatorByNotAllTheWay();
         bot.openIndexer();
 
-        Vector2d launchPos = new Vector2d(0,-20);
+        Vector2d launchPos = new Vector2d(0,-14);
         setThrowerToTarget(launchPos, Math.toRadians(0));
-       // bot.stopOpenCV()
 
         //drive to middle, and face first power shot goal, prepare to launch.
         bot.followTrajectorySync(bot.trajectoryBuilder().lineTo(launchPos).build());
         bot.lowerWobvatorByNotAllTheWay();
         setThrowerToTarget(bot.getPoseEstimate());
+        sleep(500);
 
         telemetry.log().add("Drive to PowerShot");
 
         //turn toward 3 power shots
+        RobotLog.v("Launching Power Shot 1");
+        bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
         bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
         //throw ring
         setThrowerToTarget(bot.getPoseEstimate());
         sleep(500);
         bot.launchRing();
+        RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
         sleep(500);
         bot.openIndexer();
         //prepare to throw next ring
+        RobotLog.v("Launching Power Shot 2");
+        bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
         bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
         //throw ring
         setThrowerToTarget(bot.getPoseEstimate());
         sleep(500);
         bot.launchRing();
+        RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
         sleep(500);
         bot.openIndexer();
         //prepare to throw next ring
+        RobotLog.v("Launching Power Shot 3");
+        bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
         bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
         //throw ring
         setThrowerToTarget(bot.getPoseEstimate());
         sleep(500);
         bot.launchRing();
+        RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
         sleep(500);
         bot.openIndexer();
         //stop thrower
@@ -105,9 +116,9 @@ public class RedLeftAutonTest extends LinearOpMode {
 
         bot.lowerWobvatorByNotAllTheWay();
 
-        if (ringCount == openCvPipeLines.RingCount.NONE) bot.followTrajectorySync(bot.trajectoryBuilder().lineToLinearHeading(new Pose2d(24, -42, Math.toRadians(0))).build());
-        else if (ringCount == openCvPipeLines.RingCount.ONE) bot.followTrajectorySync(bot.trajectoryBuilder().splineTo(new Vector2d(38,-17), Math.toRadians(0)).build());
-        else if (ringCount == openCvPipeLines.RingCount.FOUR) bot.followTrajectorySync(bot.trajectoryBuilder(false, DriveSpeeds.fast).splineTo(new Vector2d(60,-42), Math.toRadians(0)).build());
+        if (ringCount == openCvPipeLines.RingCount.NONE) bot.followTrajectorySync(bot.trajectoryBuilder().lineToLinearHeading(new Pose2d(28, -42, Math.toRadians(0))).build());
+        else if (ringCount == openCvPipeLines.RingCount.ONE) bot.followTrajectorySync(bot.trajectoryBuilder().splineTo(new Vector2d(45,-17), Math.toRadians(0)).build());
+        else if (ringCount == openCvPipeLines.RingCount.FOUR) bot.followTrajectorySync(bot.trajectoryBuilder(false, DriveSpeeds.fast).splineTo(new Vector2d(65,-42), Math.toRadians(0)).build());
 
         telemetry.log().add("Drove to target goal");
         bot.releaseWobbleGoal();
@@ -140,7 +151,7 @@ public class RedLeftAutonTest extends LinearOpMode {
 
         //then drive  back to orginal sqaure
         if (ringCount == openCvPipeLines.RingCount.NONE) {
-            bot.followTrajectorySync(bot.trajectoryBuilder().splineTo(new Vector2d(20, -42), Math.toRadians(0)).build());
+            bot.followTrajectorySync(bot.trajectoryBuilder().splineTo(new Vector2d(21, -42), Math.toRadians(0)).build());
         }
         else if (ringCount == openCvPipeLines.RingCount.ONE) {
             bot.followTrajectorySync(bot.trajectoryBuilder()
@@ -148,7 +159,7 @@ public class RedLeftAutonTest extends LinearOpMode {
                     .build());
 
             bot.followTrajectorySync(bot.trajectoryBuilder(false, DriveSpeeds.fast)
-                   .splineTo(new Vector2d(38, -14), Math.toRadians(0))
+                   .splineTo(new Vector2d(40, -14), Math.toRadians(0))
                     .build());
         } else if (ringCount == openCvPipeLines.RingCount.FOUR) {
             bot.followTrajectorySync(bot.trajectoryBuilder(false, DriveSpeeds.fast)
@@ -156,7 +167,7 @@ public class RedLeftAutonTest extends LinearOpMode {
                     .build());
 
             bot.followTrajectorySync(bot.trajectoryBuilder(false, DriveSpeeds.fast)
-                    .splineTo(new Vector2d(65, -42), Math.toRadians(0))
+                    .splineTo(new Vector2d(63, -42), Math.toRadians(0))
                     .build());
         }
 
@@ -169,10 +180,15 @@ public class RedLeftAutonTest extends LinearOpMode {
         if (ringCount == openCvPipeLines.RingCount.ONE) {bot.followTrajectorySync(bot.trajectoryBuilder().lineToLinearHeading(new Pose2d(13,-12 ,Math.toRadians(0))).build());}
         else bot.followTrajectorySync(bot.trajectoryBuilder().lineToLinearHeading(new Pose2d(13,-36, Math.toRadians(0))).build());
 
+        bot.turnRealtiveSync(Math.toRadians(0));
+        bot.turnRealtiveSync(Math.toRadians(0));
         sleep(250);
 
         bot.savePos(bot.getPoseEstimate());
         telemetry.log().add("AUTON IS DONE");
+        RobotLog.v("AUTON IS DONE");
+        bot.setPacketAction(((packet, fieldOverlay) -> packet.addLine("AUTON IS DONE")));
+        bot.update();
 
         //sleep(2000);
 

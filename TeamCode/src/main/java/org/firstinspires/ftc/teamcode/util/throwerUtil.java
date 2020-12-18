@@ -10,8 +10,8 @@ public class throwerUtil {
 
     public static double MIN_Y = -29;
     public static double MAX_Y = -43;
-    public static double INITAL_ANGLE = 35;
-    public static double INITAL_HEIGHT = 14.5;
+    public static double INITAL_ANGLE = 29;
+    public static double INITAL_HEIGHT = 13.75;
     public static final double wheelDiameter = 3.77953; //96 mm
     public static final double inchesPerRev = Math.PI * wheelDiameter;
 

@@ -60,8 +60,9 @@ public class Meet2Teleop extends LinearOpMode {
             Pose2d currentPos = bot.readPos();
             bot.setPoseEstimate(currentPos);
             RobotLog.v("Read pos as " + currentPos.toString());
-            angleZeroValue = currentPos.getHeading();
+            angleZeroValue = Math.toRadians(90); //currentPos.getHeading();
             telemetry.log().add("set POS to " + currentPos.toString());
+            RobotLog.v("set POS to " + currentPos.toString());
         } catch (Exception e) {telemetry.log().add("FAILED TO READ POSITION");}
         telemetry.log().add("DID POS THING");
         //reset POS to 0
@@ -141,11 +142,17 @@ public class Meet2Teleop extends LinearOpMode {
             }
             //interrupt all robot actions to turn toward goal.
             if (gamepad1.left_stick_button) {
-                bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
+               // bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
+                bot.turnRealtiveSync(Math.toRadians(0));
+            }
+            if (gamepad1.left_stick_button) {
+                // bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
+                bot.turnRealtiveSync(Math.toRadians(0));
             }
 
             if (gamepad2.a) {
                 bot.launchRing();
+                RobotLog.v("Thrower motor 0 VELO when lauched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
             } else bot.openIndexer();
 
             if (bot.b2.onPress()) grab.toggle();
@@ -201,14 +208,16 @@ public class Meet2Teleop extends LinearOpMode {
             double vi = throwerUtil.getVi(0, throwerUtil.INITAL_HEIGHT, dist + launcherDistanceFromRealsense, TARGET_HIGHET, throwerUtil.INITAL_ANGLE);
             double targetRev = vi/throwerUtil.inchesPerRev;
 
-            if (bot.leftBumper2.onPress()) TurnOnThrower.toggle();
-            if (TurnOnThrower.output() && !USE_CALCULATED_VELOCITY) {
-                bot.setThrowerVelocity(REV_PER_SEC * 360, AngleUnit.DEGREES);
-            } else if (TurnOnThrower.output() && USE_CALCULATED_VELOCITY) {
-                bot.setThrowerVelocity(targetRev*360 * throwerUtil.GOAL_CONSTANT, AngleUnit.DEGREES);
-            } else {
-                bot.thrower1.setPower(0);
-                bot.thrower2.setPower(0);
+            if (bot.leftBumper2.onPress()) {
+                TurnOnThrower.toggle();
+                if (TurnOnThrower.output() && !USE_CALCULATED_VELOCITY) {
+                    bot.setThrowerVelocity(REV_PER_SEC * 360, AngleUnit.DEGREES);
+                } else if (TurnOnThrower.output() && USE_CALCULATED_VELOCITY) {
+                    bot.setThrowerVelocity(targetRev * 360 * throwerUtil.GOAL_CONSTANT, AngleUnit.DEGREES);
+                } else {
+                    bot.thrower1.setPower(0);
+                    bot.thrower2.setPower(0);
+                }
             }
 
 //            if (USE_CALCULATED_VELOCITY) {
@@ -274,9 +283,13 @@ public class Meet2Teleop extends LinearOpMode {
 
             });
 
-
+            telemetry.addData("Target VELO: ", REV_PER_SEC);
+            telemetry.addData("CURRENT THROWER 0 VELO:", bot.getThrowerVelocity(AngleUnit.DEGREES)[0]/360);
+            telemetry.addData("CURRENT THROWER 1 VELO: ", bot.getThrowerVelocity(AngleUnit.DEGREES)[1]/360);
+            telemetry.addData("IS LAUNCHED: ", bot.isReadyToThrow());
             telemetry.update();
             bot.update(); //updates robot's position
+            bot.updateLightsBasedOnThrower();
 
         }
         bot.stopRobot();

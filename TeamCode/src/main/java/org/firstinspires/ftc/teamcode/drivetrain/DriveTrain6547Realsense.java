@@ -26,6 +26,7 @@ import com.acmerobotics.roadrunner.trajectory.constraints.MecanumConstraints;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -122,6 +123,8 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public DcMotorEx thrower1, thrower2;
     private double[] motorPowersToAdd = new double[]{0,0,0,0};
 
+    public RevBlinkinLedDriver lights;
+
     private Pose2d lastPoseOnTurn;
 
     private OpMode opMode;
@@ -133,6 +136,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     boolean inTaking = false;
     boolean outTaking = false;
+
+    double targetVelocity = 0;
+    double leewayVelo = 360;
     public DriveTrain6547Realsense(OpMode opMode) {
         super(kV, kA, kStatic, TRACK_WIDTH, WHEEL_BASE, LATERAL_MULTIPLIER);
         USE_REALSENSE = true;
@@ -244,6 +250,8 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         } catch (Exception e) {
             RobotLog.setGlobalWarningMsg((RobotCoreException) e, "WILL CONTINUE AS NORMAL");
         }
+
+        lights = opMode.hardwareMap.get(RevBlinkinLedDriver.class, "lights");
 
         raiseWobvator();
         openIndexer();
@@ -612,9 +620,11 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         if (ticksPerSecond == 0) {
             thrower2.setPower(0);
             thrower1.setPower(0);
+            targetVelocity = 0;
             return;
         }
         try {
+            targetVelocity = ticksPerSecond;
             thrower1.setVelocity(ticksPerSecond);
             thrower2.setVelocity(ticksPerSecond);
         } catch (Exception e) {
@@ -625,14 +635,18 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         if (angularRate == 0) {
             thrower2.setPower(0);
             thrower1.setPower(0);
+            targetVelocity = 0;
             return;
         }
         try {
+            targetVelocity = angularRate;
             thrower1.setVelocity(angularRate, angleUnit);
             thrower2.setVelocity(angularRate, angleUnit);
         } catch (Exception e) {
             RobotLog.e("SETTING angle VELOCITY FAILED");
         }
+        if (angleUnit == AngleUnit.DEGREES) RobotLog.v("Setting Thrower Velocity to " + (angularRate/360) +"REV/s");
+        if (angleUnit == AngleUnit.RADIANS) RobotLog.v("Setting Thrower Velocity to " + (angularRate/(2*Math.PI)) +"REV/s");
     }
     public double[] getThrowerVelocity() {
         try {return new double[] {thrower1.getVelocity(), thrower2.getVelocity()}; }
@@ -650,6 +664,20 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public void stopThrower() {
         thrower1.setPower(0);
         thrower2.setPower(0);
+    }
+    public boolean isReadyToThrow() {
+        double[] velocities = getThrowerVelocity(AngleUnit.DEGREES);
+        double minVelo = targetVelocity - leewayVelo;
+        double maxVelo = targetVelocity + leewayVelo;
+        boolean isMotor0AtTarget = velocities[0] > minVelo && velocities[0] < maxVelo;
+        boolean isMotor1AtTarget = velocities[1] > minVelo && velocities[1] < maxVelo;
+
+        return  isMotor0AtTarget || isMotor1AtTarget;
+    }
+    public void updateLightsBasedOnThrower() {
+        if (targetVelocity == 0 || !isReadyToThrow()) {
+            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+        } else lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
     }
     public void launchRing() {
         try {
