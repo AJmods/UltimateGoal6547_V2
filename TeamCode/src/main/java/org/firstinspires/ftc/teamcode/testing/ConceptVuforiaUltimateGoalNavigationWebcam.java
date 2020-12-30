@@ -29,6 +29,10 @@
 
 package org.firstinspires.ftc.teamcode.testing;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -42,6 +46,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
+import org.firstinspires.ftc.teamcode.util.command.PacketAction;
+import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +93,6 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
 
 @TeleOp(name="ULTIMATEGOAL Vuforia Nav Webcam", group ="Concept")
-@Disabled
 public class ConceptVuforiaUltimateGoalNavigationWebcam extends LinearOpMode {
 
     // IMPORTANT: If you are using a USB WebCam, you must select CAMERA_CHOICE = BACK; and PHONE_IS_PORTRAIT = false;
@@ -132,7 +138,11 @@ public class ConceptVuforiaUltimateGoalNavigationWebcam extends LinearOpMode {
     private float phoneYRotate    = 0;
     private float phoneZRotate    = 0;
 
+    DriveTrain6547Realsense bot;
+
     @Override public void runOpMode() {
+
+        bot = new DriveTrain6547Realsense(this);
         /*
          * Retrieve the camera we are to use.
          */
@@ -264,7 +274,8 @@ public class ConceptVuforiaUltimateGoalNavigationWebcam extends LinearOpMode {
         // CONSEQUENTLY do not put any driving commands in this loop.
         // To restore the normal opmode structure, just un-comment the following line:
 
-        // waitForStart();
+        telemetry.log().add("Ready to start");
+        waitForStart();
 
         // Note: To use the remote camera preview:
         // AFTER you hit Init on the Driver Station, use the "options menu" to select "Camera Stream"
@@ -272,6 +283,8 @@ public class ConceptVuforiaUltimateGoalNavigationWebcam extends LinearOpMode {
 
         targetsUltimateGoal.activate();
         while (!isStopRequested()) {
+
+            Pose2d vuforiaPos = new Pose2d();
 
             // check all the trackable targets to see which one (if any) is visible.
             targetVisible = false;
@@ -300,10 +313,21 @@ public class ConceptVuforiaUltimateGoalNavigationWebcam extends LinearOpMode {
                 // express the rotation of the robot in degrees.
                 Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
                 telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+
+                vuforiaPos = new Pose2d(translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, Math.toRadians(rotation.thirdAngle + 90));
+
+                telemetry.addData("Pose2D pos", vuforiaPos);
             }
             else {
                 telemetry.addData("Visible Target", "none");
             }
+            Pose2d finalVuforiaPos = vuforiaPos;
+            telemetry.addData("final Pose2D pos", vuforiaPos);
+            bot.setPacketAction((packet, fieldOverlay) -> {
+                fieldOverlay.setStroke("#FF0000");
+                DashboardUtil.drawRobot(fieldOverlay, finalVuforiaPos);
+            });
+            bot.update();
             telemetry.update();
         }
 

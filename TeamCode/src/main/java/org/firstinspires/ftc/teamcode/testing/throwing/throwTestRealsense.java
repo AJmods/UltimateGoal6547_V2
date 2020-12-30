@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.drivetrain.localizer.T265LocalizerRR;
 import org.firstinspires.ftc.teamcode.util.FieldConstants;
 import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
-import org.firstinspires.ftc.teamcode.util.throwerUtil;
+import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 
 @TeleOp(name = "Throw Test Realsense")
 @Config
@@ -64,7 +64,7 @@ public class throwTestRealsense extends LinearOpMode {
                 double deltaX = pos.getX() - RED_GOAL_X;
                 double detlaY = pos.getY() - targetY;
                 double dist = Math.hypot(deltaX, detlaY);
-                double vi = throwerUtil.getVi(0, INITAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, 35);
+                double vi = ThrowerUtil.getVi(0, INITAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, 35);
                 double targetRev = vi/inchesPerRev;
 
                 if (USE_CALCULATED_VELOCITY) {

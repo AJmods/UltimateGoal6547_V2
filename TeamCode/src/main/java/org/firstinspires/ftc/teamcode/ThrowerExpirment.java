@@ -13,8 +13,7 @@ import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
 import org.firstinspires.ftc.teamcode.util.FieldConstants;
 import org.firstinspires.ftc.teamcode.util.homar.ToggleBoolean;
 import org.firstinspires.ftc.teamcode.util.homar.ToggleInt;
-import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
-import org.firstinspires.ftc.teamcode.util.throwerUtil;
+import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 
 /*
 This is the tele-op we use to drive the robot
@@ -77,14 +76,14 @@ public class ThrowerExpirment extends LinearOpMode {
                 RobotLog.v("Thrower motor 0 VELO when lauched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
             } else bot.openIndexer();
 
-            boolean isValidAngle = throwerUtil.isValidAngle(pos.getX(), pos.getY(), pos.getHeading());
+            boolean isValidAngle = ThrowerUtil.isValidAngle(pos.getX(), pos.getY(), pos.getHeading());
 
-            double targetY = throwerUtil.getTargetY(pos, RED_GOAL_X);
+            double targetY = ThrowerUtil.getTargetY(pos, RED_GOAL_X);
             double deltaX = pos.getX() - RED_GOAL_X;
             double detlaY = pos.getY() - targetY;
             double dist = Math.hypot(deltaX, detlaY);
-            double vi = throwerUtil.getVi(0, throwerUtil.INITAL_HEIGHT, dist, TARGET_HIGHET, throwerUtil.INITAL_ANGLE);
-            double targetRev = vi/throwerUtil.inchesPerRev;
+            double vi = ThrowerUtil.getVi(0, ThrowerUtil.INITAL_HEIGHT, dist, TARGET_HIGHET, ThrowerUtil.INITAL_ANGLE);
+            double targetRev = vi/ ThrowerUtil.inchesPerRev;
 
 
             if (TURN_ON_THROWER) {
@@ -113,8 +112,8 @@ public class ThrowerExpirment extends LinearOpMode {
                 double drawsConstant = REV_PER_SEC/targetRev;
                 packet.addLine("Current Motor Rev/s)/(Target Rev/s): " + drawsConstant + " (Danda's Constant)");
 
-                packet.addLine("INITIAL ANGLE: " + throwerUtil.INITAL_ANGLE);
-                packet.addLine("INITIAL HEIGHT: " + throwerUtil.INITAL_HEIGHT);
+                packet.addLine("INITIAL ANGLE: " + ThrowerUtil.INITAL_ANGLE);
+                packet.addLine("INITIAL HEIGHT: " + ThrowerUtil.INITAL_HEIGHT);
                 //draw robot
               //  DashboardUtil.drawRobot(fieldOverlay, pos);
                 //draw launcherPos
@@ -123,8 +122,8 @@ public class ThrowerExpirment extends LinearOpMode {
 
                 //draw target robot angle range
                 fieldOverlay.setStroke("#000000");
-                fieldOverlay.strokeLine(pos.getX(), pos.getY(), RED_GOAL_X, throwerUtil.MIN_Y);
-                fieldOverlay.strokeLine(pos.getX(), pos.getY(), RED_GOAL_X, throwerUtil.MAX_Y);
+                fieldOverlay.strokeLine(pos.getX(), pos.getY(), RED_GOAL_X, ThrowerUtil.MIN_Y);
+                fieldOverlay.strokeLine(pos.getX(), pos.getY(), RED_GOAL_X, ThrowerUtil.MAX_Y);
 
                 //mark middle launch goal with circle
                 fieldOverlay.strokeCircle(RED_GOAL_X, targetY, 1);
@@ -132,7 +131,7 @@ public class ThrowerExpirment extends LinearOpMode {
                 //draw robot launch goal position
                 fieldOverlay.setStrokeWidth(3);
                 fieldOverlay.setStroke("FF0000");
-                fieldOverlay.strokeLine(RED_GOAL_X, throwerUtil.MIN_Y, RED_GOAL_X, throwerUtil.MAX_Y);
+                fieldOverlay.strokeLine(RED_GOAL_X, ThrowerUtil.MIN_Y, RED_GOAL_X, ThrowerUtil.MAX_Y);
 
             });
 
@@ -158,17 +157,17 @@ public class ThrowerExpirment extends LinearOpMode {
         setThrowerToTarget(startPos, true);
     }
     public void setThrowerToTarget(Pose2d startPos, boolean isPowerShot) {
-        double targetY = throwerUtil.getTargetY(startPos, FieldConstants.TOP_OF_FIELD);
+        double targetY = ThrowerUtil.getTargetY(startPos, FieldConstants.TOP_OF_FIELD);
         double dist = Math.hypot(startPos.getX() - FieldConstants.TOP_OF_FIELD, startPos.getY() - targetY);
         if (isPowerShot) {
-            double vi = throwerUtil.getVi(startPos.getX(), throwerUtil.INITAL_HEIGHT, dist, FieldConstants.POWER_SHOT_HEIGHT, throwerUtil.INITAL_ANGLE);
-            double targetRevPerSec = vi / throwerUtil.inchesPerRev;
-            bot.setThrowerVelocity(targetRevPerSec * 360 * throwerUtil.POWER_SHOT_CONSTANT, AngleUnit.DEGREES);
+            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITAL_HEIGHT, dist, FieldConstants.POWER_SHOT_HEIGHT, ThrowerUtil.INITAL_ANGLE);
+            double targetRevPerSec = vi / ThrowerUtil.inchesPerRev;
+            bot.setThrowerVelocity(targetRevPerSec * 360 * ThrowerUtil.POWER_SHOT_CONSTANT, AngleUnit.DEGREES);
             RobotLog.v("Set speed to " + (targetRevPerSec*360) + "Rev/s");
         }
         else {
-            double vi = throwerUtil.getVi(startPos.getX(), throwerUtil.INITAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, throwerUtil.INITAL_ANGLE);
-            double targetRevPerSec = vi / throwerUtil.inchesPerRev;
+            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, ThrowerUtil.INITAL_ANGLE);
+            double targetRevPerSec = vi / ThrowerUtil.inchesPerRev;
             bot.setThrowerVelocity(targetRevPerSec * 360, AngleUnit.DEGREES);
             RobotLog.v("Set speed to " + (targetRevPerSec*360) + "Rev/s");
         }

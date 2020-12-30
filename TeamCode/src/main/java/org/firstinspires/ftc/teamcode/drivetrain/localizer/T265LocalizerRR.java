@@ -64,8 +64,8 @@ public class T265LocalizerRR implements Localizer {
                 Translation2d oldPose = up.pose.getTranslation();
                 Rotation2d oldRot = up.pose.getRotation();
                 //The T265's unit of measurement is meters.  dividing it by .0254 converts meters to inches.
-                mPoseEstimate = new Pose2d(oldPose.getX() / .0254, oldPose.getY() / .0254, norm(oldRot.getRadians())); //rawpos
-                //mPoseEstimate = rawPose.plus(poseOffset); //offsets the pose to be what the pose estimate is;
+                rawPose = new Pose2d(oldPose.getX() / .0254, oldPose.getY() / .0254, norm(oldRot.getRadians())); //rawpos
+                mPoseEstimate = rawPose.plus(poseOffset); //offsets the pose to be what the pose estimate is;
        } else {
             RobotLog.v("NULL Camera Update");
        }
@@ -83,13 +83,14 @@ public class T265LocalizerRR implements Localizer {
     @Override
     public void setPoseEstimate(@NotNull Pose2d pose2d) {
         RobotLog.v("Set Pose to " + pose2d.toString());
-        Pose2d newPos = new Pose2d(pose2d.getX() * .0254, pose2d.getY() * .0254, pose2d.getHeading());
-        slamra.setPose(new com.arcrobotics.ftclib.geometry.Pose2d(newPos.getX(), newPos.getY(), new Rotation2d(newPos.getHeading())));
-//        pose2d = new Pose2d(pose2d.getX(),pose2d.getY(),0);
-//        RobotLog.v("SETING POSE ESTIMATE TO " + pose2d.toString());
-//        poseOffset = pose2d.minus(rawPose);
-//        RobotLog.v("SET POSE OFFSET TO " + poseOffset.toString());
-//        mPoseEstimate = rawPose.plus(poseOffset); //set mPose to new pose.
+      //  Pose2d newPos = new Pose2d(pose2d.getX() * .0254, pose2d.getY() * .0254, pose2d.getHeading());
+       // slamra.setPose(new com.arcrobotics.ftclib.geometry.Pose2d(newPos.getX(), newPos.getY(), new Rotation2d(newPos.getHeading())));
+        pose2d = new Pose2d(pose2d.getX(),pose2d.getY(),0);
+        RobotLog.v("SETING POSE ESTIMATE TO " + pose2d.toString());
+        poseOffset = pose2d.minus(rawPose);
+        poseOffset = new Pose2d(poseOffset.getX(), poseOffset.getY(), Math.toRadians(0));
+        RobotLog.v("SET POSE OFFSET TO " + poseOffset.toString());
+       // mPoseEstimate = rawPose.plus(poseOffset); //set mPose to new pose.
 //        /* Alternate to using pose2d.minus()*/
 //        try {
 //            poseOffset = new Pose2d(pose2d.getX() - rawPose.getX(), pose2d.getY() - rawPose.getY(), pose2d.getHeading() - rawPose.getHeading());

@@ -37,11 +37,21 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.util.command.PacketAction;
 import org.firstinspires.ftc.teamcode.drivetrain.localizer.T265LocalizerRR;
@@ -50,6 +60,7 @@ import org.firstinspires.ftc.teamcode.util.pipeline.openCvPipeLines;
 import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
 import org.firstinspires.ftc.teamcode.util.roadrunner.LynxModuleUtil;
 import org.firstinspires.ftc.teamcode.util.homar.Button;
+import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -59,6 +70,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
+import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.BASE_CONSTRAINTS;
 import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.LATERAL_MULTIPLIER;
 import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.MOTOR_VELO_PID;
@@ -71,8 +88,8 @@ import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.kA;
 import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.kStatic;
 import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.kV;
 
-/*
- * Simple mecanum drive hardware implementation for REV hardware.
+/**
+ * FTC 6547's Robot for the 2020-21 FTC Ultimate Goal Season
  */
 @Config
 public class DriveTrain6547Realsense extends MecanumDrive {
@@ -89,6 +106,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     }
 
     //don't touch this unless you know what it does
+    /**
+     * Used when add stuff to the packet that is created when the update() method is called.
+     */
     private PacketAction packetAction = (packet, fieldOverlay) -> {
         //do nothing
     };
@@ -116,13 +136,26 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     private List<DcMotorEx> motors;
     private BNO055IMU imu;
 
+    /**
+     * Servo that grabs and releases the wobble goal
+     */
     public Servo wobbleGoalGrabber;
+    /**
+     * Moves the wobble goal grabber up and down
+     * Also known as the Wobvator
+     */
     public Servo wobbleGoalElevator;
+    /**
+     * Servo that launches the rings
+     */
     public Servo indexer;
     public DcMotorEx intake;
     public DcMotorEx thrower1, thrower2;
     private double[] motorPowersToAdd = new double[]{0,0,0,0};
 
+    /**
+     * Robot lights, located on the bottom of the robot
+     */
     public RevBlinkinLedDriver lights;
 
     private Pose2d lastPoseOnTurn;
@@ -137,8 +170,61 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     boolean inTaking = false;
     boolean outTaking = false;
 
+    private ElapsedTime timeBetweenUpdates = new ElapsedTime();
+    private ElapsedTime timeBetweenVuforiaTargetDectection = new ElapsedTime(99);
+
+    /**
+     * Robot's thrower target velocity.  Can be any unit (for now)
+     */
     double targetVelocity = 0;
     double leewayVelo = 360;
+
+
+    //Vuforia Stuff
+    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
+    private static final boolean PHONE_IS_PORTRAIT = false  ;
+
+    private static final String VUFORIA_KEY =
+            "AcA49uX/////AAABmeu99zB3Z0UMtBs+8wKvO+wqH9r+mWnpErlw09BRR+xRyjMJYpow6ZrtHOUAJSedLLrnIoaq2dGAjjHmnCEcqVHnd0YYm7aXeDGnwgAJHsYGU3e7whsv01hBic/gBbuoCqPb7cGk4ZXpkw3FNAYu889wonaHzeIOMQqQrZMtGyQ96E3Lk4/JHtTZDiWfJzdcFDg/LpR+tslv2WKXQlZNKQg581oZZ+GUVW0RbHAXJRcCkHrPgBg1yzuKIqmrwWblPscHtLuFXSJfkuk3C6K8Kp6JvJsTn7JvQGu5Ph9hzaZV4SwN3w4csZMNw5amuZv20f8lkzcLQkN0uT9uTJnwF4uRmc/JHzYlT1DWJJXewPQU";
+
+    // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
+    // We will define some constants and conversions here
+    private static final float mmPerInch        = 25.4f;
+    private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
+
+    // Constants for perimeter targets
+    private static final float halfField = 72 * mmPerInch;
+    private static final float quadField  = 36 * mmPerInch;
+
+    // Class Members
+    private OpenGLMatrix lastLocation = null;
+    private VuforiaLocalizer vuforia = null;
+
+    /**
+     * This is the webcam we are to use. As with other hardware devices such as motors and
+     * servos, this device is identified using the robot configuration tool in the FTC application.
+     */
+    WebcamName webcamName = null;
+
+    private boolean targetVisible = false;
+    private float phoneXRotate    = 0;
+    private float phoneYRotate    = 0;
+    private float phoneZRotate    = 0;
+
+    private VuforiaTrackables targetsUltimateGoal;
+
+    private List<VuforiaTrackable> allTrackables;
+
+    /**
+     * Automaticly changed when startVuforia() and stopVuforia() methods are called
+     */
+    private boolean useVuforia = false;
+
+    private Vector2d lastVuforiaPos = new Vector2d();
+
+    //end of Vuforia Stuff
+
+
     public DriveTrain6547Realsense(OpMode opMode) {
         super(kV, kA, kStatic, TRACK_WIDTH, WHEEL_BASE, LATERAL_MULTIPLIER);
         USE_REALSENSE = true;
@@ -151,7 +237,16 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         this.opMode = opMode;
         initRobot(resetRealsense);
     }
+
+    /**
+     * Called in constructor, initializses the bot
+     */
     private void initRobot() {initRobot(true);}
+
+    /**
+     * Called in constructor, initializes the bot
+     * @param resetRealsense determines if the realsense should reset it's position or not
+     */
     private void initRobot(boolean resetRealsense) {
 //        if (!USE_REALSENSE) {
 //            RobotLog.setGlobalWarningMessage("NOT USING REALSENSE, USING DEFAULT LOCALIZER", "");
@@ -252,6 +347,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         }
 
         lights = opMode.hardwareMap.get(RevBlinkinLedDriver.class, "lights");
+        lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK); //turn off lights
 
         raiseWobvator();
         openIndexer();
@@ -265,6 +361,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         thrower2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         thrower2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
+
+    /**
+     * Initialize openCV.  May conflict with Vuforia if that is also initialized
+     */
     public void initOpenCV() {
         opMode.telemetry.log().add("Initializing OpenCV");
         int cameraMonitorViewId = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
@@ -279,6 +379,133 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
         //webCam.startStreaming(rows, cols, OpenCvCameraRotation.UPRIGHT);//display on RC
     }
+
+    /**
+     * Initialize Vuforia.  May conflict with OpenCV if that is also initialized
+     */
+    public void initVufoira() {
+
+        webcamName = opMode.hardwareMap.get(WebcamName.class, "Webcam 1");
+
+        int cameraMonitorViewId = opMode.hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", opMode.hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+
+        // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+
+        /**
+         * We also indicate which camera on the RC we wish to use.
+         */
+        parameters.cameraName = webcamName;
+
+        // Make sure extended tracking is disabled for this example.
+        parameters.useExtendedTracking = false;
+
+        //  Instantiate the Vuforia engine
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+        // Load the data sets for the trackable objects. These particular data
+        // sets are stored in the 'assets' part of our application.
+        targetsUltimateGoal = this.vuforia.loadTrackablesFromAsset("UltimateGoal");
+        VuforiaTrackable blueTowerGoalTarget = targetsUltimateGoal.get(0);
+        blueTowerGoalTarget.setName("Blue Tower Goal Target");
+        VuforiaTrackable redTowerGoalTarget = targetsUltimateGoal.get(1);
+        redTowerGoalTarget.setName("Red Tower Goal Target");
+        VuforiaTrackable redAllianceTarget = targetsUltimateGoal.get(2);
+        redAllianceTarget.setName("Red Alliance Target");
+        VuforiaTrackable blueAllianceTarget = targetsUltimateGoal.get(3);
+        blueAllianceTarget.setName("Blue Alliance Target");
+        VuforiaTrackable frontWallTarget = targetsUltimateGoal.get(4);
+        frontWallTarget.setName("Front Wall Target");
+
+        // For convenience, gather together all the trackable objects in one easily-iterable collection */
+        allTrackables = new ArrayList<VuforiaTrackable>();
+        allTrackables.addAll(targetsUltimateGoal);
+
+        /**
+         * In order for localization to work, we need to tell the system where each target is on the field, and
+         * where the phone resides on the robot.  These specifications are in the form of <em>transformation matrices.</em>
+         * Transformation matrices are a central, important concept in the math here involved in localization.
+         * See <a href="https://en.wikipedia.org/wiki/Transformation_matrix">Transformation Matrix</a>
+         * for detailed information. Commonly, you'll encounter transformation matrices as instances
+         * of the {@link OpenGLMatrix} class.
+         *
+         * If you are standing in the Red Alliance Station looking towards the center of the field,
+         *     - The X axis runs from your left to the right. (positive from the center to the right)
+         *     - The Y axis runs from the Red Alliance Station towards the other side of the field
+         *       where the Blue Alliance Station is. (Positive is from the center, towards the BlueAlliance station)
+         *     - The Z axis runs from the floor, upwards towards the ceiling.  (Positive is above the floor)
+         *
+         * Before being transformed, each target image is conceptually located at the origin of the field's
+         *  coordinate system (the center of the field), facing up.
+         */
+
+        //Set the position of the perimeter targets with relation to origin (center of field)
+        redAllianceTarget.setLocation(OpenGLMatrix
+                .translation(0, -halfField, mmTargetHeight)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180)));
+
+        blueAllianceTarget.setLocation(OpenGLMatrix
+                .translation(0, halfField, mmTargetHeight)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 0)));
+        frontWallTarget.setLocation(OpenGLMatrix
+                .translation(-halfField, 0, mmTargetHeight)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0 , 90)));
+
+        // The tower goal targets are located a quarter field length from the ends of the back perimeter wall.
+        blueTowerGoalTarget.setLocation(OpenGLMatrix
+                .translation(halfField, quadField, mmTargetHeight)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0 , -90)));
+        redTowerGoalTarget.setLocation(OpenGLMatrix
+                .translation(halfField, -quadField, mmTargetHeight)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, -90)));
+
+        //
+        // Create a transformation matrix describing where the phone is on the robot.
+        //
+        // NOTE !!!!  It's very important that you turn OFF your phone's Auto-Screen-Rotation option.
+        // Lock it into Portrait for these numbers to work.
+        //
+        // Info:  The coordinate frame for the robot looks the same as the field.
+        // The robot's "forward" direction is facing out along X axis, with the LEFT side facing out along the Y axis.
+        // Z is UP on the robot.  This equates to a bearing angle of Zero degrees.
+        //
+        // The phone starts out lying flat, with the screen facing Up and with the physical top of the phone
+        // pointing to the LEFT side of the Robot.
+        // The two examples below assume that the camera is facing forward out the front of the robot.
+
+        // We need to rotate the camera around it's long axis to bring the correct camera forward.
+        if (CAMERA_CHOICE == BACK) {
+            phoneYRotate = -90;
+        } else {
+            phoneYRotate = 90;
+        }
+
+        // Rotate the phone vertical about the X axis if it's in portrait mode
+        if (PHONE_IS_PORTRAIT) {
+            phoneXRotate = 90 ;
+        }
+
+        // Next, translate the camera lens to where it is on the robot.
+        // In this example, it is centered (left to right), but forward of the middle of the robot, and above ground level.
+        final float CAMERA_FORWARD_DISPLACEMENT  = 4.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot-center
+        final float CAMERA_VERTICAL_DISPLACEMENT = 8.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
+        final float CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
+
+        OpenGLMatrix robotFromCamera = OpenGLMatrix
+                .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, YZX, DEGREES, phoneYRotate, phoneZRotate, phoneXRotate));
+
+        /**  Let all the trackable listeners know where the phone is.  */
+        for (VuforiaTrackable trackable : allTrackables) {
+            ((VuforiaTrackableDefaultListener) trackable.getListener()).setPhoneInformation(robotFromCamera, parameters.cameraDirection);
+        }
+    }
+    /**
+     * Initialize Gamepads using the HOMAR FTC Library
+     * The HOMAR FTC Libray enables methods such as onPress() on onRelease()
+     */
     private void initGamepads() //set the buttons to thier values
     {
         a1 = new Button();
@@ -308,6 +535,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         rightTrigger1 = new Button();
         rightTrigger2 = new Button();
     }
+
+    /**
+     * Must be called at the beginning of each loop if gamepads will be used
+     */
     public void updateGamepads() //update the gamepad buttons from HOMAR-FTC-Libary for tele-op
     {
         Gamepad gamepad1 = opMode.gamepad1;
@@ -357,6 +588,105 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         {
             opMode.telemetry.log().add("Unable to write " + number + " in " + filename);
         }
+    }
+    public void startVuforia() {
+        useVuforia = true;
+        targetsUltimateGoal.activate();
+    }
+    public void stopVuforia() {
+        useVuforia = false;
+        targetsUltimateGoal.deactivate();
+    }
+
+    /**
+     * initVuforia() and startVuforia() must be called before this method is called
+     * @return The robot's position according to Vuforia
+     */
+    public Vector2d getPosFromVuforia() {
+        Vector2d vuforiaPos;
+
+        // check all the trackable targets to see which one (if any) is visible.
+        targetVisible = false;
+        for (VuforiaTrackable trackable : allTrackables) {
+            if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
+                opMode.telemetry.addData("Visible Target", trackable.getName());
+                targetVisible = true;
+
+                // getUpdatedRobotLocation() will return null if no new information is available since
+                // the last time that call was made, or if the trackable is not currently visible.
+                OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
+
+                if (robotLocationTransform != null) {
+                    lastLocation = robotLocationTransform;
+                }
+                break;
+            }
+        }
+
+        // Provide feedback as to where the robot is located (if we know).
+        if (targetVisible) {
+            // express position (translation) of robot in inches.
+            VectorF translation = lastLocation.getTranslation();
+            opMode.telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+                    translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
+
+            // express the rotation of the robot in degrees.
+            Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+            opMode.telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+
+            vuforiaPos = new Vector2d(translation.get(0) / mmPerInch, translation.get(1) / mmPerInch);
+
+            opMode.telemetry.addData("Vuforia pos", vuforiaPos);
+            return vuforiaPos;
+        }
+        else {
+            opMode.telemetry.addData("Visible Target", "none");
+            return null;
+        }
+    }
+    public Vector2d getRawVuforiaimagePos() {
+        for (VuforiaTrackable trackable : allTrackables) {
+            if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
+                targetVisible = true;
+                try {
+                    VectorF vuforiaRawPosition = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedVuforiaCameraFromTarget().getTranslation();
+                    double distanceInches = Math.hypot(vuforiaRawPosition.get(0), vuforiaRawPosition.get(2)) / mmPerInch;
+//                    opMode.telemetry.addData("VUFORIA POSIITON ", vuforiaRawPosition);
+//                    opMode.telemetry.addData("DISTANCE (INCHES)", distanceInches);
+                    return new Vector2d(vuforiaRawPosition.get(2) / mmPerInch, vuforiaRawPosition.get(2) / mmPerInch);
+                } catch (Exception ignored){
+                    RobotLog.v("Failed to read Raw vuforia Pos");
+                    return null;
+                }
+
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param vec1
+     * @param vec2
+     * @param maxDistance how big can the difference between the positions be
+     * @return if both positions are different from eachother, returns true.  Else it returns false
+     */
+    public boolean isBigJump(Vector2d vec1, Vector2d vec2, double maxDistance) {
+        double deltaX = vec1.getX() - vec2.getX();
+        double deltaY = vec1.getY() - vec2.getY();
+        double distance = Math.hypot(deltaX, deltaY);
+        return distance > maxDistance;
+    }
+    /**
+     * @param pose1
+     * @param pose2
+     * @param maxDistance how big can the difference between the positions be
+     * @return if both positions are different from eachother, returns true.  Else it returns false
+     */
+    public boolean isBigJump(Pose2d pose1, Pose2d pose2, double maxDistance) {
+        double deltaX = pose1.getX() - pose2.getX();
+        double deltaY = pose1.getY() - pose2.getY();
+        double distance = Math.hypot(deltaX, deltaY);
+        return distance > maxDistance;
     }
     public void writeFile(String filename, String str)
     {
@@ -471,6 +801,11 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         double angle = Math.atan2(deltaY, deltaX);
         return (angle == Double.NaN) ? 0 : angle;
     }
+
+    /**
+     * Turns to an angle realtive to the field.
+     * @param angle
+     */
     public void turnRealtiveSync(double angle)
     {
         double target=angle-getPoseEstimate().getHeading();
@@ -506,16 +841,43 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         throw new AssertionError();
     }
 
+    /**
+     * Updates the robot's position and packet telemetry.
+     * Uses setPacketAction() to add infomation to the packet
+     */
     public void update() {
-        updatePoseEstimate();
-
-        Pose2d currentPose = getPoseEstimate();
-        Pose2d lastError = getLastError();
-
-        poseHistory.add(currentPose);
 
         TelemetryPacket packet = new TelemetryPacket();
         Canvas fieldOverlay = packet.fieldOverlay();
+
+        updatePoseEstimate();
+
+        Pose2d currentPose = getPoseEstimate();
+
+        if (useVuforia) {
+            Vector2d vuforiaPos = getPosFromVuforia();
+            Vector2d rawVuforiaPos = getRawVuforiaimagePos();
+            //if the distance is too big, do not use Vuforia.
+            double distanceFromImage;
+            try {distanceFromImage = Math.hypot(rawVuforiaPos.getX(), rawVuforiaPos.getY()); }
+            catch (Exception ignored) {distanceFromImage = 9999;}
+            packet.addLine("Distance from Image: " + distanceFromImage);
+
+            if (vuforiaPos != null && vuforiaPos.getX() != 0 && vuforiaPos.getY() != 0 && distanceFromImage < 50 && (!isBigJump(vuforiaPos, lastVuforiaPos, 10) || timeBetweenVuforiaTargetDectection.seconds() > 2)) {
+                lastVuforiaPos = vuforiaPos;
+
+                Vector2d averagePos = vuforiaPos.plus(new Vector2d(currentPose.getX(), currentPose.getY())).div(2);
+                packet.addLine("Average POS: " + averagePos.toString());
+                Pose2d newPose = new Pose2d(averagePos.getX(), averagePos.getY(), 0);
+                setPoseEstimate(newPose);
+                currentPose = getPoseEstimate();
+                timeBetweenVuforiaTargetDectection.reset();
+            }
+        }
+
+        Pose2d lastError = getLastError();
+
+        poseHistory.add(currentPose);
 
         packet.put("mode", mode);
 
@@ -527,7 +889,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         packet.put("yError", lastError.getY());
         packet.put("headingError", lastError.getHeading());
 
-        //draw goals
+        //draw power shot positions
         fieldOverlay.setFill("#FF0000");
         fieldOverlay.fillCircle(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y, 1);
         fieldOverlay.fillCircle(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y, 1);
@@ -605,9 +967,13 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
         packetAction.addToPacket(packet, fieldOverlay);
 
+        packet.addLine("Time between last update: " + timeBetweenUpdates.milliseconds() + " milliseconds");
+
         dashboard.sendTelemetryPacket(packet);
 
         runAtAllTimes();
+
+        timeBetweenUpdates.reset();
     }
 
     public void waitForIdle() {
@@ -616,6 +982,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         }
     }
 
+    /**
+     * Sets both of the throwing motors to a disired ticks per second.
+     * @param ticksPerSecond
+     */
     public void setThrowerVelocity(double ticksPerSecond) {
         if (ticksPerSecond == 0) {
             thrower2.setPower(0);
@@ -631,6 +1001,12 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             RobotLog.e("SETTING tick VELOCITY FAILED");
         }
     }
+
+    /**
+     * Set's both of the thrower motor's velocity to something.
+     * @param angularRate disired speed
+     * @param angleUnit (Degrees or Radians)
+     */
     public void setThrowerVelocity(double angularRate, AngleUnit angleUnit) {
         if (angularRate == 0) {
             thrower2.setPower(0);
@@ -648,12 +1024,19 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         if (angleUnit == AngleUnit.DEGREES) RobotLog.v("Setting Thrower Velocity to " + (angularRate/360) +"REV/s");
         if (angleUnit == AngleUnit.RADIANS) RobotLog.v("Setting Thrower Velocity to " + (angularRate/(2*Math.PI)) +"REV/s");
     }
+    /**
+     * @return Robot's thrower Velocity in ticks per second for both motors.
+     */
     public double[] getThrowerVelocity() {
         try {return new double[] {thrower1.getVelocity(), thrower2.getVelocity()}; }
         catch (Exception e) {
             return new double[] {0,0};
         }
     }
+    /**
+     * @param angleUnit
+     * @return Robot's thrower Velocity for both motors.
+     */
     public double[] getThrowerVelocity(AngleUnit angleUnit) {
         try {
             return new double[] {thrower1.getVelocity(angleUnit), thrower2.getVelocity(angleUnit)};
@@ -661,10 +1044,18 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             return new double[] {0,0};
         }
     }
+
+    /**
+     * stops both motors on the robot thrower
+     */
     public void stopThrower() {
         thrower1.setPower(0);
         thrower2.setPower(0);
     }
+
+    /**
+     * @return determines if the thrower is at the targetVelocity.  Must use degrees at the moment
+     */
     public boolean isReadyToThrow() {
         double[] velocities = getThrowerVelocity(AngleUnit.DEGREES);
         double minVelo = targetVelocity - leewayVelo;
@@ -674,11 +1065,77 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
         return  isMotor0AtTarget || isMotor1AtTarget;
     }
+
+    /**
+     * Gets the thrower velocity that will make the ring hit the goal, given
+     * the robot is facing the goal.
+     * @param currentPos Current Position of the robot
+     * @return The speed in terms of rev/s to launch the ring to the target goal
+     */
+    public double getThrowerVeloctiyFromPosition(Pose2d currentPos) {
+        //get distance based
+        double targetY = ThrowerUtil.getTargetY(currentPos, FieldConstants.RED_GOAL_X);
+        double dist = Math.hypot(currentPos.getX() - FieldConstants.RED_GOAL_X, currentPos.getY() - targetY);
+        double revPerSec = getThrowerVelocityFromPosition(dist);
+        return revPerSec;
+    }
+
+    /**
+     * @param currentPos Current Position of the robot
+     * @param angleUnit The desired unit of speed
+     * @return The speed to launch the ring to the target goal
+     */
+    public double getThrowerVeloctiyFromPosition(Pose2d currentPos, AngleUnit angleUnit) {
+        //get distance based
+        double targetY = ThrowerUtil.getTargetY(currentPos, FieldConstants.RED_GOAL_X);
+        double dist = Math.hypot(currentPos.getX() - FieldConstants.RED_GOAL_X, currentPos.getY() - targetY);
+        double unitsPerSec = getThrowerVelocityFromPosition(dist, angleUnit);
+        return unitsPerSec;
+    }
+
+    /**
+     * Uses a equation from cubic regression from values we gathered from launching the ring a lot
+     * @param dist Distance from goal
+     * @return The speed in terms of rev/s to launch the ring to the target goal
+     */
+    public double getThrowerVelocityFromPosition(double dist) {
+        //revPerSecond
+        return (-0.0001001 * Math.pow(dist, 3)) + (0.03045 * Math.pow(dist, 2)) - (2.859 * dist) + 132.4;
+    }
+
+    /**
+     * Uses a equation from cubic regression from values we gatered from launching the ring a lot
+     * @param dist
+     * @param angleUnit (Degrees or Radians)
+     * @return The speed to launch the ring to the target goal
+     * will return NaN if the angleUnit is invalid
+     */
+    public double getThrowerVelocityFromPosition(double dist, AngleUnit angleUnit) {
+
+        double revPerSec = (-0.0001001 * Math.pow(dist, 3)) + (0.03045 * Math.pow(dist, 2)) - (2.859 * dist) + 132.4;
+        if (angleUnit == DEGREES) return revPerSec*360;
+        else if (angleUnit == RADIANS) return revPerSec*2*Math.PI;
+        return Double.NaN;
+    }
+
+    /**
+     * Updates the robot's lights based on the thrower's current speed compared to the target speed
+     * Lights are RED if the thrower isn't going fast enough
+     * Lights are YELLOW if the thrower is too fast
+     * Lights are GREEN when the current speed is matches (close enough) to the target speed
+     */
     public void updateLightsBasedOnThrower() {
         if (targetVelocity == 0 || !isReadyToThrow()) {
-            lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+            double currentV = getThrowerVelocity(DEGREES)[0];
+            if (targetVelocity > currentV) lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+            else lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
         } else lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
     }
+
+    /**
+     * launches the ring by moving the "indexer" servo to push the ring into the launching,
+     * provided there is a ring loaded in the robot
+     */
     public void launchRing() {
         try {
             indexer.setPosition(.55);
@@ -686,6 +1143,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             RobotLog.e("LAUCNH RING FAILED");
         }
     }
+
+    /**
+     * opens the indexer, the servo that launches the rings
+     */
     public void openIndexer() {
         try {
             indexer.setPosition(.2);
@@ -693,6 +1154,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             RobotLog.e("OPEN INDEXER FAILED");
         }
     }
+    /**
+     * moves the indexer between it's launched and open positions
+     * Never know when you need this.
+     */
     public void midIndexer(){
         try {
             indexer.setPosition(.38);
@@ -700,6 +1165,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             RobotLog.e("MID INDEXER FAILED");
         }
     }
+
+    /**
+     * grabs the wobble goal using the wobble goal grabber
+     */
     public void grabWobbleGoal() {
 
         try {
@@ -708,6 +1177,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             RobotLog.e("GRAB WOB GOAL FAILED");
         }
     }
+    /**
+     * releases the wobble goal using the wobble goal grabber
+     */
     public void releaseWobbleGoal() {
         try {
             wobbleGoalGrabber.setPosition(.45);
@@ -715,6 +1187,11 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             RobotLog.e("RELEASE WOB GOAL FAILED");
         }
     }
+
+    /**
+     * Lower's the wobble goal grabber so it can grab/release wobble goals
+     * May cause the wobble goal to touch the flow
+     */
     public void lowerWobvator() {
         try {
         wobbleGoalElevator.setPosition(.35);
@@ -722,6 +1199,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             RobotLog.e("LOWER WOBVATOR FAILED");
         }
     }
+    /**
+     * Lower's the wobble goal grabber but not all the way so the wobble goal that is has grabbed does not risk touching the floor
+     */
     public void lowerWobvatorByNotAllTheWay() {
         try {
         wobbleGoalElevator.setPosition(.385);
@@ -729,6 +1209,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             RobotLog.e("LOWER WOBVATOR but not all the way FAILED");
         }
     }
+    /**
+     * Raises the wobble goal grabber as much as possible
+     */
     public void raiseWobvator() {
         try {
         wobbleGoalElevator.setPosition(.42);
@@ -763,7 +1246,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     {
         if (Math.abs(gamepadStick) < .2) return;
         double posToAdd = gamepadStick*speed;
-        opMode.telemetry.addData("changing pos by ",posToAdd);
+        //opMode.telemetry.addData("changing pos by ",posToAdd);
         double servoCurrentPos = servo.getPosition();
         double targetPos = posToAdd + servoCurrentPos;
         //if ((servoCurrentPos > min && gamepadStick > 0) || (servoCurrentPos < max && gamepadStick < 0))
@@ -874,4 +1357,39 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public void setPacketAction(PacketAction packetAction) {
         this.packetAction = packetAction;
     }
+
+    /**
+     * Stores data about a ring that is launched
+     */
+//    public class Ring {
+//
+//        private Vector2d position;
+//        private double startTime = 0;
+//        private double launchTime = 0;
+//
+//        private double changeXby = 0;
+//        private double changeYby = 0;
+//        private double xDist = 0;
+//        private double yDist = 0;
+//
+//        public Ring() {
+//            position = new Vector2d(0,0);
+//            startTime = System.currentTimeMillis();
+//        }
+//
+//        public Ring(Vector2d position) {
+//            this.position = position;
+//            startTime = System.currentTimeMillis();
+//        }
+//
+//        public void beginLaunch() {
+//            startTime = System.currentTimeMillis();
+//        }
+//        public void update() {
+//            launchTime = System.currentTimeMillis() - startTime;
+//        }
+//        public Canvas addRingToFieldOverlay(Canvas fieldOverlay) {
+//            return fieldOverlay.strokeCircle(0,0,2);
+//        }
+//    }
 }

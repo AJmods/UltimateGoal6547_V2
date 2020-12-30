@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.teamcode.util.throwerUtil;
+import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 
 @TeleOp
 @Config
@@ -61,8 +61,8 @@ public class TestThower extends LinearOpMode {
             motor2.setVelocity(REV_PER_SEC*360, AngleUnit.DEGREES);
             //motor2.setVelocity(vTicks * DrewsConstant*2);
 
-            telemetry.addData("Vi (Rev/s)", vi/ throwerUtil.inchesPerRev);
-            telemetry.addData("Current REV/calculated Rev ", REV_PER_SEC / (vi/throwerUtil.inchesPerRev));
+            telemetry.addData("Vi (Rev/s)", vi/ ThrowerUtil.inchesPerRev);
+            telemetry.addData("Current REV/calculated Rev ", REV_PER_SEC / (vi/ ThrowerUtil.inchesPerRev));
             telemetry.addData("current Motor 1 V (REV/s)", motor.getVelocity(AngleUnit.DEGREES)/360);
             telemetry.addData("current Motor 2 V (REV/s)", motor2.getVelocity(AngleUnit.DEGREES)/360);
             telemetry.addData("Current Motor 1 POW", motor.getPower());
