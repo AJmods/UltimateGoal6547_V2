@@ -9,6 +9,7 @@ public class ThrowerUtil {
     public static double POWER_SHOT_CONSTANT = 2.173;
     public static double GOAL_CONSTANT = 2.36;
 
+
     public static double MIN_Y = -29;
     public static double MAX_Y = -43;
     public static double INITAL_ANGLE = 29;

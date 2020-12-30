@@ -40,4 +40,5 @@ public class FieldConstants {
 //    public static double RED_POWER_SHOT_2X = 73;
 //    public static double RED_POWER_SHOT_3Y = -14;
 //    public static double RED_POWER_SHOT_3X = 73;
+
 }
