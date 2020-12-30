@@ -2,10 +2,11 @@ package org.firstinspires.ftc.teamcode.util;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 @Config
-public class throwerUtil {
-    public static double POWER_SHOT_CONSTANT = 2.35;
+public class ThrowerUtil {
+    public static double POWER_SHOT_CONSTANT = 2.173;
     public static double GOAL_CONSTANT = 2.36;
 
     public static double MIN_Y = -29;
@@ -46,6 +47,14 @@ public class throwerUtil {
         double yIntercept = currentPos.getY() - (currentPos.getX() * slope);
         return (targetY - yIntercept) / slope;
     }
+//    public static Pose2d getEndPoint(Vector2d pos, double heading) { return getEndPoint(new Pose2d(pos.getX(), pos.getY(), heading));}
+//    public static Pose2d getEndPoint(Pose2d currentPos) {
+//
+//        double slope = Math.tan(currentPos.getHeading());
+//        double yIntercept = currentPos.getY() - (currentPos.getX() * slope);
+//        //Equation of Line is: y = m(x - x1) + y1, or y = slope*
+//        double lineEquation = slope*(3 - currentPos.getX()) + currentPos.getY();
+//    }
 
     public static boolean isValidAngle(double x, double y, double angle) {
         double minAngle = Math.atan2(MIN_Y - y, FieldConstants.RED_GOAL_X - x);
