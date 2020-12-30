@@ -22,15 +22,15 @@ public class StraightTestRealsense extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         DriveTrain6547Realsense bot = new DriveTrain6547Realsense(this);
 
-        telemetry.log().add("POSE ESTIME: " + bot.getPoseEstimate().toString());
+        telemetry.log().add("POSE ESTIMATE: " + bot.getPoseEstimate().toString());
 
         bot.setPoseEstimate(new Pose2d(-68,-24,0));
 
-        telemetry.log().add("POSE ESTIME 2: " + bot.getPoseEstimate().toString());
+        telemetry.log().add("POSE ESTIMATE 2: " + bot.getPoseEstimate().toString());
 
         bot.setPoseEstimate(new Pose2d(-68,-24,0));
 
-        telemetry.log().add("POSE ESTIME 3: " + bot.getPoseEstimate().toString());
+        telemetry.log().add("POSE ESTIMATE 3: " + bot.getPoseEstimate().toString());
 
         Trajectory trajectory = bot.trajectoryBuilder(bot.getPoseEstimate())
                 .forward(DISTANCE)

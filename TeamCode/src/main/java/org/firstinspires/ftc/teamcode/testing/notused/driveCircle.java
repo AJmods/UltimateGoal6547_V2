@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.drivetrain.DriveSpeeds;
 @Config
 public class driveCircle extends LinearOpMode {
 
-    public static double RADUIS=20;
+    public static double RADIUS =20;
     public static double LOOPS=1;
 
     @Override
@@ -22,35 +22,35 @@ public class driveCircle extends LinearOpMode {
 
         waitForStart();
 
-        //bot.setPoseEstimate(new Pose2d(0,RADUIS, 0));
+        //bot.setPoseEstimate(new Pose2d(0,RADIUS, 0));
 
-        bot.followTrajectorySync(bot.trajectoryBuilder(false, DriveSpeeds.slow).splineTo(new Vector2d(0, RADUIS),Math.toRadians(360)).build());
+        bot.followTrajectorySync(bot.trajectoryBuilder(false, DriveSpeeds.slow).splineTo(new Vector2d(0, RADIUS),Math.toRadians(360)).build());
 
         TrajectoryBuilder builder = bot.trajectoryBuilder(false, DriveSpeeds.medium);
 
         for (int i = 0; i < LOOPS; i++)
-        builder = builder.splineTo(new Vector2d(RADUIS, 0),Math.toRadians(270))
-                .splineTo(new Vector2d(0, -RADUIS),Math.toRadians(180))
-                .splineTo(new Vector2d(-RADUIS, 0),Math.toRadians(90))
-                .splineTo(new Vector2d(0, RADUIS),Math.toRadians(360));
+        builder = builder.splineTo(new Vector2d(RADIUS, 0),Math.toRadians(270))
+                .splineTo(new Vector2d(0, -RADIUS),Math.toRadians(180))
+                .splineTo(new Vector2d(-RADIUS, 0),Math.toRadians(90))
+                .splineTo(new Vector2d(0, RADIUS),Math.toRadians(360));
 
         bot.followTrajectorySync(builder.build());
 
         builder = bot.trajectoryBuilder(true);
         for (int i = 0; i < LOOPS; i++)
-            builder = builder.splineTo(new Vector2d(-RADUIS, 0),Math.toRadians(270))
-                    .splineTo(new Vector2d(0, -RADUIS),Math.toRadians(0))
-                    .splineTo(new Vector2d(RADUIS, 0),Math.toRadians(90))
-                    .splineTo(new Vector2d(0, RADUIS),Math.toRadians(180));
+            builder = builder.splineTo(new Vector2d(-RADIUS, 0),Math.toRadians(270))
+                    .splineTo(new Vector2d(0, -RADIUS),Math.toRadians(0))
+                    .splineTo(new Vector2d(RADIUS, 0),Math.toRadians(90))
+                    .splineTo(new Vector2d(0, RADIUS),Math.toRadians(180));
 
         //builder = bot.trajectoryBuilder();
 
         //drive circle while rotating
 //        for (int i = 0; i < LOOPS; i++)
-//            builder = builder.splineToSplineHeading(new Pose2d(RADUIS, 0,Math.toRadians(90)), Math.toRadians(270))
-//                    .splineToSplineHeading(new Pose2d(0, -RADUIS, Math.toRadians(180)), Math.toRadians(180))
-//                    .splineToSplineHeading(new Pose2d(-RADUIS, 0, Math.toRadians(270)), Math.toRadians(90))
-//                    .splineToSplineHeading(new Pose2d(0, RADUIS, Math.toRadians(360)), Math.toRadians(360));
+//            builder = builder.splineToSplineHeading(new Pose2d(RADIUS, 0,Math.toRadians(90)), Math.toRadians(270))
+//                    .splineToSplineHeading(new Pose2d(0, -RADIUS, Math.toRadians(180)), Math.toRadians(180))
+//                    .splineToSplineHeading(new Pose2d(-RADIUS, 0, Math.toRadians(270)), Math.toRadians(90))
+//                    .splineToSplineHeading(new Pose2d(0, RADIUS, Math.toRadians(360)), Math.toRadians(360));
 
         //drive circle backwards (workaround)
 
@@ -59,10 +59,10 @@ public class driveCircle extends LinearOpMode {
 //        builder = bot.trajectoryBuilder();
 //
 //        for (int i = 0; i < LOOPS; i++)
-//            builder = builder.splineToSplineHeading(new Pose2d(-RADUIS, 0, Math.toRadians(270)), Math.toRadians(270))
-//                    .splineToSplineHeading(new Pose2d(0, -RADUIS, Math.toRadians(360)), Math.toRadians(360))
-//                    .splineToSplineHeading(new Pose2d(RADUIS, 0,Math.toRadians(90)), Math.toRadians(90))
-//                    .splineToSplineHeading(new Pose2d(0, RADUIS, Math.toRadians(180)), Math.toRadians(180));
+//            builder = builder.splineToSplineHeading(new Pose2d(-RADIUS, 0, Math.toRadians(270)), Math.toRadians(270))
+//                    .splineToSplineHeading(new Pose2d(0, -RADIUS, Math.toRadians(360)), Math.toRadians(360))
+//                    .splineToSplineHeading(new Pose2d(RADIUS, 0,Math.toRadians(90)), Math.toRadians(90))
+//                    .splineToSplineHeading(new Pose2d(0, RADIUS, Math.toRadians(180)), Math.toRadians(180));
 //
 //
 //        bot.followTrajectorySync(builder.build());

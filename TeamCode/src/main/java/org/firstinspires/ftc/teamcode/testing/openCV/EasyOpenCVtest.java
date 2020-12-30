@@ -36,7 +36,7 @@ import java.util.List;
  */
 @Autonomous(name= "opencvSkystoneDetector", group="Sky autonomous")
 public class EasyOpenCVtest extends LinearOpMode {
-    private ElapsedTime runtime = new ElapsedTime();
+    private final ElapsedTime runtime = new ElapsedTime();
 
     //0 means skystone, 1 means yellow stone
     //-1 for debug, but we can keep it like this because if it works, it should change to either 0 or 255
@@ -44,15 +44,15 @@ public class EasyOpenCVtest extends LinearOpMode {
     private static int valLeft = -1;
     private static int valRight = -1;
 
-    private static float rectHeight = .6f/8f;
-    private static float rectWidth = 1.5f/8f;
+    private static final float rectHeight = .6f/8f;
+    private static final float rectWidth = 1.5f/8f;
 
-    private static float offsetX = 0f/8f;//changing this moves the three rects and the three circles left or right, range : (-2, 2) not inclusive
-    private static float offsetY = 0f/8f;//changing this moves the three rects and circles up or down, range: (-4, 4) not inclusive
+    private static final float offsetX = 0f/8f;//changing this moves the three rects and the three circles left or right, range : (-2, 2) not inclusive
+    private static final float offsetY = 0f/8f;//changing this moves the three rects and circles up or down, range: (-4, 4) not inclusive
 
-    private static float[] midPos = {4f/8f+offsetX, 4f/8f+offsetY};//0 = col, 1 = row
-    private static float[] leftPos = {2f/8f+offsetX, 4f/8f+offsetY};
-    private static float[] rightPos = {6f/8f+offsetX, 4f/8f+offsetY};
+    private static final float[] midPos = {4f/8f+offsetX, 4f/8f+offsetY};//0 = col, 1 = row
+    private static final float[] leftPos = {2f/8f+offsetX, 4f/8f+offsetY};
+    private static final float[] rightPos = {6f/8f+offsetX, 4f/8f+offsetY};
     //moves all rectangles right or left by amount. units are in ratio to monitor
 
     private final int rows = 640;
@@ -106,7 +106,7 @@ public class EasyOpenCVtest extends LinearOpMode {
         }
 
         private Stage stageToRenderToViewport = Stage.detection;
-        private Stage[] stages = Stage.values();
+        private final Stage[] stages = Stage.values();
 
         @Override
         public void onViewportTapped()

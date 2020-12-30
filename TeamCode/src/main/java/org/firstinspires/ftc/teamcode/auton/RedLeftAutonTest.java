@@ -3,10 +3,8 @@ package org.firstinspires.ftc.teamcode.auton;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.MarkerCallback;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -27,7 +25,7 @@ public class RedLeftAutonTest extends LinearOpMode {
 
     public static boolean isBlue = false;
 
-    private Pose2d startPos = new Pose2d(-56,-25);
+    private final Pose2d startPos = new Pose2d(-56,-25);
 
     enum BotStartColor{
         RED, BLUE
@@ -81,8 +79,8 @@ public class RedLeftAutonTest extends LinearOpMode {
 
         //turn toward 3 power shots
         RobotLog.v("Launching Power Shot 1");
-        bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
-        bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
         //throw ring
         setThrowerToTarget(bot.getPoseEstimate());
         //wait for launch speed to be ready
@@ -93,8 +91,8 @@ public class RedLeftAutonTest extends LinearOpMode {
         bot.openIndexer();
         //prepare to throw next ring
         RobotLog.v("Launching Power Shot 2");
-        bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
-        bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
         //throw ring
         setThrowerToTarget(bot.getPoseEstimate());
         //wait for launch speed to be ready
@@ -105,8 +103,8 @@ public class RedLeftAutonTest extends LinearOpMode {
         bot.openIndexer();
         //prepare to throw next ring
         RobotLog.v("Launching Power Shot 3");
-        bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
-        bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
         //throw ring
         setThrowerToTarget(bot.getPoseEstimate());
         //wait for launch speed to be ready
@@ -166,7 +164,7 @@ public class RedLeftAutonTest extends LinearOpMode {
 
         telemetry.log().add("Going to Drive to Area");
 
-        //then drive  back to orginal sqaure
+        //then drive  back to original square
         if (ringCount == openCvPipeLines.RingCount.NONE) {
             bot.followTrajectorySync(bot.trajectoryBuilder().splineTo(new Vector2d(21, -42), Math.toRadians(0)).build());
         }
@@ -204,8 +202,8 @@ public class RedLeftAutonTest extends LinearOpMode {
         if (ringCount == openCvPipeLines.RingCount.ONE) {bot.followTrajectorySync(bot.trajectoryBuilder().lineToLinearHeading(new Pose2d(13,-12 ,Math.toRadians(0))).build());}
         else bot.followTrajectorySync(bot.trajectoryBuilder().lineToLinearHeading(new Pose2d(13,-36, Math.toRadians(0))).build());
 
-        bot.turnRealtiveSync(Math.toRadians(0));
-        bot.turnRealtiveSync(Math.toRadians(0));
+        bot.turnRelativeSync(Math.toRadians(0));
+        bot.turnRelativeSync(Math.toRadians(0));
         sleep(250);
 
         bot.savePos(bot.getPoseEstimate());
@@ -232,13 +230,13 @@ public class RedLeftAutonTest extends LinearOpMode {
         double targetY = ThrowerUtil.getTargetY(startPos, FieldConstants.TOP_OF_FIELD);
         double dist = Math.hypot(startPos.getX() - FieldConstants.TOP_OF_FIELD, startPos.getY() - targetY);
         if (isPowerShot) {
-            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITAL_HEIGHT, dist, FieldConstants.POWER_SHOT_HEIGHT, ThrowerUtil.INITAL_ANGLE);
+            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITIAL_HEIGHT, dist, FieldConstants.POWER_SHOT_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
             double targetRevPerSec = vi / ThrowerUtil.inchesPerRev;
             bot.setThrowerVelocity(targetRevPerSec * 360 * ThrowerUtil.POWER_SHOT_CONSTANT, AngleUnit.DEGREES);
             RobotLog.v("Set speed to " + (targetRevPerSec*360) + "Rev/s");
         }
         else {
-            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, ThrowerUtil.INITAL_ANGLE);
+            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITIAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
             double targetRevPerSec = vi / ThrowerUtil.inchesPerRev;
             bot.setThrowerVelocity(targetRevPerSec * 360, AngleUnit.DEGREES);
             RobotLog.v("Set speed to " + (targetRevPerSec*360) + "Rev/s");

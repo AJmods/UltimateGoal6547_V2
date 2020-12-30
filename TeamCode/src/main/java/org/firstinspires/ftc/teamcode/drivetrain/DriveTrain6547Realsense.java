@@ -43,7 +43,6 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -107,12 +106,16 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     //don't touch this unless you know what it does
     /**
-     * Used when add stuff to the packet that is created when the update() method is called.
+     * Used when add extra data to the packet that is created when the update() method is called.
+     * Do not use if you don't know what it does
      */
     private PacketAction packetAction = (packet, fieldOverlay) -> {
         //do nothing
     };
 
+    /**
+     * The file name used when saving the robot's position
+     */
     public static String POS_FILE_NAME = "pos.txt";
 
     public openCvPipeLines.RingDetectionPipeLine ringDetectionPipeLine;
@@ -121,7 +124,14 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     private FtcDashboard dashboard;
     public NanoClock clock;
 
-    public Mode mode;
+
+    /**
+     * The mode the robot is in when update() is called
+     * IDLE will not autonomous move the bot
+     * FOLLOW_TRAJECTORY follows a trajectory if followTrajectory() or followTrajectorySync() was called
+     * TURN turns the robot if turn(), turnSync(), or any other turn method is called
+     */
+    public Mode mode = Mode.FOLLOW_TRAJECTORY;
 
     public PIDFController turnController;
     private MotionProfile turnProfile;
@@ -132,8 +142,12 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     private List<Pose2d> poseHistory;
 
+    /**
+     * Drive train motors
+     */
     private DcMotorEx leftFront, leftRear, rightRear, rightFront;
     private List<DcMotorEx> motors;
+
     private BNO055IMU imu;
 
     /**
@@ -151,7 +165,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public Servo indexer;
     public DcMotorEx intake;
     public DcMotorEx thrower1, thrower2;
-    private double[] motorPowersToAdd = new double[]{0,0,0,0};
+    private final double[] motorPowersToAdd = new double[]{0,0,0,0};
 
     /**
      * Robot lights, located on the bottom of the robot
@@ -160,9 +174,12 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     private Pose2d lastPoseOnTurn;
 
-    private OpMode opMode;
+    /**
+     * The opmode the is currently running
+     */
+    private final OpMode opMode;
 
-    public Button a1,a2,b1,b2,x1,x2,y1,y2,dpadUp1,dpadUp2,dpadDown1, dpadDown2, dpadLeft1, dpadLeft2,dpadRight1, dpadRight2,leftBumper1,leftBumper2,rightBumper1,rightBumper2,start1,start2, rightTrigger1, rightTrigger2, leftTrigger1, leftTrigger2;
+    public Button a1,a2, b1,b2,x1,x2,y1,y2,dpadUp1,dpadUp2,dpadDown1, dpadDown2, dpadLeft1, dpadLeft2,dpadRight1, dpadRight2,leftBumper1,leftBumper2,rightBumper1,rightBumper2,start1,start2, rightTrigger1, rightTrigger2, leftTrigger1, leftTrigger2;
 
     double currentHeadingV=0;
     double currentHeadingA=0;
@@ -170,11 +187,18 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     boolean inTaking = false;
     boolean outTaking = false;
 
-    private ElapsedTime timeBetweenUpdates = new ElapsedTime();
-    private ElapsedTime timeBetweenVuforiaTargetDectection = new ElapsedTime(99);
+    /**
+     * Time between each time update() is called
+     */
+    private final ElapsedTime timeBetweenUpdates = new ElapsedTime();
 
     /**
-     * Robot's thrower target velocity.  Can be any unit (for now)
+     * Time between last time a vufoira image was detected
+     */
+    private final ElapsedTime timeBetweenVuforiaTargetDetection = new ElapsedTime(99);
+
+    /**
+     * Robot's thrower target velocity.
      */
     double targetVelocity = 0;
     double leewayVelo = 360;
@@ -184,10 +208,11 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
     private static final boolean PHONE_IS_PORTRAIT = false  ;
 
+    @SuppressWarnings("SpellCheckingInspection")
     private static final String VUFORIA_KEY =
             "AcA49uX/////AAABmeu99zB3Z0UMtBs+8wKvO+wqH9r+mWnpErlw09BRR+xRyjMJYpow6ZrtHOUAJSedLLrnIoaq2dGAjjHmnCEcqVHnd0YYm7aXeDGnwgAJHsYGU3e7whsv01hBic/gBbuoCqPb7cGk4ZXpkw3FNAYu889wonaHzeIOMQqQrZMtGyQ96E3Lk4/JHtTZDiWfJzdcFDg/LpR+tslv2WKXQlZNKQg581oZZ+GUVW0RbHAXJRcCkHrPgBg1yzuKIqmrwWblPscHtLuFXSJfkuk3C6K8Kp6JvJsTn7JvQGu5Ph9hzaZV4SwN3w4csZMNw5amuZv20f8lkzcLQkN0uT9uTJnwF4uRmc/JHzYlT1DWJJXewPQU";
 
-    // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
+    // Since ImageTarget trackables use mm to specify their dimensions, we must use mm for all the physical dimension.
     // We will define some constants and conversions here
     private static final float mmPerInch        = 25.4f;
     private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
@@ -209,14 +234,14 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     private boolean targetVisible = false;
     private float phoneXRotate    = 0;
     private float phoneYRotate    = 0;
-    private float phoneZRotate    = 0;
+    private final float phoneZRotate    = 0;
 
     private VuforiaTrackables targetsUltimateGoal;
 
     private List<VuforiaTrackable> allTrackables;
 
     /**
-     * Automaticly changed when startVuforia() and stopVuforia() methods are called
+     * Automatically changed when startVuforia() and stopVuforia() methods are called
      */
     private boolean useVuforia = false;
 
@@ -239,7 +264,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     }
 
     /**
-     * Called in constructor, initializses the bot
+     * Called in constructor, initialises the bot
      */
     private void initRobot() {initRobot(true);}
 
@@ -504,9 +529,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     }
     /**
      * Initialize Gamepads using the HOMAR FTC Library
-     * The HOMAR FTC Libray enables methods such as onPress() on onRelease()
+     * The HOMAR FTC Library enables methods such as onPress() on onRelease()
      */
-    private void initGamepads() //set the buttons to thier values
+    private void initGamepads() //set the buttons to their values
     {
         a1 = new Button();
         a2 = new Button();
@@ -539,7 +564,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     /**
      * Must be called at the beginning of each loop if gamepads will be used
      */
-    public void updateGamepads() //update the gamepad buttons from HOMAR-FTC-Libary for tele-op
+    public void updateGamepads() //update the gamepad buttons from HOMAR-FTC-Library for tele-op
     {
         Gamepad gamepad1 = opMode.gamepad1;
         Gamepad gamepad2 = opMode.gamepad2;
@@ -644,14 +669,14 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             return null;
         }
     }
-    public Vector2d getRawVuforiaimagePos() {
+    public Vector2d getRawVuforiaImagePos() {
         for (VuforiaTrackable trackable : allTrackables) {
             if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
                 targetVisible = true;
                 try {
                     VectorF vuforiaRawPosition = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedVuforiaCameraFromTarget().getTranslation();
                     double distanceInches = Math.hypot(vuforiaRawPosition.get(0), vuforiaRawPosition.get(2)) / mmPerInch;
-//                    opMode.telemetry.addData("VUFORIA POSIITON ", vuforiaRawPosition);
+//                    opMode.telemetry.addData("VUFORIA LOCATION ", vuforiaRawPosition);
 //                    opMode.telemetry.addData("DISTANCE (INCHES)", distanceInches);
                     return new Vector2d(vuforiaRawPosition.get(2) / mmPerInch, vuforiaRawPosition.get(2) / mmPerInch);
                 } catch (Exception ignored){
@@ -799,14 +824,14 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         double deltaY = target.getY() - start.getY();
 
         double angle = Math.atan2(deltaY, deltaX);
-        return (angle == Double.NaN) ? 0 : angle;
+        return (Double.isNaN(angle)) ? 0 : angle;
     }
 
     /**
-     * Turns to an angle realtive to the field.
+     * Turns to an angle relative to the field.
      * @param angle
      */
-    public void turnRealtiveSync(double angle)
+    public void turnRelativeSync(double angle)
     {
         double target=angle-getPoseEstimate().getHeading();
         //target-=Math.toRadians(90);
@@ -815,7 +840,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             target+=(target>=0) ? Math.toRadians(-360) : Math.toRadians(360);
         }
         opMode.telemetry.log().add("inputted Angle: " + angle + " , turning to: " + target);
-        RobotLog.d("Turning Realtive to heading " + angle + ", amount turning: " + target);
+        RobotLog.d("Turning Relative to heading " + angle + ", amount turning: " + target);
         turnSync(target);
     }
 
@@ -843,7 +868,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     /**
      * Updates the robot's position and packet telemetry.
-     * Uses setPacketAction() to add infomation to the packet
+     * Uses setPacketAction() to add information to the packet
      */
     public void update() {
 
@@ -856,14 +881,14 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
         if (useVuforia) {
             Vector2d vuforiaPos = getPosFromVuforia();
-            Vector2d rawVuforiaPos = getRawVuforiaimagePos();
+            Vector2d rawVuforiaPos = getRawVuforiaImagePos();
             //if the distance is too big, do not use Vuforia.
             double distanceFromImage;
             try {distanceFromImage = Math.hypot(rawVuforiaPos.getX(), rawVuforiaPos.getY()); }
             catch (Exception ignored) {distanceFromImage = 9999;}
             packet.addLine("Distance from Image: " + distanceFromImage);
 
-            if (vuforiaPos != null && vuforiaPos.getX() != 0 && vuforiaPos.getY() != 0 && distanceFromImage < 50 && (!isBigJump(vuforiaPos, lastVuforiaPos, 10) || timeBetweenVuforiaTargetDectection.seconds() > 2)) {
+            if (vuforiaPos != null && vuforiaPos.getX() != 0 && vuforiaPos.getY() != 0 && distanceFromImage < 50 && (!isBigJump(vuforiaPos, lastVuforiaPos, 10) || timeBetweenVuforiaTargetDetection.seconds() > 2)) {
                 lastVuforiaPos = vuforiaPos;
 
                 Vector2d averagePos = vuforiaPos.plus(new Vector2d(currentPose.getX(), currentPose.getY())).div(2);
@@ -871,7 +896,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
                 Pose2d newPose = new Pose2d(averagePos.getX(), averagePos.getY(), 0);
                 setPoseEstimate(newPose);
                 currentPose = getPoseEstimate();
-                timeBetweenVuforiaTargetDectection.reset();
+                timeBetweenVuforiaTargetDetection.reset();
             }
         }
 
@@ -919,7 +944,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
                         0, 0, targetAlpha
                 )));
 
-               // RobotLog.v("Target Omeaga: " + targetOmega + "COrrection: " + correction);
+               // RobotLog.v("Target Omega: " + targetOmega + "Correction: " + correction);
 
                 currentHeadingV = targetOmega + correction;
                 currentHeadingA = targetAlpha;
@@ -983,7 +1008,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     }
 
     /**
-     * Sets both of the throwing motors to a disired ticks per second.
+     * Sets both of the throwing motors to a desired ticks per second.
      * @param ticksPerSecond
      */
     public void setThrowerVelocity(double ticksPerSecond) {
@@ -1004,7 +1029,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     /**
      * Set's both of the thrower motor's velocity to something.
-     * @param angularRate disired speed
+     * @param angularRate desired speed
      * @param angleUnit (Degrees or Radians)
      */
     public void setThrowerVelocity(double angularRate, AngleUnit angleUnit) {
@@ -1072,7 +1097,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
      * @param currentPos Current Position of the robot
      * @return The speed in terms of rev/s to launch the ring to the target goal
      */
-    public double getThrowerVeloctiyFromPosition(Pose2d currentPos) {
+    public double getThrowerVelocityFromPosition(Pose2d currentPos) {
         //get distance based
         double targetY = ThrowerUtil.getTargetY(currentPos, FieldConstants.RED_GOAL_X);
         double dist = Math.hypot(currentPos.getX() - FieldConstants.RED_GOAL_X, currentPos.getY() - targetY);
@@ -1085,7 +1110,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
      * @param angleUnit The desired unit of speed
      * @return The speed to launch the ring to the target goal
      */
-    public double getThrowerVeloctiyFromPosition(Pose2d currentPos, AngleUnit angleUnit) {
+    public double getThrowerVelocityFromPosition(Pose2d currentPos, AngleUnit angleUnit) {
         //get distance based
         double targetY = ThrowerUtil.getTargetY(currentPos, FieldConstants.RED_GOAL_X);
         double dist = Math.hypot(currentPos.getX() - FieldConstants.RED_GOAL_X, currentPos.getY() - targetY);
@@ -1104,7 +1129,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     }
 
     /**
-     * Uses a equation from cubic regression from values we gatered from launching the ring a lot
+     * Uses a equation from cubic regression from values we gathered from launching the ring a lot
      * @param dist
      * @param angleUnit (Degrees or Radians)
      * @return The speed to launch the ring to the target goal
@@ -1140,7 +1165,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         try {
             indexer.setPosition(.55);
         } catch (Exception e) {
-            RobotLog.e("LAUCNH RING FAILED");
+            RobotLog.e("LAUNCH RING FAILED");
         }
     }
 

@@ -58,23 +58,25 @@ public abstract class MecanumDriveBase6547Offseason extends MecanumDrive {
     }
 
     public FtcDashboard dashboard;
-    private NanoClock clock;
+    private final NanoClock clock;
 
     private Mode mode;
 
-    private PIDFController turnController;
+    private final PIDFController turnController;
     private MotionProfile turnProfile;
     private double turnStart;
 
     private DriveConstraints constraints;
-    private TrajectoryFollower follower;
+    private final TrajectoryFollower follower;
 
     private List<Double> lastWheelPositions;
     private double lastTimestamp;
 
-    private DcMotorEx leftEncoder,rightEncoder,frontEncoder;
+    private final DcMotorEx leftEncoder;
+    private final DcMotorEx rightEncoder;
+    private final DcMotorEx frontEncoder;
 
-    private int loops=0;
+    private final int loops=0;
 
     public static int LOOP_REM = 10;
 
@@ -275,7 +277,7 @@ public abstract class MecanumDriveBase6547Offseason extends MecanumDrive {
         List<Double> positions = getWheelPositions();
         double currentTimestamp = clock.seconds();
 
-        List<Double> velocities = new ArrayList<>(positions.size());;
+        List<Double> velocities = new ArrayList<>(positions.size());
         if (lastWheelPositions != null) {
             double dt = currentTimestamp - lastTimestamp;
             for (int i = 0; i < positions.size(); i++) {

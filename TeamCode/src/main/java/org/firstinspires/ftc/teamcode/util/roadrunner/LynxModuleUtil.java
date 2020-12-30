@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Collection of utilites for interacting with Lynx modules.
+ * Collection of utilities for interacting with Lynx modules.
  */
 public class LynxModuleUtil {
 

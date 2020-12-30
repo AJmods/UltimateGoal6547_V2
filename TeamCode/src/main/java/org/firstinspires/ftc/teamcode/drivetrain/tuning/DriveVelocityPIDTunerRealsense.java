@@ -35,7 +35,6 @@ import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.kV;
  * successfully connected, start the program, and your robot will begin moving forward and backward
  * according to a motion profile. Your job is to graph the velocity errors over time and adjust the
  * PID coefficients. Once you've found a satisfactory set of gains, add them to your drive class
- * ctor.
  */
 @Config
 @Autonomous(group = "drive")
@@ -45,7 +44,7 @@ public class DriveVelocityPIDTunerRealsense extends LinearOpMode {
 
     private static final String PID_VAR_NAME = "VELO_PID";
 
-    private FtcDashboard dashboard = FtcDashboard.getInstance();
+    private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private String catName;
     private CustomVariable catVar;
 

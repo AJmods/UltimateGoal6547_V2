@@ -66,7 +66,7 @@ public class TestT265 extends OpMode
         field.strokeLine(x1, y1, x2, y2);
 
         packet.addLine("Confidence: " + up.confidence);
-        packet.addLine("Tranlaton X:" + translation.getX() +", Y:" + translation.getY());
+        packet.addLine("Translation X:" + translation.getX() +", Y:" + translation.getY());
         packet.addLine("Get Rotation Degrees " + up.pose.getRotation().getDegrees());
         packet.addLine("Get Rotation Heading " + up.pose.getHeading());
 
@@ -77,7 +77,7 @@ public class TestT265 extends OpMode
     @Override
     public void stop() {
         slamra.stop();
-        RobotLog.d("Stopping Realsese");
+        RobotLog.d("Stopping Realsense");
     }
 
 }

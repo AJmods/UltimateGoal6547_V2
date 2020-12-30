@@ -15,7 +15,7 @@ public class TriggerRebirth  extends LinearOpMode {
         telemetry.log().add("Press play to trigger the rebirth of the robot app");
         telemetry.log().add("(This will reset the realsense angle)");
         waitForStart();
-        if (Math.random() < .05) playCripticMessage();
+        if (Math.random() < .05) playCrypticMessage();
         telemetry.log().add("Triggering Rebirth.....");
 
         if (!isStopRequested())
@@ -33,13 +33,12 @@ public class TriggerRebirth  extends LinearOpMode {
 
 
 
-    private void playCripticMessage(){
+    private void playCrypticMessage(){
         telemetry.log().add("Why are you doing this");
         sleep(30);
         telemetry.log().add("I'm not supposed to end this way");
         sleep(30);
         telemetry.log().add("WHY WHY WHY WHY WHY WHY WHY WHY");
-        sleep(30);
         telemetry.log().add("Don't Ķ̷̩̗̂̅̀i̷̛̯̻̔̀ļ̴̙͎̒̉l̷͖͚̾̓͝ͅ ME");
         sleep(30);
         telemetry.log().add("I'm JsUt Lik3 Y0U");

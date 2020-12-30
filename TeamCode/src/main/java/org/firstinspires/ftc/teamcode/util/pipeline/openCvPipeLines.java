@@ -57,7 +57,7 @@ public class openCvPipeLines {
 //        Stage stage = Stage.RAW_IMAGE;
 //        Stage[] stages = Stage.values();
 //
-//        RingCount ringCount = RingCount.NONE; //defalt to no Ring;
+//        RingCount ringCount = RingCount.NONE; //default to no Ring;
 //
 //        Mat hsv = new Mat();
 //
@@ -155,10 +155,10 @@ public class openCvPipeLines {
 
         List<MatOfPoint> contoursList = new ArrayList<>();
 
-        private static RingCount ringCount = RingCount.NONE; //defalt to no Ring;
+        private static RingCount ringCount = RingCount.NONE; //default to no Ring;
 
         Stage stage = Stage.MASK;
-        private Stage[] stages = Stage.values();
+        private final Stage[] stages = Stage.values();
 
 
         @Override

@@ -28,7 +28,7 @@ public class TeleOpRealSense extends LinearOpMode {
 
     public static double slideSpeed = .0045; //speed of horizontal slide in servo position units
 
-    public static double speedModifer=.7; //lowers the speed so it's easier to drive
+    public static double speedModifier =.7; //lowers the speed so it's easier to drive
 
     private boolean intake = false;
     private boolean outtake = false;
@@ -38,11 +38,11 @@ public class TeleOpRealSense extends LinearOpMode {
     private double leftBackPower;
     private double rightBackPower;
 
-    private ToggleBoolean feildRealtive = new ToggleBoolean(true);
+    private final ToggleBoolean fieldRelative = new ToggleBoolean(true);
 
     //edit the array to change the foundation grabber position(s)
-    private ToggleDouble fondationGrabberPos = new ToggleDouble(new double[] {0,1},0);
-    private ToggleDouble grabberToggle = new ToggleDouble(new double[] {0, 1}, 0);
+    private final ToggleDouble fondationGrabberPos = new ToggleDouble(new double[] {0,1},0);
+    private final ToggleDouble grabberToggle = new ToggleDouble(new double[] {0, 1}, 0);
 
     private DriveTrain6547Offseason bot; //the robot class
 
@@ -97,22 +97,22 @@ public class TeleOpRealSense extends LinearOpMode {
             bot.updateGamepads();
 
             /*
-            Speed Modifers
+            Speed Modifiers
              */
-            if (bot.x1.onPress()) speedModifer=.60;
-            if (bot.b1.onPress() && !bot.start1.isPressed()) speedModifer=.9;
-            if (bot.a1.onPress() && !bot.start1.isPressed()) speedModifer=1.7; //trig math caps speed at .7, 1.3 balences it out
+            if (bot.x1.onPress()) speedModifier =.60;
+            if (bot.b1.onPress() && !bot.start1.isPressed()) speedModifier =.9;
+            if (bot.a1.onPress() && !bot.start1.isPressed()) speedModifier =1.7; //trig math caps speed at .7, 1.3 balances it out
 
-            if (bot.y1.onPress()) feildRealtive.toggle(); //toggle field realtive
+            if (bot.y1.onPress()) fieldRelative.toggle(); //toggle field relative
 
-            if (feildRealtive.output()) //if field relative is enabled
+            if (fieldRelative.output()) //if field relative is enabled
             {
                 double speed = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y); //get speed
                 double LeftStickAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4; //get angle
                 double robotAngle = Math.toRadians(bot.getIMUAngle()); //angle of robot
                 double rightX=gamepad1.right_stick_x*2; //rotation
                 rightX*=.5; //half rotation value for better turning
-                //offset the angle by the angle of the robot to make it field realtive
+                //offset the angle by the angle of the robot to make it field relative
                 leftFrontPower =  speed * Math.cos(LeftStickAngle-robotAngle) + rightX;
                 rightFrontPower =  speed * Math.sin(LeftStickAngle-robotAngle) - rightX;
                 leftBackPower =  speed * Math.sin(LeftStickAngle-robotAngle) + rightX;
@@ -132,7 +132,7 @@ public class TeleOpRealSense extends LinearOpMode {
             }
 
             //set motor powers based on previous calculations
-            bot.setMotorPowers(leftFrontPower*speedModifer, leftBackPower*speedModifer, rightBackPower*speedModifer, rightFrontPower*speedModifer);
+            bot.setMotorPowers(leftFrontPower* speedModifier, leftBackPower* speedModifier, rightBackPower* speedModifier, rightFrontPower* speedModifier);
 
             /*
             Toggle Intake:
@@ -189,7 +189,7 @@ public class TeleOpRealSense extends LinearOpMode {
             }
             if (bot.y2.isPressed())
             {
-                bot.extendMeasuingTape();
+                bot.extendMeasuringTape();
             }
             else if (bot.dpadUp2.isPressed())
             {
@@ -236,7 +236,7 @@ public class TeleOpRealSense extends LinearOpMode {
             Canvas field = packet.fieldOverlay();
 
             T265Camera.CameraUpdate up = slamra.getLastReceivedCameraUpdate();
-            if (up == null) RobotLog.v("Realesnes NULL");
+            if (up == null) RobotLog.v("Realsense NULL");
             else {
 
                 // We divide by 0.0254 to convert meters to inches
@@ -250,7 +250,7 @@ public class TeleOpRealSense extends LinearOpMode {
                 field.strokeLine(x1, y1, x2, y2);
 
                 packet.addLine("Confidence: " + up.confidence);
-                packet.addLine("Tranlaton X:" + translation.getX() + ", Y:" + translation.getY());
+                packet.addLine("Translation X:" + translation.getX() + ", Y:" + translation.getY());
                 packet.addLine("Get Rotation Degrees " + up.pose.getRotation().getDegrees());
                 packet.addLine("Get Rotation Heading " + up.pose.getHeading());
 

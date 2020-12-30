@@ -51,7 +51,7 @@ public class infiniteTurnTest extends LinearOpMode {
                     fieldOverlay.strokeLine(robotPos.getX(), robotPos.getY(), targetX, targetY);
                 });
            // }
-//            else if (bot.mode == DriveTrain6547Realsense.Mode.IDLE && InfinteTurn && T265Localizer.getHeading() < targetAngleRad - LEEWAY && T265Localizer.getHeading() > targetAngleRad + LEEWAY) {
+//            else if (bot.mode == DriveTrain6547Realsense.Mode.IDLE && InfiniteTurn && T265Localizer.getHeading() < targetAngleRad - LEEWAY && T265Localizer.getHeading() > targetAngleRad + LEEWAY) {
 //                targetAngleRad-=T265Localizer.getHeading();
 //                if (Math.abs(targetAngleRad)>Math.toRadians(180)) //make the angle difference less then 180 to remove unnecessary turning
 //                {

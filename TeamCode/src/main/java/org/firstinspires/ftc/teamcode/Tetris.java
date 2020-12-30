@@ -14,7 +14,7 @@ public class Tetris extends LinearOpMode {
 
     //TODO : fix rotation function, then polish it (now gotta polish it)
     //TODO : add function where the piece that is currently being controlled will land if it is has been touching a landed piece or the bottom of the screen.
-    //TODO : add a function where the player can push the down button on the gamepad to make the piece in controll go faster
+    //TODO : add a function where the player can push the down button on the gamepad to make the piece in control go faster
     //TODO : add a score function
     //TODO : make the screen size customizable, (8x20 might be a bt big)
     //TODO : add a highscore function
@@ -24,7 +24,7 @@ public class Tetris extends LinearOpMode {
     int rotationErrorCounter = 0; //added this for fun
 
 
-    //from here to runOpMode(), theses are short summaries of the variables, below are all the methods where all the varibles are used, they will have more complex and useful descriptions.
+    //from here to runOpMode(), theses are short summaries of the variables, below are all the methods where all the variables are used, they will have more complex and useful descriptions.
 
     //change the lines[][] variable to customize the size of the tetris board.  Big boards may result in bugs.  Debug mode is better for smaller boards
     boolean[][] lines = new boolean[20][10];  //a 2d array that is an 20x10 "screen", think of each coordinate (example: lines[0][0]) as a pixel.  if the coordinate value is true then █ displays, but if the value is false then ░ displays.
@@ -86,11 +86,11 @@ public class Tetris extends LinearOpMode {
             lines = new boolean[lines.length][5];
         } if (lines[0].length > 100)
         {
-            telemetry.log().add("Invalid lineX size, chaning it o lines["+lines.length+"][100]");
+            telemetry.log().add("Invalid lineX size, changing it o lines["+lines.length+"][100]");
             lines = new boolean[lines.length][100];
         }
         */
-        //calulate spaces
+        //calculate spaces
         spaces-=(lines[0].length-4)*1.5;
         for (int i =0; i< spaces; i++) bigSpace+=" ";
         //prep board
@@ -124,7 +124,7 @@ public class Tetris extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            cycleRight = (gamepad1.dpad_right) ? 1 : 0; //checks the gamepad so this program won't act wierd
+            cycleRight = (gamepad1.dpad_right) ? 1 : 0; //checks the gamepad so this program won't act weird
             cycleLeft = (gamepad1.dpad_left) ? 1 : 0;
             cycleX = (gamepad1.x) ? 1 : 0;
             runtime.reset();
@@ -375,7 +375,7 @@ public class Tetris extends LinearOpMode {
         rotation=0;
         pieceModifery = 0;
         pieceModiferx = 0;
-        if (decider == 0) //T shaped peice
+        if (decider == 0) //T shaped piece
         {
             pieces[0] = (lines[0].length/2) - 1;// 9;
             pieces[1] = (lines[0].length/2); //10;
@@ -397,7 +397,7 @@ public class Tetris extends LinearOpMode {
             pieces270[1] = (lines[0].length/2) + 100; //110;
             pieces270[2] = (lines[0].length/2); //10;
             pieces270[3] = (lines[0].length/2) + 99; //109;
-        } else if (decider == 1) //J shaped peice
+        } else if (decider == 1) //J shaped piece
         {
             pieces[0] = (lines[0].length/2) -1; //9;
             pieces[1] = (lines[0].length/2) + 99; //109;
@@ -419,7 +419,7 @@ public class Tetris extends LinearOpMode {
             pieces270[1] = (lines[0].length/2) - 1; //9;
             pieces270[2] = (lines[0].length/2) + 99; //109;
             pieces270[3] = (lines[0].length/2) + 199; //209;
-        } else if (decider == 2) //backward L shaped peice
+        } else if (decider == 2) //backward L shaped piece
         {
             pieces[0] = (lines[0].length/2) + 1; //11;
             pieces[1] = (lines[0].length/2) + 101; //111;
@@ -441,7 +441,7 @@ public class Tetris extends LinearOpMode {
             pieces270[1] = (lines[0].length/2) + 99; //109;
             pieces270[2] = (lines[0].length/2) + 199; //209;
             pieces270[3] = (lines[0].length/2) + 200; //210;
-        } else if (decider == 3) //square shaped peice
+        } else if (decider == 3) //square shaped piece
         { //a square does not need to rotate.
             pieces[0] = (lines[0].length/2) -1;//9;
             pieces[1] = (lines[0].length/2); //10;
@@ -463,7 +463,7 @@ public class Tetris extends LinearOpMode {
             pieces270[1] = pieces[1];
             pieces270[2] = pieces[2];
             pieces270[3] = pieces[3];
-        } else if (decider == 4) //Line shaped peice
+        } else if (decider == 4) //Line shaped piece
         {
             pieces[0] = (lines[0].length/2) - 2; //8;
             pieces[1] = (lines[0].length/2) -1 ; //9;
@@ -485,7 +485,7 @@ public class Tetris extends LinearOpMode {
             pieces270[1] = (lines[0].length/2)+100;//110;
             pieces270[2] = (lines[0].length/2)+200;//210;
             pieces270[3] = (lines[0].length/2)+300;//310;
-        } else if (decider == 5) //S shaped peice
+        } else if (decider == 5) //S shaped piece
         {
             pieces[0] = (lines[0].length/2) + 1;//11;
             pieces[1] = (lines[0].length/2);//10;
@@ -507,7 +507,7 @@ public class Tetris extends LinearOpMode {
             pieces270[1] = (lines[0].length/2) + 100; //110;
             pieces270[2] = (lines[0].length/2) + 109; //119;
             pieces270[3] = (lines[0].length/2) + 209; //219;
-        } else if (decider == 6) //Z shaped peice
+        } else if (decider == 6) //Z shaped piece
         {
             pieces[0] = (lines[0].length/2)-1; //9;
             pieces[1] = (lines[0].length/2);//10;
@@ -602,7 +602,7 @@ public class Tetris extends LinearOpMode {
             }
         }
     }
-    public void setLines(int xModifier, int yModifier) //changes the location of the piece in controll based on the parameters
+    public void setLines(int xModifier, int yModifier) //changes the location of the piece in control based on the parameters
     {
         pieceModifery-=(yModifier*100);
         pieceModiferx+=xModifier;
@@ -658,7 +658,7 @@ public class Tetris extends LinearOpMode {
         //telemetry.addData(sline[0] + "         " + nextPieceText[0] + "\n" + sline[1] + "         " + nextPieceText[1] + "\n" + sline[2] + "         " + nextPieceText[2] +  "\n" + sline[3] + "\n" + sline[4] + "         " + debugModeText + "\n" + sline[5] + "\n" + sline[6], "");
         telemetry.update();
     }
-    public void resetStrings() //doesn't exactly reset the strings, it turns lines[][] values that are true becuase of the current piece controlling it and turn those values to false, then clears the strings
+    public void resetStrings() //doesn't exactly reset the strings, it turns lines[][] values that are true because of the current piece controlling it and turn those values to false, then clears the strings
     {
         for (int i = 0; i < 4; i++)
         {

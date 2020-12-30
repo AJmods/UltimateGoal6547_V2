@@ -33,7 +33,8 @@ public class StandardTwowheelLocalizerPhoneGyro extends TwoTrackingWheelLocalize
 
     //public static double COUNTS_PER_INCH = 1743.855179349648;
 
-    private DcMotor frontEncoder,sideEncoder;
+    private final DcMotor frontEncoder;
+    private final DcMotor sideEncoder;
 
     //variables for gyro operation
     private float zero;
@@ -41,8 +42,8 @@ public class StandardTwowheelLocalizerPhoneGyro extends TwoTrackingWheelLocalize
     public int sensorDataCounter = 0;
 
     //arrays for gyro operation
-    private float[] rotationMatrix = new float[9];
-    private float[] orientation = new float[3];
+    private final float[] rotationMatrix = new float[9];
+    private final float[] orientation = new float[3];
     //objects for gyro operation
     private SensorManager sensorManager;
     private Sensor rotationVectorSensor;

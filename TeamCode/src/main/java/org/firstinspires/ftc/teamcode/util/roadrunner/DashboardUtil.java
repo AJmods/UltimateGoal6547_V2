@@ -30,7 +30,7 @@ public class DashboardUtil {
         double slope = Math.tan(angle);
         //y = mx + b
         //b = y - mx
-        double yInterecpt = pos.getY() - (pos.getX() * slope);
+        double yIntercept = pos.getY() - (pos.getX() * slope);
 
         double endX;
         if (angle > 0) {
@@ -42,8 +42,8 @@ public class DashboardUtil {
             return;
         }
 
-        double endY1 = (endX * slope) + yInterecpt;
-        double endY2 = (pos.getX() * slope) + yInterecpt;
+        double endY1 = (endX * slope) + yIntercept;
+        double endY2 = (pos.getX() * slope) + yIntercept;
 
         canvas.strokeLine(endX, endY1, pos.getX(), endY2);
 
@@ -89,8 +89,8 @@ public class DashboardUtil {
         canvas.fillCircle(pose.getX(),pose.getY(),1);
     }
 
-    //so apperatnyl theres this method called setStroke().......
-    //GOD FUCKING DAMMIT
+    //so apparently there's this method called setStroke().......
+    //GOD FUCKING DAMMIT I SPENT HOURS ON A METHOD THAT IS ALREADY BUILT IN
 //    public static void generateVuforiaPoints(double radius) {generateVuforiaPoints(radius, DEFAULT_RESOLUTION);}
 //    public static void generateVuforiaPoints(double radius, double res) {
 //        int circles = FieldConstants.VuforiaTargetsX.length;
@@ -123,8 +123,8 @@ public class DashboardUtil {
 //                boolean countUp = Math.abs(endPoint) > Math.abs(startPoint);
 //                double startPoint2 = countUp ? startPoint : endPoint;
 //                double endPoint2 = countUp ? endPoint : startPoint;
-//                double resModifer = countUp ? 1 : -1;
-//                for (double x = startPoint2; Math.abs(x) <= Math.abs(endPoint2); x+=res * resModifer) {
+//                double resModifier = countUp ? 1 : -1;
+//                for (double x = startPoint2; Math.abs(x) <= Math.abs(endPoint2); x+=res * resModifier) {
 //
 //                    double endY = -Math.sqrt(Math.pow(radius,2) - Math.pow(x-centerX,2)) + centerY;
 //
@@ -141,7 +141,7 @@ public class DashboardUtil {
 //    public static void drawVuforiaCircles(Canvas fieldOverlay) {
 //        int circles = vuforiaCirclePointsX.length;
 //        for (int i = 0; i < circles; i++) {
-//            fieldOverlay.fillPolygon(Arrays.tovuforiaCirclePointsX[i], vuforiaCirclePointsY[i]);
+//            fieldOverlay.fillPolygon(vuforiaCirclePointsX[i], vuforiaCirclePointsY[i]);
 //        }
 //    }
 }

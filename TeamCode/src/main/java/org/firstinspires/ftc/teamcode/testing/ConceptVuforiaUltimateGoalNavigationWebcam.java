@@ -92,7 +92,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  */
 
 
-@TeleOp(name="ULTIMATEGOAL Vuforia Nav Webcam", group ="Concept")
+@TeleOp(name="ULTIMATE GOAL Vuforia Nav Webcam", group ="Concept")
 public class ConceptVuforiaUltimateGoalNavigationWebcam extends LinearOpMode {
 
     // IMPORTANT: If you are using a USB WebCam, you must select CAMERA_CHOICE = BACK; and PHONE_IS_PORTRAIT = false;
@@ -107,14 +107,15 @@ public class ConceptVuforiaUltimateGoalNavigationWebcam extends LinearOpMode {
      *
      * Vuforia license keys are always 380 characters long, and look as if they contain mostly
      * random data. As an example, here is a example of a fragment of a valid key:
-     *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
+     *      ... yIgIzTqZ4mWjk9wd3cZO9T1GlfOOI2dRzKS4T0hQ8kT ...
      * Once you've obtained a license key, copy the string from the Vuforia web site
      * and paste it in to your code on the next line, between the double quotes.
      */
+    @SuppressWarnings("SpellCheckingInspection")
     private static final String VUFORIA_KEY =
             "AcA49uX/////AAABmeu99zB3Z0UMtBs+8wKvO+wqH9r+mWnpErlw09BRR+xRyjMJYpow6ZrtHOUAJSedLLrnIoaq2dGAjjHmnCEcqVHnd0YYm7aXeDGnwgAJHsYGU3e7whsv01hBic/gBbuoCqPb7cGk4ZXpkw3FNAYu889wonaHzeIOMQqQrZMtGyQ96E3Lk4/JHtTZDiWfJzdcFDg/LpR+tslv2WKXQlZNKQg581oZZ+GUVW0RbHAXJRcCkHrPgBg1yzuKIqmrwWblPscHtLuFXSJfkuk3C6K8Kp6JvJsTn7JvQGu5Ph9hzaZV4SwN3w4csZMNw5amuZv20f8lkzcLQkN0uT9uTJnwF4uRmc/JHzYlT1DWJJXewPQU";
 
-    // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
+    // Since ImageTarget trackables use mm to specify their dimensions, we must use mm for all the physical dimension.
     // We will define some constants and conversions here
     private static final float mmPerInch        = 25.4f;
     private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
@@ -136,7 +137,7 @@ public class ConceptVuforiaUltimateGoalNavigationWebcam extends LinearOpMode {
     private boolean targetVisible = false;
     private float phoneXRotate    = 0;
     private float phoneYRotate    = 0;
-    private float phoneZRotate    = 0;
+    private final float phoneZRotate    = 0;
 
     DriveTrain6547Realsense bot;
 
@@ -186,7 +187,7 @@ public class ConceptVuforiaUltimateGoalNavigationWebcam extends LinearOpMode {
         frontWallTarget.setName("Front Wall Target");
 
         // For convenience, gather together all the trackable objects in one easily-iterable collection */
-        List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
+        List<VuforiaTrackable> allTrackables = new ArrayList<>();
         allTrackables.addAll(targetsUltimateGoal);
 
         /**

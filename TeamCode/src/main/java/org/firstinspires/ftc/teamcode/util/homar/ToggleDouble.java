@@ -32,7 +32,7 @@ public class ToggleDouble {
     public void input(boolean currentlyPressed) {
         //if the button is being pressed now and wasn't being pressed last time, change the value of the toggle
         if (currentlyPressed && !previouslyPressed) toggle();
-        //change previoulyPressed to reflect the current state of the toggle
+        //change previouslyPressed to reflect the current state of the toggle
         previouslyPressed = currentlyPressed;
     }
 

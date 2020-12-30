@@ -20,10 +20,10 @@ This is the tele-op we use to drive the robot
  */
 @Config
 @TeleOp(name = "Thrower Experiment", group = "_teleOp")
-public class ThrowerExpirment extends LinearOpMode {
+public class ThrowerExperiment extends LinearOpMode {
 
     public static double REV_PER_SEC = 44;
-    public static double TARGET_HIGHET = FieldConstants.RED_GOAL_HEIGHT;
+    public static double TARGET_HEIGHT = FieldConstants.RED_GOAL_HEIGHT;
 
     public static boolean LOCK_BOT_TO_POS = true;
     public static double ROBOT_X = 0;
@@ -36,16 +36,16 @@ public class ThrowerExpirment extends LinearOpMode {
 
     private final double RED_GOAL_X = FieldConstants.RED_GOAL_X;
 
-    private ToggleBoolean feildRealtive = new ToggleBoolean(true);
+    private final ToggleBoolean fieldRelative = new ToggleBoolean(true);
     ToggleBoolean grab = new ToggleBoolean(false);
-    ToggleBoolean lowerWobwater = new ToggleBoolean(false);
+    ToggleBoolean lowerWobvator = new ToggleBoolean(false);
     ToggleInt powerShot = new ToggleInt(3);
 
     private DriveTrain6547Realsense bot; //the robot class
 
-    private double angleZeroValue = 0;
+    private final double angleZeroValue = 0;
 
-    private double robotAngle=0;
+    private final double robotAngle=0;
 
     private double veloWhenLaunchedRevPerSec = 0;
 
@@ -64,25 +64,25 @@ public class ThrowerExpirment extends LinearOpMode {
 
             bot.updateGamepads();
             /*
-            Speed Modifers
+            Speed Modifiers
              */
             if (gamepad1.left_stick_button) {
-               // bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
-                bot.turnRealtiveSync(Math.toRadians(0));
+               // bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
+                bot.turnRelativeSync(Math.toRadians(0));
             }
 
             if (gamepad2.a) { bot.launchRing();
                 veloWhenLaunchedRevPerSec =  (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360);
-                RobotLog.v("Thrower motor 0 VELO when lauched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+                RobotLog.v("Thrower motor 0 VELO when launched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
             } else bot.openIndexer();
 
             boolean isValidAngle = ThrowerUtil.isValidAngle(pos.getX(), pos.getY(), pos.getHeading());
 
             double targetY = ThrowerUtil.getTargetY(pos, RED_GOAL_X);
             double deltaX = pos.getX() - RED_GOAL_X;
-            double detlaY = pos.getY() - targetY;
-            double dist = Math.hypot(deltaX, detlaY);
-            double vi = ThrowerUtil.getVi(0, ThrowerUtil.INITAL_HEIGHT, dist, TARGET_HIGHET, ThrowerUtil.INITAL_ANGLE);
+            double deltaY = pos.getY() - targetY;
+            double dist = Math.hypot(deltaX, deltaY);
+            double vi = ThrowerUtil.getVi(0, ThrowerUtil.INITIAL_HEIGHT, dist, TARGET_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
             double targetRev = vi/ ThrowerUtil.inchesPerRev;
 
 
@@ -106,14 +106,14 @@ public class ThrowerExpirment extends LinearOpMode {
                 packet.addLine("TARGET REV/S: " + REV_PER_SEC);
 
                 //add data.
-                packet.addLine("Actaul Ring Velocity when Launched: " + veloWhenLaunchedRevPerSec + " REV/s");
+                packet.addLine("Actual Ring Velocity when Launched: " + veloWhenLaunchedRevPerSec + " REV/s");
                 packet.addLine("Theoretical Ring Velocity: " + targetRev + " REV/s");
 
                 double drawsConstant = REV_PER_SEC/targetRev;
                 packet.addLine("Current Motor Rev/s)/(Target Rev/s): " + drawsConstant + " (Danda's Constant)");
 
-                packet.addLine("INITIAL ANGLE: " + ThrowerUtil.INITAL_ANGLE);
-                packet.addLine("INITIAL HEIGHT: " + ThrowerUtil.INITAL_HEIGHT);
+                packet.addLine("INITIAL ANGLE: " + ThrowerUtil.INITIAL_ANGLE);
+                packet.addLine("INITIAL HEIGHT: " + ThrowerUtil.INITIAL_HEIGHT);
                 //draw robot
               //  DashboardUtil.drawRobot(fieldOverlay, pos);
                 //draw launcherPos
@@ -160,13 +160,13 @@ public class ThrowerExpirment extends LinearOpMode {
         double targetY = ThrowerUtil.getTargetY(startPos, FieldConstants.TOP_OF_FIELD);
         double dist = Math.hypot(startPos.getX() - FieldConstants.TOP_OF_FIELD, startPos.getY() - targetY);
         if (isPowerShot) {
-            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITAL_HEIGHT, dist, FieldConstants.POWER_SHOT_HEIGHT, ThrowerUtil.INITAL_ANGLE);
+            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITIAL_HEIGHT, dist, FieldConstants.POWER_SHOT_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
             double targetRevPerSec = vi / ThrowerUtil.inchesPerRev;
             bot.setThrowerVelocity(targetRevPerSec * 360 * ThrowerUtil.POWER_SHOT_CONSTANT, AngleUnit.DEGREES);
             RobotLog.v("Set speed to " + (targetRevPerSec*360) + "Rev/s");
         }
         else {
-            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, ThrowerUtil.INITAL_ANGLE);
+            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITIAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
             double targetRevPerSec = vi / ThrowerUtil.inchesPerRev;
             bot.setThrowerVelocity(targetRevPerSec * 360, AngleUnit.DEGREES);
             RobotLog.v("Set speed to " + (targetRevPerSec*360) + "Rev/s");

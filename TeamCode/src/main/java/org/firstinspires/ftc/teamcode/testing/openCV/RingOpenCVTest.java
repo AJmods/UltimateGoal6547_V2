@@ -27,7 +27,7 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 @TeleOp(name= "opencvRingDetectorTest")
 @Disabled
 public class RingOpenCVTest extends LinearOpMode {
-    private ElapsedTime runtime = new ElapsedTime();
+    private final ElapsedTime runtime = new ElapsedTime();
 
     OpenCvCamera phoneCam;
 
@@ -58,8 +58,8 @@ public class RingOpenCVTest extends LinearOpMode {
         runtime.reset();
         while (opModeIsActive()) {
 
-            telemetry.addData("RING COUNT: ", ringDetectionPipeLine.getRingCount());
-            telemetry.addData("RING COUNT: ", ringDetectionPipeLine.getRingCount());
+            telemetry.addData("RING COUNT: ", openCvPipeLines.RingDetectionPipeLine.getRingCount());
+            telemetry.addData("RING COUNT: ", openCvPipeLines.RingDetectionPipeLine.getRingCount());
             telemetry.update();
             sleep(100);
             //call movement functions

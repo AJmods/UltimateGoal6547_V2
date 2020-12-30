@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
 @TeleOp
-public class testAllServeros extends LinearOpMode {
+public class testAllServos extends LinearOpMode {
 
     Servo wobvator;
     Servo wobGrabber;

@@ -37,7 +37,9 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
 
     public static final double COUNTS_PER_INCH = 1743.855179349648;
 
-    private DcMotor leftEncoder, rightEncoder, frontEncoder;
+    private final DcMotor leftEncoder;
+    private final DcMotor rightEncoder;
+    private final DcMotor frontEncoder;
 
     public StandardTrackingWheelLocalizer(HardwareMap hardwareMap) {
         super(Arrays.asList(

@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 @Disabled
 public class TestVelo extends LinearOpMode {
     public static double revPerSec = 1;
-    public static double minLaucnchAMPS = 3;
+    public static double minLaunchAMPS = 3;
     boolean launched = false;
     boolean stateChanged = false;
     DcMotorEx motor;
@@ -55,13 +55,13 @@ public class TestVelo extends LinearOpMode {
             motor.setVelocity(revPerSec*360, AngleUnit.DEGREES);
             motor2.setVelocity(revPerSec*360, AngleUnit.DEGREES);
 
-            launched = motor.getCurrent(CurrentUnit.AMPS) > minLaucnchAMPS;
+            launched = motor.getCurrent(CurrentUnit.AMPS) > minLaunchAMPS;
 
             telemetry.addData("LAUNCHED", launched);
             telemetry.addData("Target V: ", vTicks);
-            telemetry.addData("curernt V (guess)", getVTicksPerSec(motor));
+            telemetry.addData("current V (guess)", getVTicksPerSec(motor));
             telemetry.addData("current V (Degrees)", motor.getVelocity(AngleUnit.DEGREES));
-            telemetry.addData("current V (Radains)", motor.getVelocity(AngleUnit.RADIANS));
+            telemetry.addData("current V (Radians)", motor.getVelocity(AngleUnit.RADIANS));
             telemetry.addData("Current V (ticks)", motor.getVelocity());
             telemetry.addData("MOTOR 1 AMPS:", motor.getCurrent(CurrentUnit.AMPS));
             telemetry.addData("MOTOR 2 AMPS:", motor2.getCurrent(CurrentUnit.AMPS));
@@ -73,10 +73,10 @@ public class TestVelo extends LinearOpMode {
     }
 
     public double getVTicksPerSec(DcMotorEx motor) {
-        double timeBetweenIntervel = time.seconds();
+        double timeBetweenInterval = time.seconds();
         double currentTicks = motor.getCurrentPosition() - lastTick;
 
-        double answer = currentTicks / timeBetweenIntervel;
+        double answer = currentTicks / timeBetweenInterval;
 
         time.reset();
         lastTick = motor.getCurrentPosition();

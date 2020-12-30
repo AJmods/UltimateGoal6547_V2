@@ -37,7 +37,7 @@ public class SplineTestRealsense extends LinearOpMode {
 
         sleep(500);
 
-        if (!REVERSE) drive.turnRealtiveSync(Math.toRadians(225));
+        if (!REVERSE) drive.turnRelativeSync(Math.toRadians(225));
 
 
 

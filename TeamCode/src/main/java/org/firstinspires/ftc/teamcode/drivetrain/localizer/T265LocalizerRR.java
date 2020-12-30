@@ -58,13 +58,13 @@ public class T265LocalizerRR implements Localizer {
     public Pose2d getPoseEstimate() {
         //variable up is updated in update()
 
-        //The FTC265 library uses FTClib geometry, so I need to convert that to road runner Geometry
-        //TODO: convert all FTClib geometry to ACME robotics geometry in T265Camera.java
+        //The FTC265 library uses Ftclib geometry, so I need to convert that to road runner Geometry
+        //TODO: convert all Ftclib geometry to ACME robotics geometry in T265Camera.java
        if (up != null) {
                 Translation2d oldPose = up.pose.getTranslation();
                 Rotation2d oldRot = up.pose.getRotation();
                 //The T265's unit of measurement is meters.  dividing it by .0254 converts meters to inches.
-                rawPose = new Pose2d(oldPose.getX() / .0254, oldPose.getY() / .0254, norm(oldRot.getRadians())); //rawpos
+                rawPose = new Pose2d(oldPose.getX() / .0254, oldPose.getY() / .0254, norm(oldRot.getRadians())); //raw pos
                 mPoseEstimate = rawPose.plus(poseOffset); //offsets the pose to be what the pose estimate is;
        } else {
             RobotLog.v("NULL Camera Update");
@@ -86,7 +86,7 @@ public class T265LocalizerRR implements Localizer {
       //  Pose2d newPos = new Pose2d(pose2d.getX() * .0254, pose2d.getY() * .0254, pose2d.getHeading());
        // slamra.setPose(new com.arcrobotics.ftclib.geometry.Pose2d(newPos.getX(), newPos.getY(), new Rotation2d(newPos.getHeading())));
         pose2d = new Pose2d(pose2d.getX(),pose2d.getY(),0);
-        RobotLog.v("SETING POSE ESTIMATE TO " + pose2d.toString());
+        RobotLog.v("SETTING POSE ESTIMATE TO " + pose2d.toString());
         poseOffset = pose2d.minus(rawPose);
         poseOffset = new Pose2d(poseOffset.getX(), poseOffset.getY(), Math.toRadians(0));
         RobotLog.v("SET POSE OFFSET TO " + poseOffset.toString());
@@ -128,6 +128,7 @@ public class T265LocalizerRR implements Localizer {
         while (angle<=0) angle+=Math.toRadians(360);
         return angle;
     }
+    @SuppressWarnings("SpellCheckingInspection")
     private Pose2d adjustPosbyCameraPos()
     {
         double dist = Math.hypot(slamraX,slamraY); //distance camera is from center

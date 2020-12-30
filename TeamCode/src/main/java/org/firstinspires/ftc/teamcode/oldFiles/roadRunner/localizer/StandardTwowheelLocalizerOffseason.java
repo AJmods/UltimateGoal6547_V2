@@ -31,13 +31,14 @@ public class StandardTwowheelLocalizerOffseason extends TwoTrackingWheelLocalize
 
     //public static double COUNTS_PER_INCH = 1743.855179349648;
 
-    private DcMotor frontEncoder,sideEncoder;
+    private final DcMotor frontEncoder;
+    private final DcMotor sideEncoder;
 
-    private DriveTrain6547Offseason bot;
+    private final DriveTrain6547Offseason bot;
 
     double LastAngle;
 
-    private List<LynxModule> allHubs;
+    private final List<LynxModule> allHubs;
 
     public static double forwardX=-1.625;
     public static double forwardY=-5;

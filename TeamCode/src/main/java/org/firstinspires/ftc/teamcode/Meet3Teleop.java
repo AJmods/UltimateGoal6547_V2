@@ -25,7 +25,7 @@ public class Meet3Teleop extends LinearOpMode {
 
     public static boolean USE_CALCULATED_VELOCITY = false;
     public static double REV_PER_SEC = 44;
-    public static double TARGET_HIGHET = FieldConstants.RED_GOAL_HEIGHT;
+    public static double TARGET_HEIGHT = FieldConstants.RED_GOAL_HEIGHT;
 
     private final double RED_GOAL_X = FieldConstants.RED_GOAL_X;
 
@@ -34,9 +34,9 @@ public class Meet3Teleop extends LinearOpMode {
     private double leftBackPower;
     private double rightBackPower;
 
-    private ToggleBoolean feildRealtive = new ToggleBoolean(true);
+    private final ToggleBoolean fieldRelative = new ToggleBoolean(true);
     ToggleBoolean grab = new ToggleBoolean(false);
-    ToggleBoolean lowerWobwater = new ToggleBoolean(false);
+    ToggleBoolean lowerWobvator = new ToggleBoolean(false);
     ToggleInt powerShot = new ToggleInt(3);
 
     private DriveTrain6547Realsense bot; //the robot class
@@ -78,13 +78,13 @@ public class Meet3Teleop extends LinearOpMode {
 
         telemetry.log().add("CONTROLS:");
         telemetry.log().add("Gamepad1: TOGGLE field relative: Y");
-        telemetry.log().add("Gamepad1: CALABRATE feild relative: l and r bumpers");
-        telemetry.log().add("Gamepad1: ROBOT SPEED modifers: X, B, A");
+        telemetry.log().add("Gamepad1: CALIBRATE field relative: l and r bumpers");
+        telemetry.log().add("Gamepad1: ROBOT SPEED modifiers: X, B, A");
         telemetry.log().add("Gamepad2: INTAKE: Left and Right Triggers");
         telemetry.log().add("Gamepad2: INDEXER: A button");
         telemetry.log().add("Gamepad2: TURN ON/OFF THROWER: LB");
 
-        double speedModifer=1;
+        double speedModifier=1;
 
         ToggleBoolean TurnOnThrower = new ToggleBoolean(false);
 
@@ -98,25 +98,25 @@ public class Meet3Teleop extends LinearOpMode {
 
             bot.updateGamepads();
             /*
-            Speed Modifers
+            Speed Modifiers
              */
             if (bot.mode == DriveTrain6547Realsense.Mode.IDLE) {
-                if (bot.x1.onPress()) speedModifer = .60;
-                if (bot.b1.onPress() && !bot.start1.isPressed()) speedModifer = .9;
+                if (bot.x1.onPress()) speedModifier = .60;
+                if (bot.b1.onPress() && !bot.start1.isPressed()) speedModifier = .9;
                 if (bot.a1.onPress() && !bot.start1.isPressed())
-                    speedModifer = 1.3; //trig math caps speed at .7, 1.3 balences it out
+                    speedModifier = 1.3; //trig math caps speed at .7, 1.3 balances it out
 
-                if (bot.y1.onPress()) feildRealtive.toggle(); //toggle field realtive
+                if (bot.y1.onPress()) fieldRelative.toggle(); //toggle field relative
 
                 robotAngle = bot.getRawExternalHeading() - angleZeroValue; //angle of robot
 
-                if (feildRealtive.output()) //if field relative is enabled
+                if (fieldRelative.output()) //if field relative is enabled
                 {
                     double speed = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y); //get speed
                     double LeftStickAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4; //get angle
                     double rightX = gamepad1.right_stick_x * 2; //rotation
                     rightX *= .5; //half rotation value for better turning
-                    //offset the angle by the angle of the robot to make it field realtive
+                    //offset the angle by the angle of the robot to make it field relative
                     leftFrontPower = speed * Math.cos(LeftStickAngle - robotAngle) + rightX;
                     rightFrontPower = speed * Math.sin(LeftStickAngle - robotAngle) - rightX;
                     leftBackPower = speed * Math.sin(LeftStickAngle - robotAngle) + rightX;
@@ -133,10 +133,10 @@ public class Meet3Teleop extends LinearOpMode {
                     leftBackPower = -gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x;
                     rightBackPower = -gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x;
                 }
-                leftFrontPower *= speedModifer;
-                leftBackPower *= speedModifer;
-                rightBackPower *= speedModifer;
-                rightFrontPower *= speedModifer;
+                leftFrontPower *= speedModifier;
+                leftBackPower *= speedModifier;
+                rightBackPower *= speedModifier;
+                rightFrontPower *= speedModifier;
 
                 telemetry.addData("leftFront Power", leftFrontPower);
 
@@ -150,12 +150,12 @@ public class Meet3Teleop extends LinearOpMode {
                 }
                 //interrupt all robot actions to turn toward goal.
 //            if (gamepad1.left_stick_button) {
-//               // bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
-//                bot.turnRealtiveSync(Math.toRadians(0));
+//               // bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
+//                bot.turnRelativeSync(Math.toRadians(0));
 //            }
                 if (gamepad1.left_stick_button) {
-                    // bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
-                    bot.turnRealtiveSync(Math.toRadians(0));
+                    // bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
+                    bot.turnRelativeSync(Math.toRadians(0));
                 }
 
             }
@@ -170,17 +170,17 @@ public class Meet3Teleop extends LinearOpMode {
 
             if (gamepad2.a) {
                 bot.launchRing();
-                RobotLog.v("Thrower motor 0 VELO when lauched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+                RobotLog.v("Thrower motor 0 VELO when launched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
             } else bot.openIndexer();
 
             if (bot.b2.onPress()) grab.toggle();
-            if (bot.y2.onPress()) lowerWobwater.toggle();
+            if (bot.y2.onPress()) lowerWobvator.toggle();
 
             if (grab.output()) {
                 bot.grabWobbleGoal();
             } else bot.releaseWobbleGoal();
 
-            if (lowerWobwater.output()) {
+            if (lowerWobvator.output()) {
                 bot.lowerWobvator();
             } else bot.raiseWobvator();
 
@@ -209,7 +209,7 @@ public class Meet3Teleop extends LinearOpMode {
 //            if (gamepad2.left_bumper && gamepad2.right_bumper) {
 //                powerShot.toggle();
 //                if (powerShot.output() == 0) {
-//                    bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
+//                    bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
 //                } else if (powerShot.output() == 1) {
 //
 //                } else if (powerShot.output() == 2) {
@@ -229,9 +229,9 @@ public class Meet3Teleop extends LinearOpMode {
 
             double targetY = ThrowerUtil.getTargetY(pos, RED_GOAL_X);
             double deltaX = pos.getX() - RED_GOAL_X;
-            double detlaY = pos.getY() - targetY;
-            double dist = Math.hypot(deltaX, detlaY);
-            double vi = ThrowerUtil.getVi(0, ThrowerUtil.INITAL_HEIGHT, dist + launcherDistanceFromRealsense, TARGET_HIGHET, ThrowerUtil.INITAL_ANGLE);
+            double deltaY = pos.getY() - targetY;
+            double dist = Math.hypot(deltaX, deltaY);
+            double vi = ThrowerUtil.getVi(0, ThrowerUtil.INITIAL_HEIGHT, dist + launcherDistanceFromRealsense, TARGET_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
             double targetRev = vi/ ThrowerUtil.inchesPerRev;
 
             if (bot.leftBumper2.onPress()) {
@@ -241,7 +241,7 @@ public class Meet3Teleop extends LinearOpMode {
             if (TurnOnThrower.output() && !USE_CALCULATED_VELOCITY) {
                 bot.setThrowerVelocity(REV_PER_SEC * 360, AngleUnit.DEGREES);
             } else if (TurnOnThrower.output() && USE_CALCULATED_VELOCITY) {
-                bot.setThrowerVelocity(bot.getThrowerVeloctiyFromPosition(pos, AngleUnit.DEGREES), AngleUnit.DEGREES);
+                bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(pos, AngleUnit.DEGREES), AngleUnit.DEGREES);
             } else {
                 bot.thrower1.setPower(0);
                 bot.thrower2.setPower(0);
@@ -255,7 +255,7 @@ public class Meet3Teleop extends LinearOpMode {
             //stroke launcher targetPos
 
             if (gamepad1.left_stick_button) {
-                bot.turnRealtiveSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
+                bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
             }
 
             bot.setPacketAction((packet, fieldOverlay) -> {
@@ -336,13 +336,13 @@ public class Meet3Teleop extends LinearOpMode {
         double targetY = ThrowerUtil.getTargetY(startPos, FieldConstants.TOP_OF_FIELD);
         double dist = Math.hypot(startPos.getX() - FieldConstants.TOP_OF_FIELD, startPos.getY() - targetY);
         if (isPowerShot) {
-            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITAL_HEIGHT, dist, FieldConstants.POWER_SHOT_HEIGHT, ThrowerUtil.INITAL_ANGLE);
+            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITIAL_HEIGHT, dist, FieldConstants.POWER_SHOT_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
             double targetRevPerSec = vi / ThrowerUtil.inchesPerRev;
             bot.setThrowerVelocity(targetRevPerSec * 360 * ThrowerUtil.POWER_SHOT_CONSTANT, AngleUnit.DEGREES);
             RobotLog.v("Set speed to " + (targetRevPerSec*360) + "Rev/s");
         }
         else {
-            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, ThrowerUtil.INITAL_ANGLE);
+            double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITIAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
             double targetRevPerSec = vi / ThrowerUtil.inchesPerRev;
             bot.setThrowerVelocity(targetRevPerSec * 360, AngleUnit.DEGREES);
             RobotLog.v("Set speed to " + (targetRevPerSec*360) + "Rev/s");

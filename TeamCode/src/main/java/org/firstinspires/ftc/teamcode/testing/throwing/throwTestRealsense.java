@@ -27,8 +27,8 @@ public class throwTestRealsense extends LinearOpMode {
     public static double MIN_Y = -33;
     public static double MAX_Y = -39;
     public static double REV_PER_SEC = 0;
-    public static double INITAL_ANGLE = 35;
-    public static double INITAL_HEIGHT = 10;
+    public static double INITIAL_ANGLE = 35;
+    public static double INITIAL_HEIGHT = 10;
     private final double RED_GOAL_X = FieldConstants.RED_GOAL_X;
     private final double wheelDiameter = 3.77953; //96 mm
     private final double inchesPerRev = Math.PI * wheelDiameter;
@@ -62,9 +62,9 @@ public class throwTestRealsense extends LinearOpMode {
             if (isValidAngle) {
                 double targetY = getTargetY(pos, RED_GOAL_X);
                 double deltaX = pos.getX() - RED_GOAL_X;
-                double detlaY = pos.getY() - targetY;
-                double dist = Math.hypot(deltaX, detlaY);
-                double vi = ThrowerUtil.getVi(0, INITAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, 35);
+                double deltaY = pos.getY() - targetY;
+                double dist = Math.hypot(deltaX, deltaY);
+                double vi = ThrowerUtil.getVi(0, INITIAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, 35);
                 double targetRev = vi/inchesPerRev;
 
                 if (USE_CALCULATED_VELOCITY) {

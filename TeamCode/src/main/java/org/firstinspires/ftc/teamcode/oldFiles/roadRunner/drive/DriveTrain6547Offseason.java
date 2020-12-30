@@ -81,7 +81,7 @@ public class DriveTrain6547Offseason extends MecanumDriveBase6547Offseason {
 
     RevBlinkinLedDriver lights;
 
-    public SkyStoneLoc skyStoneLoc=SkyStoneLoc.CENTER; //defualt to center
+    public SkyStoneLoc skyStoneLoc=SkyStoneLoc.CENTER; //default to center
 
     public Button a1,a2,b1,b2,x1,x2,y1,y2,dpadUp1,dpadUp2,dpadDown1, dpadDown2, dpadLeft1, dpadLeft2,dpadRight1, dpadRight2,leftBumper1,leftBumper2,rightBumper1,rightBumper2,start1,start2, rightTrigger1, rightTrigger2, leftTrigger1, leftTrigger2;
 
@@ -106,8 +106,8 @@ public class DriveTrain6547Offseason extends MecanumDriveBase6547Offseason {
     ElapsedTime screamTime = new ElapsedTime(); //makes the robot scream (don't put in notebook)
 
     public DcMotorEx leftFront, leftRear, rightRear, rightFront;
-    private List<DcMotorEx> motors;
-    private BNO055IMU imu;
+    private final List<DcMotorEx> motors;
+    private final BNO055IMU imu;
 
     List<LynxModule> allHubs;
 
@@ -241,10 +241,8 @@ public class DriveTrain6547Offseason extends MecanumDriveBase6547Offseason {
         setRunLift(false); //robot will not try to move lift unless otherwise told
 
         setBulkReadAuto();
-
-        //opMode.telemetry = dashboard.getopMode.telemetry();
     }
-    private void initGamepads() //set the buttons to thier values
+    private void initGamepads() //set the buttons to their values
     {
         a1 = new Button();
         a2 = new Button();
@@ -273,7 +271,7 @@ public class DriveTrain6547Offseason extends MecanumDriveBase6547Offseason {
         rightTrigger1 = new Button();
         rightTrigger2 = new Button();
     }
-    public void updateGamepads() //update the gamepad buttons from HOMAR-FTC-Libary for tele-op
+    public void updateGamepads() //update the gamepad buttons from HOMAR-FTC-Library for tele-op
     {
         a1.input(opMode.gamepad1.a);
         a2.input(opMode.gamepad2.a);
@@ -460,7 +458,7 @@ public class DriveTrain6547Offseason extends MecanumDriveBase6547Offseason {
         grabberSlide.setPower(-1);
     }
     public void stopGrabberSlide() { grabberSlide.setPower(0);}
-    public void extendMeasuingTape() { measuringTape.setPower(1);}
+    public void extendMeasuringTape() { measuringTape.setPower(1);}
     public void retractMeasuringTape() {measuringTape.setPower(-1);}
     public void stopMeasuringTape() {measuringTape.setPower(0);}
     public void moveGrabberSlideForTime(long milliseconds) {moveGrabberSlideForTime(1,milliseconds);}
@@ -594,16 +592,16 @@ public class DriveTrain6547Offseason extends MecanumDriveBase6547Offseason {
        return isLiftAtStartingPos;
     }
 
-    public void setLiftToTargetPos(int targetPos, int leaway) //sets lift to target pos.
+    public void setLiftToTargetPos(int targetPos, int leeway) //sets lift to target pos.
     {
         // No while loops in this so it can be used in tele-op or a state machine
         int liftPos = lift.getCurrentPosition();
-        if (liftPos > targetPos + leaway)
+        if (liftPos > targetPos + leeway)
         {
             lift.setPower(-0.5);
             isLiftAtStartingPos = false;
         }
-        else if (liftPos < targetPos-leaway)
+        else if (liftPos < targetPos-leeway)
         {
             lift.setPower(0.5);
             isLiftAtStartingPos = false;
@@ -615,14 +613,14 @@ public class DriveTrain6547Offseason extends MecanumDriveBase6547Offseason {
         }
 
     }
-    public void moveLift(int modifer, int leaway)
+    public void moveLift(int modifier, int leeway)
     {
-        RobotLog.d("Moving Lift to " + modifer + " from " + lift.getCurrentPosition());
+        RobotLog.d("Moving Lift to " + modifier + " from " + lift.getCurrentPosition());
         isLiftAtStartingPos = false;
         runtime.reset();
-        setLiftTargetPos(getLiftStartingPos() + modifer);
+        setLiftTargetPos(getLiftStartingPos() + modifier);
         while (!isLiftAtTargetPos() && opMode.opModeIsActive()) {
-            setLiftToTargetPos(getLiftTargetPos(), leaway);
+            setLiftToTargetPos(getLiftTargetPos(), leeway);
             outputTelemetry();
         }
     }
@@ -669,11 +667,7 @@ public class DriveTrain6547Offseason extends MecanumDriveBase6547Offseason {
     }
     public boolean isStoneAtEnd()
     {
-        if (isStone(rightEndColorSensor) || isStone(endColorSensor))
-        {
-            return true;
-        }
-        else return false;
+        return isStone(rightEndColorSensor) || isStone(endColorSensor);
     }
     public boolean isStone(ColorSensor colorSensor)
     {
@@ -826,7 +820,7 @@ public class DriveTrain6547Offseason extends MecanumDriveBase6547Offseason {
         rightRear.setPower(RR);
         rightFront.setPower(RF);
     }
-    //set motor powers but it's field realtive.  Unused
+    //set motor powers but it's field Relative.  Unused
     public void setMotorPowers(double v,double v1, double v2, double v3, double angle)
     {
         angle-=getIMUAngle();
@@ -874,7 +868,7 @@ public class DriveTrain6547Offseason extends MecanumDriveBase6547Offseason {
     /*
     Road Runner turn with consideration of the gyro angle
      */
-    public void turnRealtiveSync(double angle)
+    public void turnRelativeSync(double angle)
     {
         double target=angle-getPoseEstimate().getHeading();
         //target-=Math.toRadians(90);
@@ -883,10 +877,10 @@ public class DriveTrain6547Offseason extends MecanumDriveBase6547Offseason {
             target+=(target>=0) ? Math.toRadians(-360) : Math.toRadians(360);
         }
         opMode.telemetry.log().add("inputted Angle: " + angle + " , turning to: " + target);
-        RobotLog.d("Turning Realtive to heading " + angle + ", amount turning: " + target);
+        RobotLog.d("Turning Relative to heading " + angle + ", amount turning: " + target);
         turnSync(target);
     }
-    public void turnRealtive(double angle)
+    public void turnRelative(double angle)
     {
         double target=angle-Math.toRadians(getIMUAngle());
         target-=Math.toRadians(90);

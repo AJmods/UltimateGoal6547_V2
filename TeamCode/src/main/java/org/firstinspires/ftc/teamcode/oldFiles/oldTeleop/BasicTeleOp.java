@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.oldFiles.oldTeleop;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -21,7 +20,7 @@ public class BasicTeleOp extends LinearOpMode {
     private double leftBackPower;
     private double rightBackPower;
 
-    private ToggleBoolean feildRealtive = new ToggleBoolean(true);
+    private final ToggleBoolean failedRelative = new ToggleBoolean(true);
 
     private DriveTrain6547Realsense bot; //the robot class
 
@@ -43,7 +42,7 @@ public class BasicTeleOp extends LinearOpMode {
 
         waitForStart();
 
-        double speedModifer=1;
+        double speedModifier=1;
 
         while (opModeIsActive()) {
 
@@ -51,23 +50,23 @@ public class BasicTeleOp extends LinearOpMode {
             Pose2d pos = bot.getPoseEstimate();
 
             /*
-            Speed Modifers
+            Speed Modifiers
              */
-            if (bot.x1.onPress()) speedModifer=.60;
-            if (bot.b1.onPress() && !bot.start1.isPressed()) speedModifer=.9;
-            if (bot.a1.onPress() && !bot.start1.isPressed()) speedModifer=1.3; //trig math caps speed at .7, 1.3 balences it out
+            if (bot.x1.onPress()) speedModifier=.60;
+            if (bot.b1.onPress() && !bot.start1.isPressed()) speedModifier=.9;
+            if (bot.a1.onPress() && !bot.start1.isPressed()) speedModifier=1.3; //trig math caps speed at .7, 1.3 balances it out
 
-            if (bot.y1.onPress()) feildRealtive.toggle(); //toggle field realtive
+            if (bot.y1.onPress()) failedRelative.toggle(); //toggle field relative
 
             robotAngle =  bot.getRawExternalHeading() - angleZeroValue; //angle of robot
 
-            if (feildRealtive.output()) //if field relative is enabled
+            if (failedRelative.output()) //if field relative is enabled
             {
                 double speed = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y); //get speed
                 double LeftStickAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4; //get angle
                 double rightX=gamepad1.right_stick_x*2; //rotation
                 rightX*=.5; //half rotation value for better turning
-                //offset the angle by the angle of the robot to make it field realtive
+                //offset the angle by the angle of the robot to make it field relative
                 leftFrontPower =  speed * Math.cos(LeftStickAngle-robotAngle) + rightX;
                 rightFrontPower =  speed * Math.sin(LeftStickAngle-robotAngle) - rightX;
                 leftBackPower =  speed * Math.sin(LeftStickAngle-robotAngle) + rightX;
@@ -85,10 +84,10 @@ public class BasicTeleOp extends LinearOpMode {
                 leftBackPower=-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x;
                 rightBackPower=-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x;
             }
-            leftFrontPower*=speedModifer;
-            leftBackPower*=speedModifer;
-            rightBackPower*=speedModifer;
-            rightFrontPower*=speedModifer;
+            leftFrontPower*=speedModifier;
+            leftBackPower*=speedModifier;
+            rightBackPower*=speedModifier;
+            rightFrontPower*=speedModifier;
 
             telemetry.addData("leftFront Power", leftFrontPower);
 

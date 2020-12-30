@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.drivetrain;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 /*
  * Constants shared between multiple drive types.
@@ -81,9 +80,9 @@ public class DriveConstants {
      * Resulting in 94.82478545840311 in/s.
      * This is only 80% of the theoretical maximum velocity of the bot, following the recommendation above.
      * This is capped at 80% because there are a number of variables that will prevent your bot from actually
-     * reaching this maximum velocity: voltage dropping over the game, bot weight, general mechanical inefficiences, etc.
+     * reaching this maximum velocity: voltage dropping over the game, bot weight, general mechanical inefficiencies, etc.
      * However, you can push this higher yourself if you'd like. Perhaps raise it to 90-95% of the theoretically
-     * max velocity. The theoreticaly maximum velocity is 118.53098182300388 in/s.
+     * max velocity. The theoretically maximum velocity is 118.53098182300388 in/s.
      * Just make sure that your bot can actually reach this maximum velocity. Path following will be detrimentally
      * affected if it is aiming for a velocity not actually possible.
      *
@@ -93,20 +92,20 @@ public class DriveConstants {
      *
      * Maximum Angular Velocity is calculated as maximum velocity / (trackWidth / 2) * (180 / Math.PI)
      */
-    /*  Base Contrats for 80% of thoredical max
+    /*  Base values for 80% of theoretical max
      public static DriveConstraints BASE_CONSTRAINTS = new DriveConstraints(
             94.82478545840311, 94.82478545840311, 0.0,
             Math.toRadians(603.6733333333333), Math.toRadians(603.6733333333333), 0.0
     );
      */
 
-    public static double getTheoricalMaxVeolicty()
+    public static double getTheatricalMaxVelocity()
     {
         return ((MAX_RPM / 60) * GEAR_RATIO * WHEEL_RADIUS * 2 * Math.PI) * 0.8;
     }
-    public static double getTheordicalMaxAngVelocity()
+    public static double getTheoreticalMaxAngVelocity()
     {
-        return getTheoricalMaxVeolicty() / (TRACK_WIDTH / 2) * (180 / Math.PI);
+        return getTheatricalMaxVelocity() / (TRACK_WIDTH / 2) * (180 / Math.PI);
     }
 
     public static double encoderTicksToInches(double ticks) {
