@@ -27,6 +27,7 @@ import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -445,7 +446,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         frontWallTarget.setName("Front Wall Target");
 
         // For convenience, gather together all the trackable objects in one easily-iterable collection */
-        allTrackables = new ArrayList<VuforiaTrackable>();
+        allTrackables = new ArrayList<>();
         allTrackables.addAll(targetsUltimateGoal);
 
         /**
@@ -514,9 +515,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
         // Next, translate the camera lens to where it is on the robot.
         // In this example, it is centered (left to right), but forward of the middle of the robot, and above ground level.
-        final float CAMERA_FORWARD_DISPLACEMENT  = 4.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot-center
-        final float CAMERA_VERTICAL_DISPLACEMENT = 8.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
-        final float CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
+        final float CAMERA_FORWARD_DISPLACEMENT  = 8.0f * mmPerInch;   // eg: Camera is 4 Inches in front of robot-center
+        final float CAMERA_VERTICAL_DISPLACEMENT = 10.0f * mmPerInch;   // eg: Camera is 8 Inches above ground
+        final float CAMERA_LEFT_DISPLACEMENT     = -4.0f * mmPerInch;     // eg: Camera is ON the robot's center line
 
         OpenGLMatrix robotFromCamera = OpenGLMatrix
                 .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
@@ -580,8 +581,8 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         dpadUp2.input(gamepad2.dpad_up);
         dpadRight1.input(gamepad1.dpad_right);
         dpadRight2.input(gamepad2.dpad_right);
-        dpadUp1.input(gamepad1.dpad_up);
-        dpadUp2.input(gamepad2.dpad_up);
+        dpadDown1.input(gamepad1.dpad_down);
+        dpadDown1.input(gamepad2.dpad_down);
         dpadLeft1.input(gamepad1.dpad_left);
         dpadLeft2.input(gamepad2.dpad_left);
         leftBumper1.input(gamepad1.left_bumper);
@@ -922,6 +923,8 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
         //fieldOverlay.fillCircle(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y, 8);
 
+        if (dpadLeft1.onPress()) mode = Mode.IDLE;
+
         switch (mode) {
             case IDLE:
                 // do nothing
@@ -1115,6 +1118,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         double targetY = ThrowerUtil.getTargetY(currentPos, FieldConstants.RED_GOAL_X);
         double dist = Math.hypot(currentPos.getX() - FieldConstants.RED_GOAL_X, currentPos.getY() - targetY);
         double unitsPerSec = getThrowerVelocityFromPosition(dist, angleUnit);
+        RobotLog.v("TARGET Y: " + targetY + ", DIST: " + dist + ", UNITS PER SEC: " + unitsPerSec);
         return unitsPerSec;
     }
 
@@ -1155,6 +1159,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             if (targetVelocity > currentV) lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
             else lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
         } else lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+    }
+    public boolean isInsideField(Pose2d pose2d) {
+        return Math.abs(pose2d.getY()) < FieldConstants.TOP_OF_FIELD && Math.abs(pose2d.getX()) < FieldConstants.TOP_OF_FIELD;
     }
 
     /**

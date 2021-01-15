@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -24,7 +25,8 @@ This is the tele-op we use to drive the robot
 public class Meet3Teleop extends LinearOpMode {
 
     public static boolean USE_CALCULATED_VELOCITY = false;
-    public static double REV_PER_SEC = 44;
+    public static double REV_PER_SEC = 48;
+    public static double VELO_MUTIPLIER = 1;
     public static double TARGET_HEIGHT = FieldConstants.RED_GOAL_HEIGHT;
 
     private final double RED_GOAL_X = FieldConstants.RED_GOAL_X;
@@ -51,12 +53,15 @@ public class Meet3Teleop extends LinearOpMode {
     boolean isIntaking = false;
     boolean isOuttaking = false;
 
+    boolean messageDisplayed = false;
+
     @Override
     public void runOpMode() throws InterruptedException{
        // telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()); //makes telemetry output to the FTC Dashboard
-        bot = new DriveTrain6547Realsense(this, true);
+        bot = new DriveTrain6547Realsense(this, false);
         telemetry.log().add("Initing Vuforia");
         bot.initVufoira();
+        bot.update();
         telemetry.update();
         try {
             Pose2d currentPos = bot.readPos();
@@ -66,7 +71,6 @@ public class Meet3Teleop extends LinearOpMode {
             telemetry.log().add("set POS to " + currentPos.toString());
             RobotLog.v("set POS to " + currentPos.toString());
         } catch (Exception e) {telemetry.log().add("FAILED TO READ POSITION");}
-        telemetry.log().add("DID POS THING");
         //reset POS to 0
         bot.savePos(new Pose2d(0,0,0));
 
@@ -161,10 +165,19 @@ public class Meet3Teleop extends LinearOpMode {
             }
 
             if (gamepad1.right_stick_button && bot.mode == DriveTrain6547Realsense.Mode.IDLE) {
-                bot.followTrajectory(bot.trajectoryBuilder(false, DriveSpeeds.fast).lineToLinearHeading(new Pose2d(0,-36, Math.toRadians(0))).build());
+                bot.followTrajectory(bot.trajectoryBuilder(false, DriveSpeeds.fast).lineToLinearHeading(new Pose2d(0,-39, Math.toRadians(0))).build());
             }
 
-            if (Math.abs(gamepad1.left_stick_x) > .3 || Math.abs(gamepad1.left_stick_y) > .3 || Math.abs(gamepad1.right_stick_x) > .3 || Math.abs(gamepad1.right_stick_y) > .3) {
+            if (bot.dpadUp1.onPress()) {
+                doPowerShots(pos);
+                bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+            }
+            if (bot.dpadDown1.onPress()) {
+                doRegularShots(pos);
+                bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+            }
+
+            if (isStickMoved(gamepad1.left_stick_x, gamepad1.left_stick_y) || isStickMoved(gamepad1.right_stick_x, gamepad1.right_stick_y)) {
                 bot.mode = DriveTrain6547Realsense.Mode.IDLE;
             }
 
@@ -204,6 +217,10 @@ public class Meet3Teleop extends LinearOpMode {
                 isOuttaking = false;
             }
 
+            if (bot.dpadUp2.onPress()) {
+                bot.stopIntake();
+            }
+
            // if (bot.rightBumper2.onPress()) bot.setPoseEstimate(new Pose2d(1,1,Math.toRadians(90)));
 
 //            if (gamepad2.left_bumper && gamepad2.right_bumper) {
@@ -240,11 +257,14 @@ public class Meet3Teleop extends LinearOpMode {
 
             if (TurnOnThrower.output() && !USE_CALCULATED_VELOCITY) {
                 bot.setThrowerVelocity(REV_PER_SEC * 360, AngleUnit.DEGREES);
+                bot.updateLightsBasedOnThrower();
             } else if (TurnOnThrower.output() && USE_CALCULATED_VELOCITY) {
-                bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(pos, AngleUnit.DEGREES), AngleUnit.DEGREES);
+                bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(pos, AngleUnit.DEGREES)*VELO_MUTIPLIER, AngleUnit.DEGREES);
+                bot.updateLightsBasedOnThrower();
             } else {
                 bot.thrower1.setPower(0);
                 bot.thrower2.setPower(0);
+                bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
             }
 
 //            if (USE_CALCULATED_VELOCITY) {
@@ -254,8 +274,16 @@ public class Meet3Teleop extends LinearOpMode {
 //            }
             //stroke launcher targetPos
 
-            if (gamepad1.left_stick_button) {
-                bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
+//            if (gamepad1.left_stick_button) {
+//                bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), bot.getPoseEstimate()));
+//            }
+
+            if (!bot.isInsideField(pos) && !messageDisplayed) {
+                RobotLog.setGlobalWarningMessage("POSITION ERROR, SCAN VUFORIA TARGET");
+                messageDisplayed = true;
+            } else if (bot.isInsideField(pos) && messageDisplayed) {
+                RobotLog.clearGlobalWarningMsg();
+                messageDisplayed = false;
             }
 
             bot.setPacketAction((packet, fieldOverlay) -> {
@@ -316,11 +344,89 @@ public class Meet3Teleop extends LinearOpMode {
             telemetry.addData("IS LAUNCHED: ", bot.isReadyToThrow());
             telemetry.update();
             bot.update(); //updates robot's position
-            bot.updateLightsBasedOnThrower();
+            //bot.updateLightsBasedOnThrower();
+            //if (bot.isInsideField(pos)) RobotLog.setGlobalWarningMessage("ROBOT POSE OFF, GO TO VUFORIA TARGET");
 
         }
         bot.stopVuforia();
         bot.stopRobot();
+    }
+    public boolean isStickMoved(double x, double y) {
+        return Math.abs(x) > .3 || Math.abs(y) > .3;
+    }
+
+    public void doRegularShots(Pose2d currentPos) {
+        bot.stopIntake();
+        double angleToTurnTo = bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), currentPos);
+        bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(new Pose2d(currentPos.getX(), currentPos.getY(), angleToTurnTo), AngleUnit.DEGREES), AngleUnit.DEGREES);
+
+        bot.turnRelativeSync(angleToTurnTo);
+        bot.turnRelativeSync(angleToTurnTo);
+        //bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(currentPos, AngleUnit.DEGREES) * VELO_MUTIPLIER, AngleUnit.DEGREES);
+
+        for (int i = 0; i < 3 && opModeIsActive() && !isStickMoved(gamepad1.left_stick_x, gamepad1.left_stick_y); i++) {
+            while (!bot.isReadyToThrow() && opModeIsActive() && !isStickMoved(gamepad1.left_stick_x, gamepad1.left_stick_y)) {bot.updateLightsBasedOnThrower();}
+            bot.launchRing();
+            RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+            if (!isStickMoved(gamepad1.left_stick_x, gamepad1.left_stick_y)) sleep(500);
+            bot.openIndexer();
+            if (!isStickMoved(gamepad1.left_stick_x, gamepad1.left_stick_y)) sleep(500);
+        }
+    }
+
+    public void doPowerShots(Pose2d currentPos) {
+        bot.stopIntake();
+       // Vector2d launchPos = new Vector2d(0,-14);
+        //setThrowerToTarget(new Vector2d(currentPos.getX(), currentPos.getY()), Math.toRadians(0));
+
+        //drive to middle, and face first power shot goal, prepare to launch.
+//        bot.followTrajectory(bot.trajectoryBuilder().lineToLinearHeading(new Pose2d(launchPos.getX(), launchPos.getY(), Math.toRadians(0))).build());
+//
+//        while (!isStickMoved(gamepad1.left_stick_x, gamepad1.left_stick_y) && opModeIsActive()) { bot.update();}
+        setThrowerToTarget(bot.getPoseEstimate());
+
+        //telemetry.log().add("Drive to PowerShot");
+
+        //turn toward 3 power shots
+        RobotLog.v("Launching Power Shot 1");
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
+        //throw ring
+        setThrowerToTarget(bot.getPoseEstimate());
+        //wait for launch speed to be ready
+        while (!bot.isReadyToThrow()) {bot.updateLightsBasedOnThrower();}
+        bot.launchRing();
+        RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+        sleep(500);
+        bot.openIndexer();
+        //prepare to throw next ring
+        RobotLog.v("Launching Power Shot 2");
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
+        //throw ring
+        setThrowerToTarget(bot.getPoseEstimate());
+        //wait for launch speed to be ready
+        while (!bot.isReadyToThrow()) {bot.updateLightsBasedOnThrower();}
+        bot.launchRing();
+        RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+        sleep(500);
+        bot.openIndexer();
+        //prepare to throw next ring
+        RobotLog.v("Launching Power Shot 3");
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
+        //throw ring
+        setThrowerToTarget(bot.getPoseEstimate());
+        //wait for launch speed to be ready
+        while (!bot.isReadyToThrow()) {bot.updateLightsBasedOnThrower();}
+        bot.launchRing();
+        RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+        sleep(500);
+        bot.openIndexer();
+        //stop thrower
+        bot.setThrowerVelocity(0);
+
+        telemetry.log().add("Launched Rings");
     }
 
     public void setThrowerToTarget(Vector2d startPos, double angle) {

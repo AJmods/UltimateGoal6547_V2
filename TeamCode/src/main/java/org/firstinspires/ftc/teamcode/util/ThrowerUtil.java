@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.util;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.robotcore.util.RobotLog;
 
 @Config
 public class ThrowerUtil {
@@ -10,7 +11,7 @@ public class ThrowerUtil {
     /**
      * Multiply the theoretical speed from getVi() by this number to make the launcher hit the powershots
      */
-    public static double POWER_SHOT_CONSTANT = 2.173;
+    public static double POWER_SHOT_CONSTANT = 2.1715;
     public static double GOAL_CONSTANT = 2.36;
 
 
@@ -70,6 +71,9 @@ public class ThrowerUtil {
         //y = mx + b
         //b = y - mx
         double yIntercept = currentPos.getY() - (currentPos.getX() * slope);
+
+        RobotLog.v("SLOPE: (CURRENT POSITION): " + currentPos);
+        RobotLog.v("SLOPE: " + slope + ", Y-INTERCEPT: " + yIntercept);
 
         return (slope * targetX) + yIntercept;
     }
