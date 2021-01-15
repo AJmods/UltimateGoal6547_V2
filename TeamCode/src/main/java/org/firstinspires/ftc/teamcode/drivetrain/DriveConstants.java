@@ -4,6 +4,11 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 
+/**
+ * Constants shared between the drive train
+ * Should be set for this year's robot
+ *
+ */
 /*
  * Constants shared between multiple drive types.
  *

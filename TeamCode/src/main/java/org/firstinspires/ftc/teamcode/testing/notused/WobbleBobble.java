@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 @Config
 @Disabled
+@Deprecated
 public class WobbleBobble extends LinearOpMode {
 
     Servo wobbleBobble;

@@ -5,6 +5,9 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.util.RobotLog;
 
+/**
+ * Methods and constants that are used for throwing rings
+ */
 @Config
 public class ThrowerUtil {
 

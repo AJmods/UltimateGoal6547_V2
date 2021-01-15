@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
- * Created by Drew from 11874 on 4/11/2018.
+ * IT'S TETRIS
  */
 
 @TeleOp(name ="Tetris by 6547 Cobalt Colts", group = "Tetris")

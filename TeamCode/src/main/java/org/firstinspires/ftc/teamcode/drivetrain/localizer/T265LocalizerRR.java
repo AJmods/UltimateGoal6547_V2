@@ -14,6 +14,9 @@ import com.spartronics4915.lib.T265Camera;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * a Road Runner localizer that uses the Intel T265 Realsense
+ */
 @Config
 public class T265LocalizerRR implements Localizer {
 
@@ -53,6 +56,9 @@ public class T265LocalizerRR implements Localizer {
         }
     }
 
+    /**
+     * @return
+     */
     @NotNull
     @Override
     public Pose2d getPoseEstimate() {
@@ -99,16 +105,23 @@ public class T265LocalizerRR implements Localizer {
 //        }
     }
 
+    /**
+     * @return the heading of the robot (in radains)
+     */
     public static double getHeading() {
         return mPoseEstimate.getHeading();
     }
 
+    /**
+     * updates the camera.  Used in
+     * @see org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense in update()
+     */
     @Override
     public void update() {
         up = slamra.getLastReceivedCameraUpdate();
     }
 
-    /*
+    /**
     No idea what the purpose getPoseVelocity.  Everything works fine by just using getPoseEstimate()
     That said, the code to get the velocity is comment out below.  Haven't testing it much
     and I don't know how well getting the velocity work or if use the velocity has any effect
@@ -122,12 +135,21 @@ public class T265LocalizerRR implements Localizer {
         ChassisSpeeds velocity = up.velocity;
         return new Pose2d(velocity.vxMetersPerSecond /.0254,velocity.vyMetersPerSecond /.0254,velocity.omegaRadiansPerSecond);
     }
+
+    /**
+     * @param angle angle in radians
+     * @return normiazled angle between ranges 0 to 2Pi
+     */
     private double norm(double angle)
     {
         while (angle>Math.toRadians(360)) angle-=Math.toRadians(360);
         while (angle<=0) angle+=Math.toRadians(360);
         return angle;
     }
+
+    /**
+     * DO NOT USE THiS
+     */
     @SuppressWarnings("SpellCheckingInspection")
     private Pose2d adjustPosbyCameraPos()
     {
@@ -138,14 +160,26 @@ public class T265LocalizerRR implements Localizer {
         double detlaY = dist * Math.sin(cameraAngle);
         return mPoseEstimate.minus(new Pose2d(detlaX,detlaY));
     }
+
+    /**
+     * starts realsense
+     * (Called automatically when a program using this starts)
+     */
     /*
     Unused methods.  Here just in case they may be needed.
      */
+    @Deprecated
     public static void startRealsense()
     {
         RobotLog.v("staring realsense");
         slamra.start();
     }
+
+    /**
+     * stops the realsense
+     * (called automatically when a program stops)
+     */
+    @Deprecated
     public static void stopRealsense()
     {
         RobotLog.v("Stopping Realsense");

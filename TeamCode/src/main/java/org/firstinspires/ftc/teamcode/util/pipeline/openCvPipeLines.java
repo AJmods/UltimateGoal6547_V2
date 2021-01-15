@@ -16,6 +16,9 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Pipelines for use with OpenCV
+ */
 @Config
 public class openCvPipeLines {
 

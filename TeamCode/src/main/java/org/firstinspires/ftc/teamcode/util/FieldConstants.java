@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode.util;
 
 import com.acmerobotics.dashboard.config.Config;
 
+/**
+ * Field and objects places (in inches)
+ */
 @Config
 public class FieldConstants {
 

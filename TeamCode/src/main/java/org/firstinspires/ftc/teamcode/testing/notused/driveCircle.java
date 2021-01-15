@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
@@ -11,6 +12,8 @@ import org.firstinspires.ftc.teamcode.drivetrain.DriveSpeeds;
 
 @Autonomous
 @Config
+@Disabled
+@Deprecated
 public class driveCircle extends LinearOpMode {
 
     public static double RADIUS =20;

@@ -5,6 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+/**
+ * A simple, tank-drive teleop.
+ */
 @TeleOp
 public class simpleTeleOp extends LinearOpMode {
 

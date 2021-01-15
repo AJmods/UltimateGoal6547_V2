@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode.drivetrain;
 
 import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 
+/**
+ * preset speeds when for followtrajectory().
+ */
 public class DriveSpeeds {
 
     public static DriveConstraints slow = new DriveConstraints(5, 5, 0.0,

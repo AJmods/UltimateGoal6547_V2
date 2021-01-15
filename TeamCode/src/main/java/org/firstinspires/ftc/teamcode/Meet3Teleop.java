@@ -17,8 +17,9 @@ import org.firstinspires.ftc.teamcode.util.homar.ToggleInt;
 import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
 import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 
-/*
-This is the tele-op we use to drive the robot
+/**
+ * This is the main tele-op the drivers use
+ * @see DriveTrain6547Realsense
  */
 @Config
 @TeleOp(name = "Meet 3 Tele-op", group = "_teleOp")

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -15,11 +16,13 @@ import org.firstinspires.ftc.teamcode.util.homar.ToggleBoolean;
 import org.firstinspires.ftc.teamcode.util.homar.ToggleInt;
 import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 
-/*
-This is the tele-op we use to drive the robot
+/**
+A Tele-op designed to experiment with the thrower
+ What was changed?  I don't know.
  */
 @Config
 @TeleOp(name = "Thrower Experiment", group = "_teleOp")
+@Disabled
 public class ThrowerExperiment extends LinearOpMode {
 
     public static double REV_PER_SEC = 44;
