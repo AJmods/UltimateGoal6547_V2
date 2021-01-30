@@ -105,10 +105,11 @@ public class RedLeftAutonTest extends LinearOpMode {
         //throw ring
         setThrowerToTarget(bot.getPoseEstimate());
         //wait for launch speed to be ready
+        sleep(250);
         while (!bot.isReadyToThrow()) {bot.updateLightsBasedOnThrower();}
         bot.launchRing();
         RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
-        sleep(750);
+        sleep(500);
         bot.openIndexer();
         //prepare to throw next ring
         RobotLog.v("Launching Power Shot 3");
@@ -118,6 +119,7 @@ public class RedLeftAutonTest extends LinearOpMode {
         setThrowerToTarget(bot.getPoseEstimate());
         //wait for launch speed to be ready
         while (!bot.isReadyToThrow()) {bot.updateLightsBasedOnThrower();}
+        sleep(250);
         bot.launchRing();
         RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
         sleep(500);

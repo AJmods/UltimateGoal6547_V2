@@ -15,6 +15,7 @@ public class ThrowerUtil {
      * Multiply the theoretical speed from getVi() by this number to make the launcher hit the powershots
      */
     public static double POWER_SHOT_CONSTANT = 2.1715;
+    public static double POWER_SHOT_CONSTANT_TELE_OP = 2.1715;
     public static double GOAL_CONSTANT = 2.36;
 
 
@@ -75,8 +76,8 @@ public class ThrowerUtil {
         //b = y - mx
         double yIntercept = currentPos.getY() - (currentPos.getX() * slope);
 
-        RobotLog.v("SLOPE: (CURRENT POSITION): " + currentPos);
-        RobotLog.v("SLOPE: " + slope + ", Y-INTERCEPT: " + yIntercept);
+//        RobotLog.v("SLOPE: (CURRENT POSITION): " + currentPos);
+//        RobotLog.v("SLOPE: " + slope + ", Y-INTERCEPT: " + yIntercept);
 
         return (slope * targetX) + yIntercept;
     }

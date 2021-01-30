@@ -99,6 +99,8 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public static PIDCoefficients Y_PID = new PIDCoefficients(4, 0, 0);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(1, 0, 0);
 
+    public static boolean INTERRUPT_TRAJECTORIES_WITH_GAMEPAD = false;
+
     public enum Mode {
         IDLE,
         TURN,
@@ -582,7 +584,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         dpadRight1.input(gamepad1.dpad_right);
         dpadRight2.input(gamepad2.dpad_right);
         dpadDown1.input(gamepad1.dpad_down);
-        dpadDown1.input(gamepad2.dpad_down);
+        dpadDown2.input(gamepad2.dpad_down);
         dpadLeft1.input(gamepad1.dpad_left);
         dpadLeft2.input(gamepad2.dpad_left);
         leftBumper1.input(gamepad1.left_bumper);
@@ -925,6 +927,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
         if (dpadLeft1.onPress()) mode = Mode.IDLE;
 
+        //if a gamepadStick moves, stop the roadrunner stuff.  
+        if (INTERRUPT_TRAJECTORIES_WITH_GAMEPAD) if (isStickMoved(opMode.gamepad1.left_stick_x,opMode.gamepad1.left_stick_y) || isStickMoved(opMode.gamepad1.right_stick_x, opMode.gamepad1.right_stick_y)) mode = Mode.IDLE;
+
         switch (mode) {
             case IDLE:
                 // do nothing
@@ -1141,7 +1146,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
      */
     public double getThrowerVelocityFromPosition(double dist, AngleUnit angleUnit) {
 
-        double revPerSec = (-0.0001001 * Math.pow(dist, 3)) + (0.03045 * Math.pow(dist, 2)) - (2.859 * dist) + 132.4;
+        double revPerSec = (-0.0001001 * Math.pow(dist, 3)) + (0.03045 * Math.pow(dist, 2)) - (2.859 * dist) + 132;
         if (angleUnit == DEGREES) return revPerSec*360;
         else if (angleUnit == RADIANS) return revPerSec*2*Math.PI;
         return Double.NaN;
@@ -1308,6 +1313,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         return powers.stream().mapToDouble(d -> d).toArray();
     }
     //Get and set methods
+
+    public boolean isStickMoved(double x, double y) {
+        return Math.abs(x) > .3 || Math.abs(y) > .3;
+    }
 
     public boolean isBusy() {
         return mode != Mode.IDLE;
