@@ -13,7 +13,7 @@ public class FieldConstants {
     public static double RIGHT_OF_FIELD = -72;
     public static double LEFT_OF_FIELD = 72;
 
-    public static double RED_GOAL_Y = -36;
+    public static double RED_GOAL_Y = -38;
 
     public static double RED_GOAL_X = TOP_OF_FIELD;
     public static double RED_GOAL_HEIGHT = 36;
