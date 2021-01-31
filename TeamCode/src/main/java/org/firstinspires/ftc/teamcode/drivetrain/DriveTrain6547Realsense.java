@@ -252,6 +252,8 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     //end of Vuforia Stuff
 
+    FieldConstants.PowerShots[] redPowerShots = new FieldConstants.PowerShots[] {FieldConstants.PowerShots.RED_LEFT, FieldConstants.PowerShots.RED_CENTER, FieldConstants.PowerShots.RED_RIGHT};
+
 
     public DriveTrain6547Realsense(OpMode opMode) {
         super(kV, kA, kStatic, TRACK_WIDTH, WHEEL_BASE, LATERAL_MULTIPLIER);
@@ -1015,6 +1017,32 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         }
     }
 
+    public void doRedPowerShots() {doRedPowerShots(getPoseEstimate());}
+    public void doRedPowerShots(Pose2d robotPos) {
+        for (FieldConstants.PowerShots redPowerShot : redPowerShots) {
+            doSingularPowerShot(redPowerShot, robotPos);
+        }
+
+    }
+    public void doSingularPowerShot(FieldConstants.PowerShots powerShot, Pose2d robotPos) {
+        double distFromPowerShot = getDistanceFromPowerShot(powerShot, robotPos);
+        setThrowerVelocity(getThrowerVelocityFromPositionPowerShot(distFromPowerShot, DEGREES), DEGREES);
+
+        //turn twice to make sure the robot is facing the right direction
+        for (int i = 0; i < 2; i++) turnTowardPowerShot(powerShot, robotPos);
+
+        waitUntilReadyToThrow();
+        launchRing();
+        ((LinearOpMode) opMode).sleep(500);
+        openIndexer();
+
+    }
+    public void turnTowardPowerShot(FieldConstants.PowerShots powerShot) {turnTowardPowerShot(powerShot, getPoseEstimate());}
+    public void turnTowardPowerShot(FieldConstants.PowerShots powerShot, Pose2d robotPos) {
+        double angleToTurnTo = turnTowardsAngle(powerShot.getPowerShotPosition(), robotPos);
+        turnRelativeSync(angleToTurnTo);
+    }
+
     /**
      * Sets both of the throwing motors to a desired ticks per second.
      * @param ticksPerSecond
@@ -1098,6 +1126,12 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
         return  isMotor0AtTarget || isMotor1AtTarget;
     }
+    public void waitUntilReadyToThrow() {
+        while (!isReadyToThrow() && ((LinearOpMode) opMode).opModeIsActive()) {
+            updateLightsBasedOnThrower();
+            update();
+        }
+    }
 
     /**
      * Gets the thrower velocity that will make the ring hit the goal, given
@@ -1129,16 +1163,6 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     /**
      * Uses a equation from cubic regression from values we gathered from launching the ring a lot
-     * @param dist Distance from goal
-     * @return The speed in terms of rev/s to launch the ring to the target goal
-     */
-    public double getThrowerVelocityFromPosition(double dist) {
-        //revPerSecond
-        return (-0.0001001 * Math.pow(dist, 3)) + (0.03045 * Math.pow(dist, 2)) - (2.859 * dist) + 132.4;
-    }
-
-    /**
-     * Uses a equation from cubic regression from values we gathered from launching the ring a lot
      * @param dist
      * @param angleUnit (Degrees or Radians)
      * @return The speed to launch the ring to the target goal
@@ -1150,6 +1174,51 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         if (angleUnit == DEGREES) return revPerSec*360;
         else if (angleUnit == RADIANS) return revPerSec*2*Math.PI;
         return Double.NaN;
+    }
+
+    /**
+     * Uses a equation from cubic regression from values we gathered from launching the ring a lot
+     * @param dist Distance from goal
+     * @return The speed in terms of rev/s to launch the ring to the target goal
+     */
+    public double getThrowerVelocityFromPosition(double dist) {
+        //revPerSecond
+        return (-0.0001001 * Math.pow(dist, 3)) + (0.03045 * Math.pow(dist, 2)) - (2.859 * dist) + 132.4;
+    }
+
+    /**
+     * Uses a equation from cubic regression from values we gathered from launching the ring a lot
+     * to get the target velocity to launch the ring into a powerShot
+     * @param dist Distance from power shot
+     * @return The speed in terms of rev/s to launch the ring to the target power shot
+     */
+    public double getThrowerVelocityFromPositionPowershot(double dist) {
+        //revPerSecond
+        //return (-0.0001001 * Math.pow(dist, 3)) + (0.03045 * Math.pow(dist, 2)) - (2.859 * dist) + 132.4;
+        return Double.NaN;
+    }
+
+    /**
+     * Uses a equation from cubic regression from values we gathered from launching the ring a lot
+     * @param dist distance from power shot
+     * @param angleUnit (Degrees or Radians)
+     * @return The speed to launch the ring to the target goal
+     * will return NaN if the angleUnit is invalid
+     */
+    public double getThrowerVelocityFromPositionPowerShot(double dist, AngleUnit angleUnit) {
+
+        //double revPerSec = (-0.0001001 * Math.pow(dist, 3)) + (0.03045 * Math.pow(dist, 2)) - (2.859 * dist) + 132;
+        double revPerSec = Double.NaN; //put equation here
+        if (angleUnit == DEGREES) return revPerSec*360;
+        else if (angleUnit == RADIANS) return revPerSec*2*Math.PI;
+        return Double.NaN;
+    }
+
+    public double getDistanceFromPowerShot(FieldConstants.PowerShots powershot) {return getDistanceFromPowerShot(powershot, getPoseEstimate());}
+    public double getDistanceFromPowerShot(FieldConstants.PowerShots powershot, Pose2d robotPos) {
+        double deltaX = powershot.getPowerShotPosition().getX() - robotPos.getX();
+        double deltaY = powershot.getPowerShotPosition().getY() - robotPos.getY();
+        return Math.hypot(deltaX, deltaY);
     }
 
     /**
@@ -1398,6 +1467,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public void setPacketAction(PacketAction packetAction) {
         this.packetAction = packetAction;
     }
+
 
     /**
      * Stores data about a ring that is launched

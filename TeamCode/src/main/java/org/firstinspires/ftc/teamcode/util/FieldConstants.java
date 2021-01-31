@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.util;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 /**
  * Field and objects places (in inches)
@@ -29,6 +30,24 @@ public class FieldConstants {
     //Red Tower, Red Side Wall, Audience wall, Blue Side Wall, Blue Tower
     public static double[] VuforiaTargetsX = new double[] {72,    1.5, -72, 1.5, 72};
     public static double[] VuforiaTargetsY = new double[] {-36.5, -72, 1.5, 72,  36.5};
+
+    public enum PowerShots{
+        RED_LEFT(TOP_OF_FIELD,RED_POWER_SHOT_1Y),
+        RED_CENTER(TOP_OF_FIELD,RED_POWER_SHOT_2Y),
+        RED_RIGHT(TOP_OF_FIELD,RED_POWER_SHOT_3Y);
+
+        public final double powerShotX;
+        public final double powerShotY;
+
+        PowerShots(double powerShotX, double powerShotY) {
+            this.powerShotX = powerShotX;
+            this.powerShotY = powerShotY;
+        }
+
+        public Vector2d getPowerShotPosition() {
+            return new Vector2d(powerShotX, powerShotY);
+        }
+    }
 
 //    public static double TOP_OF_FIELD = 72;
 //
