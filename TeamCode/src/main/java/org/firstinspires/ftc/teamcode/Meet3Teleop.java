@@ -172,7 +172,8 @@ public class Meet3Teleop extends LinearOpMode {
             }
 
             if (bot.dpadUp1.onPress()) {
-                doPowerShots(pos);
+                //doPowerShots(pos);
+                bot.doRedPowerShots(pos);
                 bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
             }
             if (bot.dpadDown1.onPress()) {

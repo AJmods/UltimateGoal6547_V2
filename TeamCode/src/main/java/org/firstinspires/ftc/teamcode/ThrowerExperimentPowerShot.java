@@ -22,7 +22,6 @@ A Tele-op designed to experiment with the thrower
  */
 @Config
 @TeleOp(name = "Thrower Experiment Power Shot", group = "experiment")
-@Disabled
 public class ThrowerExperimentPowerShot extends LinearOpMode {
 
     public static double REV_PER_SEC = 44;

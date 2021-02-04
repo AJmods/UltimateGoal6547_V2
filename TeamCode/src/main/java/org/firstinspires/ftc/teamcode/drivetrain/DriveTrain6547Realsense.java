@@ -252,7 +252,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     //end of Vuforia Stuff
 
-    FieldConstants.PowerShots[] redPowerShots = new FieldConstants.PowerShots[] {FieldConstants.PowerShots.RED_LEFT, FieldConstants.PowerShots.RED_CENTER, FieldConstants.PowerShots.RED_RIGHT};
+    FieldConstants.PowerShots[] redPowerShots = new FieldConstants.PowerShots[] {FieldConstants.PowerShots.RED_RIGHT, FieldConstants.PowerShots.RED_CENTER, FieldConstants.PowerShots.RED_LEFT};
+
+    public static double POWER_SHOT_VELO_ADD = 0;
 
 
     public DriveTrain6547Realsense(OpMode opMode) {
@@ -1026,10 +1028,15 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     }
     public void doSingularPowerShot(FieldConstants.PowerShots powerShot, Pose2d robotPos) {
         double distFromPowerShot = getDistanceFromPowerShot(powerShot, robotPos);
+        RobotLog.v("DISTANCE FROM POWERSHOT: " + distFromPowerShot + " for " + powerShot.name());
         setThrowerVelocity(getThrowerVelocityFromPositionPowerShot(distFromPowerShot, DEGREES), DEGREES);
 
         //turn twice to make sure the robot is facing the right direction
         for (int i = 0; i < 2; i++) turnTowardPowerShot(powerShot, robotPos);
+
+        //make sure velocity is correct
+        distFromPowerShot = getDistanceFromPowerShot(powerShot, robotPos);
+        setThrowerVelocity(getThrowerVelocityFromPositionPowerShot(distFromPowerShot, DEGREES), DEGREES);
 
         waitUntilReadyToThrow();
         launchRing();
@@ -1194,11 +1201,11 @@ public class DriveTrain6547Realsense extends MecanumDrive {
      */
     public double getThrowerVelocityFromPositionPowershot(double dist) {
         //revPerSecond
-        //return (-0.0001001 * Math.pow(dist, 3)) + (0.03045 * Math.pow(dist, 2)) - (2.859 * dist) + 132.4;
-        return Double.NaN;
+        return  (3.686e-05 * Math.pow(dist, 3)) - (0.008383*Math.pow(dist, 2)) + (0.7675 * dist) + 17.52 + POWER_SHOT_VELO_ADD;
     }
 
     /**
+     * Uses a equation from cubic regression from values we gathered from launching the ring a lot
      * Uses a equation from cubic regression from values we gathered from launching the ring a lot
      * @param dist distance from power shot
      * @param angleUnit (Degrees or Radians)
@@ -1207,8 +1214,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
      */
     public double getThrowerVelocityFromPositionPowerShot(double dist, AngleUnit angleUnit) {
 
-        //double revPerSec = (-0.0001001 * Math.pow(dist, 3)) + (0.03045 * Math.pow(dist, 2)) - (2.859 * dist) + 132;
-        double revPerSec = Double.NaN; //put equation here
+        double revPerSec  =  (3.686e-05 * Math.pow(dist, 3)) - (0.008383*Math.pow(dist, 2)) + (0.7675 * dist) + 17.52 + POWER_SHOT_VELO_ADD;
         if (angleUnit == DEGREES) return revPerSec*360;
         else if (angleUnit == RADIANS) return revPerSec*2*Math.PI;
         return Double.NaN;
