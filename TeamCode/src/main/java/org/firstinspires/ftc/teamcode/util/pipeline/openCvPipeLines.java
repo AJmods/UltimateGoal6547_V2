@@ -11,6 +11,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.dnn.*;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
