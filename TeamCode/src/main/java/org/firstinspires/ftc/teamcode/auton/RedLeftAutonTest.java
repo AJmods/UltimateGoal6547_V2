@@ -32,7 +32,8 @@ public class RedLeftAutonTest extends LinearOpMode {
 
     public static boolean isBlue = false;
 
-    private final Pose2d startPos = new Pose2d(-56,-25);
+    private static Pose2d startPos = new Pose2d(-56,-25);
+    private static Vector2d launchPos = new Vector2d(0,-14);
 
     enum BotStartColor{
         RED, BLUE
@@ -75,12 +76,10 @@ public class RedLeftAutonTest extends LinearOpMode {
         //bot.lowerWobvatorByNotAllTheWay();
         bot.openIndexer();
 
-        Vector2d launchPos = new Vector2d(0,-14);
         setThrowerToTarget(launchPos, Math.toRadians(0));
 
         //drive to middle, and face first power shot goal, prepare to launch.
         bot.followTrajectorySync(bot.trajectoryBuilder().lineTo(launchPos).build());
-        bot.lowerWobvatorByNotAllTheWay();
         setThrowerToTarget(bot.getPoseEstimate());
         sleep(500);
 
@@ -91,11 +90,12 @@ public class RedLeftAutonTest extends LinearOpMode {
         bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
         bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
         //throw ring
-        setThrowerToTarget(bot.getPoseEstimate());
+        bot.setThrowerVelocity(bot.getThrowerVelocityFromPositionPowerShot(bot.getDistanceFromPowerShot(bot.redPowerShots[0], bot.getPoseEstimate()), AngleUnit.DEGREES), AngleUnit.DEGREES);
+        //setThrowerToTarget(bot.getPoseEstimate());
         //wait for launch speed to be ready
         while (!bot.isReadyToThrow()) {bot.updateLightsBasedOnThrower();}
         bot.launchRing();
-        RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+        RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + " REV/s");
         sleep(750);
         bot.openIndexer();
         //prepare to throw next ring
@@ -103,12 +103,13 @@ public class RedLeftAutonTest extends LinearOpMode {
         bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
         bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
         //throw ring
-        setThrowerToTarget(bot.getPoseEstimate());
+        bot.setThrowerVelocity(bot.getThrowerVelocityFromPositionPowerShot(bot.getDistanceFromPowerShot(bot.redPowerShots[1], bot.getPoseEstimate()), AngleUnit.DEGREES), AngleUnit.DEGREES);
+        //setThrowerToTarget(bot.getPoseEstimate());
         //wait for launch speed to be ready
         sleep(250);
         while (!bot.isReadyToThrow()) {bot.updateLightsBasedOnThrower();}
         bot.launchRing();
-        RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+        RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + " REV/s");
         sleep(500);
         bot.openIndexer();
         //prepare to throw next ring
@@ -116,12 +117,13 @@ public class RedLeftAutonTest extends LinearOpMode {
         bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
         bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
         //throw ring
-        setThrowerToTarget(bot.getPoseEstimate());
+        //setThrowerToTarget(bot.getPoseEstimate());
+        bot.setThrowerVelocity(bot.getThrowerVelocityFromPositionPowerShot(bot.getDistanceFromPowerShot(bot.redPowerShots[2], bot.getPoseEstimate()), AngleUnit.DEGREES), AngleUnit.DEGREES);
         //wait for launch speed to be ready
         while (!bot.isReadyToThrow()) {bot.updateLightsBasedOnThrower();}
         sleep(250);
         bot.launchRing();
-        RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+        RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + " REV/s");
         sleep(500);
         bot.openIndexer();
         //stop thrower
@@ -132,7 +134,7 @@ public class RedLeftAutonTest extends LinearOpMode {
         bot.lowerWobvatorByNotAllTheWay();
 
         if (ringCount == openCvPipeLines.RingCount.NONE) bot.followTrajectorySync(bot.trajectoryBuilder().lineToLinearHeading(new Pose2d(23, -47, Math.toRadians(0))).build());
-        else if (ringCount == openCvPipeLines.RingCount.ONE) bot.followTrajectorySync(bot.trajectoryBuilder().splineTo(new Vector2d(47,-22), Math.toRadians(0)).build());
+        else if (ringCount == openCvPipeLines.RingCount.ONE) bot.followTrajectorySync(bot.trajectoryBuilder().splineTo(new Vector2d(46,-22), Math.toRadians(0)).build());
         else if (ringCount == openCvPipeLines.RingCount.FOUR) bot.followTrajectorySync(bot.trajectoryBuilder(false, DriveSpeeds.reallyFast).splineTo(new Vector2d(70,-50), Math.toRadians(0))
                 .addDisplacementMarker(() -> {
                     bot.releaseWobbleGoal();
@@ -187,7 +189,7 @@ public class RedLeftAutonTest extends LinearOpMode {
                     .build());
 
             bot.followTrajectorySync(bot.trajectoryBuilder(false, DriveSpeeds.reallyFast)
-                   .splineTo(new Vector2d(42, -19), Math.toRadians(0))
+                   .splineTo(new Vector2d(41, -19), Math.toRadians(0))
                     .build());
         } else if (ringCount == openCvPipeLines.RingCount.FOUR) {
             bot.followTrajectorySync(bot.trajectoryBuilder(false, DriveSpeeds.reallyFast)
@@ -286,5 +288,13 @@ public class RedLeftAutonTest extends LinearOpMode {
             bot.setThrowerVelocity(targetRevPerSec * 360, AngleUnit.DEGREES);
             RobotLog.v("Set speed to " + (targetRevPerSec*360) + "Rev/s");
         }
+    }
+
+    public static void setLaunchPos(Vector2d launchPos) {
+        RedLeftAutonTest.launchPos = launchPos;
+    }
+
+    public static void setStartPos(Pose2d startPos) {
+        RedLeftAutonTest.startPos = startPos;
     }
 }

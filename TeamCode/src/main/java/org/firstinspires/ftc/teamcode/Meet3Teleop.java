@@ -173,7 +173,8 @@ public class Meet3Teleop extends LinearOpMode {
 
             if (bot.dpadUp1.onPress()) {
                 //doPowerShots(pos);
-                bot.doRedPowerShots(pos);
+               // bot.doRedPowerShots(pos);
+                bot.doPowerShotsTheClassicAndBetterWay();
                 bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
             }
             if (bot.dpadDown1.onPress()) {
@@ -320,6 +321,9 @@ public class Meet3Teleop extends LinearOpMode {
                     packet.addLine("Thrower1 velocity: " + (throwerVelocities[0] / 360 * ThrowerUtil.inchesPerRev) + " inches/s, " + (throwerVelocities[0] / 360) + " rev/s, " + bot.thrower1.getVelocity() + " ticks/s");
                     packet.addLine("Thrower2 velocity: " + (throwerVelocities[1] / 360 * ThrowerUtil.inchesPerRev) + " inches/s, " + (throwerVelocities[1] / 360) + " rev/s, " + bot.thrower2.getVelocity() + " ticks/s");
                 } catch (Exception ignored) {}
+
+                packet.addLine("distance Voltage: " + bot.distanceSensor.getVoltage());
+                packet.addLine("Distance Inches (Guess) " + bot.distanceSensor.getVoltage()*500/2.54);
 
                 //draw robot
                 DashboardUtil.drawRobot(fieldOverlay, pos);

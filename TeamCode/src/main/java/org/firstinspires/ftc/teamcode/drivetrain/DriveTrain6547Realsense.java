@@ -30,6 +30,7 @@ import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.exception.RobotCoreException;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -87,6 +88,10 @@ import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.getMotorV
 import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.kA;
 import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.kStatic;
 import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.kV;
+import static org.firstinspires.ftc.teamcode.testing.testAjustDistanceSensorWithGyro.Angle0;
+import static org.firstinspires.ftc.teamcode.testing.testAjustDistanceSensorWithGyro.Angle90;
+import static org.firstinspires.ftc.teamcode.testing.testAjustDistanceSensorWithGyro.SERVO_POS_AT_0;
+import static org.firstinspires.ftc.teamcode.testing.testAjustDistanceSensorWithGyro.SERVO_POS_AT_90;
 
 /**
  * FTC 6547's Robot for the 2020-21 FTC Ultimate Goal Season
@@ -170,6 +175,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public DcMotorEx thrower1, thrower2;
     private final double[] motorPowersToAdd = new double[]{0,0,0,0};
 
+    public Servo distanceSensorServo;
+    public AnalogInput distanceSensor;
+
     /**
      * Robot lights, located on the bottom of the robot
      */
@@ -252,7 +260,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     //end of Vuforia Stuff
 
-    FieldConstants.PowerShots[] redPowerShots = new FieldConstants.PowerShots[] {FieldConstants.PowerShots.RED_RIGHT, FieldConstants.PowerShots.RED_CENTER, FieldConstants.PowerShots.RED_LEFT};
+    public FieldConstants.PowerShots[] redPowerShots = new FieldConstants.PowerShots[] {FieldConstants.PowerShots.RED_RIGHT, FieldConstants.PowerShots.RED_CENTER, FieldConstants.PowerShots.RED_LEFT};
 
     public static double POWER_SHOT_VELO_ADD = 0;
 
@@ -369,6 +377,8 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         wobbleGoalGrabber = opMode.hardwareMap.get(Servo.class, "wob");
         indexer = opMode.hardwareMap.get(Servo.class, "indexer");
         wobbleGoalElevator = opMode.hardwareMap.get(Servo.class, "wobvator");
+        distanceSensor = opMode.hardwareMap.get(AnalogInput.class, "distance0");
+        distanceSensorServo = opMode.hardwareMap.get(Servo.class, "dServo");
 
         thrower1 = opMode.hardwareMap.get(DcMotorEx.class, "thrower");
         thrower2 = opMode.hardwareMap.get(DcMotorEx.class, "thrower2");
@@ -850,7 +860,18 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         RobotLog.d("Turning Relative to heading " + angle + ", amount turning: " + target);
         turnSync(target);
     }
-
+    public void turnRelative(double angle)
+    {
+        double target=angle-getPoseEstimate().getHeading();
+        //target-=Math.toRadians(90);
+        if (Math.abs(target)>Math.toRadians(180)) //make the angle difference less then 180 to remove unnecessary turning
+        {
+            target+=(target>=0) ? Math.toRadians(-360) : Math.toRadians(360);
+        }
+        opMode.telemetry.log().add("inputted Angle: " + angle + " , turning to: " + target);
+        RobotLog.d("Turning Relative to heading " + angle + ", amount turning: " + target);
+        turn(target);
+    }
     public void followTrajectory(Trajectory trajectory) {
         follower.followTrajectory(trajectory);
         mode = Mode.FOLLOW_TRAJECTORY;
@@ -1019,26 +1040,75 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         }
     }
 
+    public void doPowerShotsTheClassicAndBetterWay() {
+        RobotLog.v("Launching Power Shot 1");
+        turnRelativeSync(turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), getPoseEstimate()));
+        turnRelativeSync(turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), getPoseEstimate()));
+        //throw ring
+        setThrowerVelocity(getThrowerVelocityFromPositionPowerShot(getDistanceFromPowerShot(redPowerShots[0], getPoseEstimate()), AngleUnit.DEGREES), AngleUnit.DEGREES);
+        //setThrowerToTarget(getPoseEstimate());
+        //wait for launch speed to be ready
+        while (!isReadyToThrow()) {updateLightsBasedOnThrower();}
+        launchRing();
+        RobotLog.v("Thrower motor 0 VELO (when launched): " + (getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+        ((LinearOpMode) opMode).sleep(750);
+        openIndexer();
+        //prepare to throw next ring
+        RobotLog.v("Launching Power Shot 2");
+        turnRelativeSync(turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), getPoseEstimate()));
+        turnRelativeSync(turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), getPoseEstimate()));
+        //throw ring
+        setThrowerVelocity(getThrowerVelocityFromPositionPowerShot(getDistanceFromPowerShot(redPowerShots[1], getPoseEstimate()), AngleUnit.DEGREES), AngleUnit.DEGREES);
+        //setThrowerToTarget(getPoseEstimate());
+        //wait for launch speed to be ready
+        ((LinearOpMode) opMode).sleep(250);
+        while (!isReadyToThrow()) {updateLightsBasedOnThrower();}
+        launchRing();
+        RobotLog.v("Thrower motor 0 VELO (when launched): " + (getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+        ((LinearOpMode) opMode).sleep(500);
+        openIndexer();
+        //prepare to throw next ring
+        RobotLog.v("Launching Power Shot 3");
+        turnRelativeSync(turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), getPoseEstimate()));
+        turnRelativeSync(turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), getPoseEstimate()));
+        //throw ring
+        //setThrowerToTarget(getPoseEstimate());
+        setThrowerVelocity(getThrowerVelocityFromPositionPowerShot(getDistanceFromPowerShot(redPowerShots[0], getPoseEstimate()), AngleUnit.DEGREES), AngleUnit.DEGREES);
+        //wait for launch speed to be ready
+        while (!isReadyToThrow()) {updateLightsBasedOnThrower();}
+        ((LinearOpMode) opMode).sleep(250);
+        launchRing();
+        RobotLog.v("Thrower motor 0 VELO (when launched): " + (getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+        ((LinearOpMode) opMode).sleep(500);
+        openIndexer();
+        //stop thrower
+        setThrowerVelocity(0);
+    }
+
     public void doRedPowerShots() {doRedPowerShots(getPoseEstimate());}
     public void doRedPowerShots(Pose2d robotPos) {
+
         for (FieldConstants.PowerShots redPowerShot : redPowerShots) {
-            doSingularPowerShot(redPowerShot, robotPos);
+            doSingularPowerShot(redPowerShot, getPoseEstimate());
         }
 
     }
     public void doSingularPowerShot(FieldConstants.PowerShots powerShot, Pose2d robotPos) {
         double distFromPowerShot = getDistanceFromPowerShot(powerShot, robotPos);
-        RobotLog.v("DISTANCE FROM POWERSHOT: " + distFromPowerShot + " for " + powerShot.name());
         setThrowerVelocity(getThrowerVelocityFromPositionPowerShot(distFromPowerShot, DEGREES), DEGREES);
 
         //turn twice to make sure the robot is facing the right direction
-        for (int i = 0; i < 2; i++) turnTowardPowerShot(powerShot, robotPos);
+        for (int i = 0; i < 3; i++) turnTowardPowerShot(powerShot, getPoseEstimate());
 
         //make sure velocity is correct
-        distFromPowerShot = getDistanceFromPowerShot(powerShot, robotPos);
-        setThrowerVelocity(getThrowerVelocityFromPositionPowerShot(distFromPowerShot, DEGREES), DEGREES);
+        distFromPowerShot = getDistanceFromPowerShot(powerShot, getPoseEstimate());
+        RobotLog.v("Pshot: DISTANCE FROM POWERSHOT: " + distFromPowerShot + " for " + powerShot.name());
+        double throwerVelocity = getThrowerVelocityFromPositionPowerShot(distFromPowerShot, DEGREES);
+        RobotLog.v("Pshot: THROWER SPEED FOR " + powerShot.name() + ": " + throwerVelocity + " + deg/sec");
+        setThrowerVelocity(throwerVelocity, DEGREES);
 
         waitUntilReadyToThrow();
+        RobotLog.v("Pshot: LAUNCHING AT " + getThrowerVelocity(DEGREES)[0] + " deg/sec");
         launchRing();
         ((LinearOpMode) opMode).sleep(500);
         openIndexer();
@@ -1215,6 +1285,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public double getThrowerVelocityFromPositionPowerShot(double dist, AngleUnit angleUnit) {
 
         double revPerSec  =  (3.686e-05 * Math.pow(dist, 3)) - (0.008383*Math.pow(dist, 2)) + (0.7675 * dist) + 17.52 + POWER_SHOT_VELO_ADD;
+        RobotLog.v("setting thrower velocity to " + revPerSec + " REV/s with powershot distance of " + dist + " inches");
         if (angleUnit == DEGREES) return revPerSec*360;
         else if (angleUnit == RADIANS) return revPerSec*2*Math.PI;
         return Double.NaN;
@@ -1224,6 +1295,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public double getDistanceFromPowerShot(FieldConstants.PowerShots powershot, Pose2d robotPos) {
         double deltaX = powershot.getPowerShotPosition().getX() - robotPos.getX();
         double deltaY = powershot.getPowerShotPosition().getY() - robotPos.getY();
+        RobotLog.v("DISTANCE FROM " + powershot.name() + " POWERSHOT: " + Math.hypot(deltaX, deltaY) + "inches");
         return Math.hypot(deltaX, deltaY);
     }
 
@@ -1373,6 +1445,12 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public void updateServo(Servo servo, double gamepadStick, double speed)
     {
         updateServo(servo, gamepadStick, speed, 0, 1);
+    }
+    public void ajustUltraSonicSensorByGyro(Servo servo, Pose2d robotPos) {
+        double ratio = Math.abs((Angle0 - robotPos.getHeading())/(Angle90 - Angle0));
+        double range = SERVO_POS_AT_90 - SERVO_POS_AT_0;
+        double servoPos = (ratio * range) + SERVO_POS_AT_0;
+        servo.setPosition(servoPos);
     }
     public void runAtAllTimes() //anything in here runs at all times during auton because this method is ran during roadRunner's state machine
     {
