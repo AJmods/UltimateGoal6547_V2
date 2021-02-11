@@ -175,8 +175,11 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public DcMotorEx thrower1, thrower2;
     private final double[] motorPowersToAdd = new double[]{0,0,0,0};
 
-    public Servo distanceSensorServo;
-    public AnalogInput distanceSensor;
+    public Servo distanceSensorServoX;
+    public AnalogInput distanceSensorX;
+
+    public Servo distanceSensorServoY;
+    public AnalogInput distanceSensorY;
 
     /**
      * Robot lights, located on the bottom of the robot
@@ -377,8 +380,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         wobbleGoalGrabber = opMode.hardwareMap.get(Servo.class, "wob");
         indexer = opMode.hardwareMap.get(Servo.class, "indexer");
         wobbleGoalElevator = opMode.hardwareMap.get(Servo.class, "wobvator");
-        distanceSensor = opMode.hardwareMap.get(AnalogInput.class, "distance0");
-        distanceSensorServo = opMode.hardwareMap.get(Servo.class, "dServo");
+        distanceSensorX = opMode.hardwareMap.get(AnalogInput.class, "distance0");
+        distanceSensorServoX = opMode.hardwareMap.get(Servo.class, "dServo");
+        distanceSensorServoY = opMode.hardwareMap.get(Servo.class, "dServoY");
+        distanceSensorY = opMode.hardwareMap.get(AnalogInput.class, "distanceY");
 
         thrower1 = opMode.hardwareMap.get(DcMotorEx.class, "thrower");
         thrower2 = opMode.hardwareMap.get(DcMotorEx.class, "thrower2");
@@ -1452,6 +1457,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         double servoPos = (ratio * range) + SERVO_POS_AT_0;
         servo.setPosition(servoPos);
     }
+    public double getDistance(AnalogInput distanceSensor) {
+        //convert voltage to inches
+        return distanceSensor.getVoltage()*492.126;
+    }
     public void runAtAllTimes() //anything in here runs at all times during auton because this method is ran during roadRunner's state machine
     {
 
@@ -1553,9 +1562,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     }
 
 
-    /**
-     * Stores data about a ring that is launched
-     */
+//    /**
+//     * Stores data about a ring that is launched
+//     */
 //    public class Ring {
 //
 //        private Vector2d position;
