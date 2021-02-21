@@ -267,6 +267,8 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     public static double POWER_SHOT_VELO_ADD = 0;
 
+    private boolean messageDisplayed = false;
+
 
     public DriveTrain6547Realsense(OpMode opMode) {
         super(kV, kA, kStatic, TRACK_WIDTH, WHEEL_BASE, LATERAL_MULTIPLIER);
@@ -912,6 +914,14 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
         Pose2d currentPose = getPoseEstimate();
 
+        if (!isInsideField(currentPose)) {
+            RobotLog.setGlobalWarningMessage("BOT IS OUTSIDE FIELD AT POSITION %s", currentPose.toString());
+            messageDisplayed = true;
+        } else if (messageDisplayed) {
+            RobotLog.clearGlobalWarningMsg();
+            messageDisplayed = false;
+        }
+
         if (useVuforia) {
             Vector2d vuforiaPos = getPosFromVuforia();
             Vector2d rawVuforiaPos = getRawVuforiaImagePos();
@@ -1361,7 +1371,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public void grabWobbleGoal() {
 
         try {
-            wobbleGoalGrabber.setPosition(.15);
+            wobbleGoalGrabber.setPosition(.13);
         } catch (Exception e) {
             RobotLog.e("GRAB WOB GOAL FAILED");
         }
@@ -1377,13 +1387,17 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         }
     }
 
+    public void openWobbleGrabberHalfway() {
+        wobbleGoalGrabber.setPosition(.3);
+    }
+
     /**
      * Lower's the wobble goal grabber so it can grab/release wobble goals
      * May cause the wobble goal to touch the flow
      */
     public void lowerWobvator() {
         try {
-        wobbleGoalElevator.setPosition(.35);
+        wobbleGoalElevator.setPosition(.355);
         } catch (Exception e) {
             RobotLog.e("LOWER WOBVATOR FAILED");
         }
@@ -1393,7 +1407,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
      */
     public void lowerWobvatorByNotAllTheWay() {
         try {
-        wobbleGoalElevator.setPosition(.385);
+        wobbleGoalElevator.setPosition(.38);
         } catch (Exception e) {
             RobotLog.e("LOWER WOBVATOR but not all the way FAILED");
         }
@@ -1459,7 +1473,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     }
     public double getDistance(AnalogInput distanceSensor) {
         //convert voltage to inches
-        return distanceSensor.getVoltage()*492.126;
+        return distanceSensor.getVoltage()*213.45759532208388;
     }
     public void runAtAllTimes() //anything in here runs at all times during auton because this method is ran during roadRunner's state machine
     {

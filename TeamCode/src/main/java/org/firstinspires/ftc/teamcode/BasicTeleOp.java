@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -13,6 +14,7 @@ This is the tele-op we use to drive the robot
  */
 @Config
 @TeleOp(name = "Basic Tele-op", group = "_teleOp")
+@Disabled
 public class BasicTeleOp extends LinearOpMode {
 
     private double leftFrontPower;

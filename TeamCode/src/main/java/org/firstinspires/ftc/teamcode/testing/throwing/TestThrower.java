@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.testing.throwing;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 
 @TeleOp
 @Config
+@Disabled
 public class TestThrower extends LinearOpMode {
 
     public static double REV_PER_SEC = 0;

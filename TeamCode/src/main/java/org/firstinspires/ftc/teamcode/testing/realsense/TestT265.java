@@ -6,12 +6,14 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Transform2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.spartronics4915.lib.T265Camera;
 
 @TeleOp(name="Test T265", group="Iterative Opmode")
+@Disabled
 public class TestT265 extends OpMode
 {
     // We treat this like a singleton because there should only ever be one object per camera

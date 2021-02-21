@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.jakewharton.processphoenix.ProcessPhoenix;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
  * Tries (and fails) to restart the robot
  */
 @Autonomous(name = "Trigger Rebirth")
+@Disabled
 public class TriggerRebirth  extends LinearOpMode {
 
     @Override

@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.testing;
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.util.homar.Button;
 
 @TeleOp
+@Disabled
 public class RevBlinkenTest extends LinearOpMode {
 
     @Override

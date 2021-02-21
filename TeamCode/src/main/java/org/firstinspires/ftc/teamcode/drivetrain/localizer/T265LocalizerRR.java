@@ -54,6 +54,9 @@ public class T265LocalizerRR implements Localizer {
                 slamra.setPose(new com.arcrobotics.ftclib.geometry.Pose2d(0,0, new Rotation2d(0)));
             }
         }
+//        if (slamra.getLastReceivedCameraUpdate().confidence == T265Camera.PoseConfidence.Failed) {
+//            RobotLog.setGlobalWarningMessage("Realsense Failed");
+//        }
     }
 
     /**
@@ -75,6 +78,14 @@ public class T265LocalizerRR implements Localizer {
        } else {
             RobotLog.v("NULL Camera Update");
        }
+
+//       try {
+//           if (up.confidence == T265Camera.PoseConfidence.Failed) {
+//               RobotLog.setGlobalWarningMessage("Realsense Failed");
+//           }
+//       } catch (Exception e) {
+//           RobotLog.setGlobalWarningMessage("Realsense Might have failed");
+//       }
 //        RobotLog.v("Raw POS: " + rawPose.toString());
 //        RobotLog.v("POSE OFFSET " + poseOffset.toString());
 //        RobotLog.v("POSE ESTIMATE " + mPoseEstimate.toString());

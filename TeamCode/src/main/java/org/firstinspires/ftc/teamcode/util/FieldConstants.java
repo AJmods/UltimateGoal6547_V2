@@ -14,15 +14,15 @@ public class FieldConstants {
     public static double RIGHT_OF_FIELD = -72;
     public static double LEFT_OF_FIELD = 72;
 
-    public static double RED_GOAL_Y = -38;
+    public static double RED_GOAL_Y = -39;
 
     public static double RED_GOAL_X = TOP_OF_FIELD;
     public static double RED_GOAL_HEIGHT = 36;
     public static double POWER_SHOT_HEIGHT = 30;
 
-    public static double RED_POWER_SHOT_1Y = 3;
-    public static double RED_POWER_SHOT_1X = 72;
-    public static double RED_POWER_SHOT_2Y = -4;
+    public static double RED_POWER_SHOT_1Y = 1;
+    public static double RED_POWER_SHOT_1X = 71;
+    public static double RED_POWER_SHOT_2Y = -6;
     public static double RED_POWER_SHOT_2X = 72;
     public static double RED_POWER_SHOT_3Y = -17.5;
     public static double RED_POWER_SHOT_3X = 72;

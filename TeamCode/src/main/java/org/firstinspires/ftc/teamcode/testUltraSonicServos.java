@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
 import org.firstinspires.ftc.teamcode.util.UltraSonicServo;
 
 @TeleOp
+@Config
 public class testUltraSonicServos extends LinearOpMode {
 
     DriveTrain6547Realsense bot;
@@ -26,8 +28,8 @@ public class testUltraSonicServos extends LinearOpMode {
 
         meet3Teleop = new Meet3Teleop(this, bot);
 
-        ultraSonicServoX = new UltraSonicServo(bot.distanceSensorServoX, bot.distanceSensorX, new Pose2d(-9,0,Math.toRadians(0)));
-        ultraSonicServoY = new UltraSonicServo(bot.distanceSensorServoY, bot.distanceSensorY, new Pose2d(9,0,Math.toRadians(0)));
+        ultraSonicServoX = new UltraSonicServo(bot.distanceSensorServoX, bot.distanceSensorX, new Pose2d(-5.5,0,Math.toRadians(0)));
+        ultraSonicServoY = new UltraSonicServo(bot.distanceSensorServoY, bot.distanceSensorY, new Pose2d(5.5,0,Math.toRadians(0)));
 
 
         telemetry.log().add("Ready to Start");
@@ -38,8 +40,11 @@ public class testUltraSonicServos extends LinearOpMode {
             ultraSonicServoX.adjustServoBasedOnRotation(pos.getHeading());
             ultraSonicServoY.adjustServoBasedOnRotation(pos.getHeading());
 
-            bot.setPoseEstimate(calculatePositionBasedOnUltraSonicServos(ultraSonicServoX, ultraSonicServoY, pos.getHeading(), new Vector2d(realSenseX, realSenseY)));
+            Pose2d newPose = calculatePositionBasedOnUltraSonicServos(ultraSonicServoX, ultraSonicServoY, pos.getHeading(), new Vector2d(realSenseX, realSenseY));
 
+            telemetry.addData("new POSE: ", newPose.toString());
+            bot.setPoseEstimate(newPose);
+            telemetry.update();
             meet3Teleop.doTeleOp();
             bot.update();
         }
@@ -57,7 +62,9 @@ public class testUltraSonicServos extends LinearOpMode {
 
         double robotPosX = ultraSonicServoX.getRawDistance(DistanceUnit.INCH) + deltaXFromRealsense;
         double robotPosY = ultraSonicServoY.getRawDistance(DistanceUnit.INCH) + deltaYFromRealsense;
+        telemetry.addData("DISANCE X: ", ultraSonicServoX.getRawDistance(DistanceUnit.INCH));
+        telemetry.addData("DISTNAE Y: ", ultraSonicServoY.getRawDistance(DistanceUnit.INCH));
 
-        return new Pose2d(robotPosX, robotPosY, robotHeading);
+        return new Pose2d(robotPosY, robotPosX, robotHeading);
     }
 }
