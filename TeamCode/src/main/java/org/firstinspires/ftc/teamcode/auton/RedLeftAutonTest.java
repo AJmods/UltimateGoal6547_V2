@@ -29,26 +29,17 @@ import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
 @Autonomous(name = "Red Left Auton", group = "test")
 public class RedLeftAutonTest extends LinearOpMode {
 
-    DriveTrain6547Realsense bot;
+    DriveTrain6547Realsense bot; //the robot
+
+    //rings the robot sees.  Defaults to no rings detected.
     openCvPipeLines.RingCount ringCount = openCvPipeLines.RingCount.NONE;
 
-    public static int enumRing = 0;
-
-    public static double x_dist_add = -5.5;
-
+    //the start position of the robot
     private static Pose2d startPos = new Pose2d(-56,-25);
+
+    //the position where the robot launches the powershots
     private static Vector2d launchPos = new Vector2d(0,-14);
 
-    enum BotStartColor{
-        RED, BLUE
-    }
-    enum BotStartDirection {
-        LEFT, RIGHT
-    }
-
-    //breaks dashboard
-//    public static BotStartColor botStartColor;
-//    public static BotStartDirection botStartDirection;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -61,8 +52,6 @@ public class RedLeftAutonTest extends LinearOpMode {
         bot.startOpenCV();
 
         bot.grabWobbleGoal();
-
-        ringCount = openCvPipeLines.RingCount.values()[enumRing];
 
         bot.update();
         telemetry.log().add("Ready to Start");
@@ -98,12 +87,11 @@ public class RedLeftAutonTest extends LinearOpMode {
         waitForStart();
         bot.stopOpenCV();
 
-        //bot.lowerWobvatorByNotAllTheWay();
         bot.openIndexer();
 
         setThrowerToTarget(launchPos, Math.toRadians(0));
 
-        //drive to middle, and face first power shot goal, prepare to launch.
+        //drive to middle powershot launch position
         bot.followTrajectorySync(bot.trajectoryBuilder().lineTo(launchPos).build());
         setThrowerToTarget(bot.getPoseEstimate());
         sleep(500);
@@ -260,6 +248,7 @@ public class RedLeftAutonTest extends LinearOpMode {
         bot.turnRelativeSync(Math.toRadians(-90));
         sleep(100);
 
+        //save robot position to be used for later
         bot.savePos(bot.getPoseEstimate());
         telemetry.log().add("AUTON IS DONE");
         RobotLog.v("RED AUTON IS DONE");
@@ -293,12 +282,23 @@ public class RedLeftAutonTest extends LinearOpMode {
     public void setThrowerToTarget(Vector2d startPos, double angle) {
         setThrowerToTarget(startPos, angle, true);
     }
+
     public void setThrowerToTarget(Vector2d startPos, double angle, boolean isPowerShot) {
         setThrowerToTarget(new Pose2d(startPos.getX(), startPos.getY(), angle), isPowerShot);
     }
+
+    /**
+     * @param startPos position of the robot where it will launch toward to powershots
+     */
     public void setThrowerToTarget(Pose2d startPos) {
         setThrowerToTarget(startPos, true);
     }
+
+    /**
+     * Sets the thrower velocity to a target
+     * @param startPos location of robot where it will launch
+     * @param isPowerShot if the target is a powershot
+     */
     public void setThrowerToTarget(Pose2d startPos, boolean isPowerShot) {
         double targetY = ThrowerUtil.getTargetY(startPos, FieldConstants.TOP_OF_FIELD);
         double dist = Math.hypot(startPos.getX() - FieldConstants.TOP_OF_FIELD, startPos.getY() - targetY);
@@ -316,8 +316,12 @@ public class RedLeftAutonTest extends LinearOpMode {
         }
     }
 
+    /**
+     * @return robot's X coordinate according to the ultrasonic.
+     */
     public double getRobotX() {
         double dist = 24 - bot.getDistance(bot.distanceSensorX);
+        double x_dist_add = -5.5;
         return x_dist_add + dist;
     }
 

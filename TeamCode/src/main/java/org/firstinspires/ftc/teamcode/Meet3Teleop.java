@@ -207,6 +207,10 @@ public class Meet3Teleop extends LinearOpMode {
         bot.stopVuforia();
         bot.stopRobot();
     }
+
+    /**
+     * Does all the Tele-op actives that relate to driving the robot with a controller
+     */
     public void doTeleOp() {
         Pose2d pos = bot.getPoseEstimate();
 
@@ -365,6 +369,11 @@ public class Meet3Teleop extends LinearOpMode {
         return val;
     }
 
+    /**
+     * Launches 3 rings into the high goal.
+     * Can be interrupted by moving the gamepad sticks.
+     * @param currentPos
+     */
     public void doRegularShots(Pose2d currentPos) {
         bot.stopIntake();
         double angleToTurnTo = bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), currentPos);
@@ -385,6 +394,11 @@ public class Meet3Teleop extends LinearOpMode {
         }
     }
 
+    /**
+     * Launches 3 rings into the red power shots.
+     * Can be interrupted by moving the gamepad sticks.
+     * @param currentPos
+     */
     public void doPowerShots(Pose2d currentPos) {
         bot.stopIntake();
        // Vector2d launchPos = new Vector2d(0,-14);
