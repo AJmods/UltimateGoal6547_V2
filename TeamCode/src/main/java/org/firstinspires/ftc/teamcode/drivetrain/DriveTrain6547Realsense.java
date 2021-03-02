@@ -14,8 +14,6 @@ import com.acmerobotics.roadrunner.followers.HolonomicPIDVAFollower;
 import com.acmerobotics.roadrunner.followers.TrajectoryFollower;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.kinematics.Kinematics;
-import com.acmerobotics.roadrunner.kinematics.MecanumKinematics;
 import com.acmerobotics.roadrunner.profile.MotionProfile;
 import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
@@ -88,10 +86,6 @@ import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.getMotorV
 import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.kA;
 import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.kStatic;
 import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.kV;
-import static org.firstinspires.ftc.teamcode.testing.testAjustDistanceSensorWithGyro.Angle0;
-import static org.firstinspires.ftc.teamcode.testing.testAjustDistanceSensorWithGyro.Angle90;
-import static org.firstinspires.ftc.teamcode.testing.testAjustDistanceSensorWithGyro.SERVO_POS_AT_0;
-import static org.firstinspires.ftc.teamcode.testing.testAjustDistanceSensorWithGyro.SERVO_POS_AT_90;
 
 /**
  * FTC 6547's Robot for the 2020-21 FTC Ultimate Goal Season
@@ -126,12 +120,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
      */
     public static String POS_FILE_NAME = "pos.txt";
 
-    public openCvPipeLines.RingDetectionPipeLine ringDetectionPipeLine;
     public OpenCvCamera webCam;
 
     private FtcDashboard dashboard;
     public NanoClock clock;
-
 
     /**
      * The mode the robot is in when update() is called
@@ -171,9 +163,14 @@ public class DriveTrain6547Realsense extends MecanumDrive {
      * Servo that launches the rings
      */
     public Servo indexer;
+    /**
+     * Intake motor
+     */
     public DcMotorEx intake;
+    /**
+     * Both of the robot thrower motors
+     */
     public DcMotorEx thrower1, thrower2;
-    private final double[] motorPowersToAdd = new double[]{0,0,0,0};
 
     public Servo distanceSensorServoX;
     public AnalogInput distanceSensorX;
@@ -359,11 +356,11 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             setPIDCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
         }
 
-        // TODO: reverse any motors using DcMotor.setDirection()
+       // Reverse motors
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
-        // TODO: if desired, use setLocalizer() to change the localization method
 
+        //set the Realsense as the localizer
         if (USE_REALSENSE) {
             try {
                 opMode.telemetry.log().add("Initializing Realsense....This may take some time");
@@ -443,12 +440,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
 
-        /**
-         * We also indicate which camera on the RC we wish to use.
-         */
+         // We also indicate which camera on the RC we wish to use.
         parameters.cameraName = webcamName;
 
-        // Make sure extended tracking is disabled for this example.
+        //Make sure extended tracking is disabled for this example.
         parameters.useExtendedTracking = false;
 
         //  Instantiate the Vuforia engine
@@ -472,7 +467,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         allTrackables = new ArrayList<>();
         allTrackables.addAll(targetsUltimateGoal);
 
-        /**
+        /*
          * In order for localization to work, we need to tell the system where each target is on the field, and
          * where the phone resides on the robot.  These specifications are in the form of <em>transformation matrices.</em>
          * Transformation matrices are a central, important concept in the math here involved in localization.
@@ -546,7 +541,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
                 .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, YZX, DEGREES, phoneYRotate, phoneZRotate, phoneXRotate));
 
-        /**  Let all the trackable listeners know where the phone is.  */
+        //  Let all the trackable listeners know where the phone is
         for (VuforiaTrackable trackable : allTrackables) {
             ((VuforiaTrackableDefaultListener) trackable.getListener()).setPhoneInformation(robotFromCamera, parameters.cameraDirection);
         }
@@ -626,17 +621,6 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     }
     public openCvPipeLines.RingCount getRingCount() {
         return openCvPipeLines.RingDetectionPipeLine.getRingCount();
-    }public void writeFile(String filename, double number)
-    {
-        try {
-            File file = AppUtil.getInstance().getSettingsFile(filename);
-            ReadWriteFile.writeFile(file, Double.toString(number));
-            opMode.telemetry.log().add("saved " + number + " in " + filename);
-        }
-        catch(Exception e)
-        {
-            opMode.telemetry.log().add("Unable to write " + number + " in " + filename);
-        }
     }
     public void startVuforia() {
         useVuforia = true;
@@ -693,6 +677,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             return null;
         }
     }
+
+    /**
+     * @return robot's raw position according to Vuforia
+     */
     public Vector2d getRawVuforiaImagePos() {
         for (VuforiaTrackable trackable : allTrackables) {
             if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
@@ -726,10 +714,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         return distance > maxDistance;
     }
     /**
-     * @param pose1
-     * @param pose2
+     * @param pose1 position 1
+     * @param pose2 position 2
      * @param maxDistance how big can the difference between the positions be
-     * @return if both positions are different from eachother, returns true.  Else it returns false
+     * @return if both positions are far apart from each other, returns true.  Else it returns false
      */
     public boolean isBigJump(Pose2d pose1, Pose2d pose2, double maxDistance) {
         double deltaX = pose1.getX() - pose2.getX();
@@ -737,6 +725,30 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         double distance = Math.hypot(deltaX, deltaY);
         return distance > maxDistance;
     }
+
+    /**
+     * Writes a file to be read later
+     * @param filename the filename of
+     * @param number number to write in the file
+     */
+    public void writeFile(String filename, double number)
+    {
+        try {
+            File file = AppUtil.getInstance().getSettingsFile(filename);
+            ReadWriteFile.writeFile(file, Double.toString(number));
+            opMode.telemetry.log().add("saved " + number + " in " + filename);
+        }
+        catch(Exception e)
+        {
+            opMode.telemetry.log().add("Unable to write " + number + " in " + filename);
+        }
+    }
+
+    /**
+     * Writes a file to be read later
+     * @param filename the filename of
+     * @param str what to write in the file
+     */
     public void writeFile(String filename, String str)
     {
         try {
@@ -749,6 +761,12 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             opMode.telemetry.log().add("Unable to write \"" + str + "\" in " + filename);
         }
     }
+
+    /**
+     * Reads a file
+     * @param filename name of the file
+     * @return the number read from the file
+     */
     public double readFile(String filename)
     {
         try {
@@ -764,6 +782,11 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             return 0;
         }
     }
+    /**
+     * Reads a file
+     * @param filename name of the file
+     * @return the string read from the file
+     */
     public String readFileString(String filename)
     {
         try {
@@ -779,7 +802,17 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             return "";
         }
     }
+
+    /**
+     * saves the robot's position in to a file to be read later
+     * @param vector2d robot's position
+     */
     public void savePos(Vector2d vector2d) {savePos(new Pose2d(vector2d.getX(), vector2d.getY(), Math.toRadians(0)));}
+
+    /**
+     * saves the robot's position in to a file to be read later
+     * @param pose2d robot's position
+     */
     public void savePos(Pose2d pose2d) {
         double x = pose2d.getX();
         double y = pose2d.getY();
@@ -789,6 +822,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         RobotLog.v("saved POS as " + posFile + " to " + POS_FILE_NAME);
         writeFile(POS_FILE_NAME, posFile);
     }
+
+    /**
+     * @return reads the robot's position
+     */
     public Pose2d readPos() {
         String posString = readFileString(POS_FILE_NAME);
         String[] nums = posString.split(",");
@@ -837,12 +874,36 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         mode = Mode.TURN;
     }
 
+    /**
+     * @param angle make the robot turn
+     */
     public void turnSync(double angle) {
         turn(angle);
         waitForIdle();
     }
+
+    /**
+     * @param target target position to turn to
+     * @return the angle to turn to turn toward the target position
+     */
     public double turnTowardsAngle(Vector2d target) {return turnTowardsAngle(target,new Vector2d());}
+
+    /**
+     * @param target target position to turn to
+     * @param start starting position to turn to
+     * @return the angle to turn to turn toward the target position
+     *
+     * Use this with turnRelativeSync()
+     */
     public double turnTowardsAngle(Vector2d target, Pose2d start) {return turnTowardsAngle(target, new Vector2d(start.getX(), start.getY()));}
+
+    /**
+     * @param target target position to turn to
+     * @param start starting position to turn to
+     * @return the angle to turn to turn toward the target position
+     *
+     * Use this with turnRelativeSync()
+     */
     public double turnTowardsAngle(Vector2d target, Vector2d start) {
         double deltaX = target.getX() - start.getX();
         double deltaY = target.getY() - start.getY();
@@ -1055,6 +1116,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         }
     }
 
+    /**
+     * Exactly what you think
+     */
     public void doPowerShotsTheClassicAndBetterWay() {
         RobotLog.v("Launching Power Shot 1");
         turnRelativeSync(turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), getPoseEstimate()));
@@ -1137,7 +1201,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     /**
      * Sets both of the throwing motors to a desired ticks per second.
-     * @param ticksPerSecond
+     * @param ticksPerSecond ticks per second to set the motor
      */
     public void setThrowerVelocity(double ticksPerSecond) {
         if (ticksPerSecond == 0) {
@@ -1218,6 +1282,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
         return  isMotor0AtTarget || isMotor1AtTarget;
     }
+
+    /**
+     * Waits until the thrower is ready to launch the ring
+     */
     public void waitUntilReadyToThrow() {
         while (!isReadyToThrow() && ((LinearOpMode) opMode).opModeIsActive()) {
             updateLightsBasedOnThrower();
@@ -1306,7 +1374,17 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         return Double.NaN;
     }
 
+    /**
+     * @param powershot powershot object
+     * @return get's the distance from the robot to a powershot
+     */
     public double getDistanceFromPowerShot(FieldConstants.PowerShots powershot) {return getDistanceFromPowerShot(powershot, getPoseEstimate());}
+
+    /**
+     * @param powershot powershot object
+     * @param robotPos position of robot
+     * @return get's the distance from the robot to a powershot
+     */
     public double getDistanceFromPowerShot(FieldConstants.PowerShots powershot, Pose2d robotPos) {
         double deltaX = powershot.getPowerShotPosition().getX() - robotPos.getX();
         double deltaY = powershot.getPowerShotPosition().getY() - robotPos.getY();
@@ -1445,6 +1523,14 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         return outTaking;
     }
 
+    /**
+     * This method allows a servo to be controlled by a gamepad stick
+     * @param servo the servo to be updated
+     * @param gamepadStick a gamepad stick number, between -1 and 1
+     * @param speed sensitivity of gamepad stick.  Use the value 1 if your confused
+     * @param max servo maximum position
+     * @param min servo minimum position
+     */
     public void updateServo(Servo servo, double gamepadStick, double speed, double max, double min)
     {
         if (Math.abs(gamepadStick) < .2) return;
@@ -1461,16 +1547,22 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         }
         //}
     }
+
+    /**
+     * This method allows a servo to be controlled by a gamepad stick
+     * @param servo the servo to be updated
+     * @param gamepadStick a gamepad stick number, between -1 and 1
+     * @param speed sensitivity of gamepad stick.  Use the value 1 if your confused
+     */
     public void updateServo(Servo servo, double gamepadStick, double speed)
     {
         updateServo(servo, gamepadStick, speed, 0, 1);
     }
-    public void ajustUltraSonicSensorByGyro(Servo servo, Pose2d robotPos) {
-        double ratio = Math.abs((Angle0 - robotPos.getHeading())/(Angle90 - Angle0));
-        double range = SERVO_POS_AT_90 - SERVO_POS_AT_0;
-        double servoPos = (ratio * range) + SERVO_POS_AT_0;
-        servo.setPosition(servoPos);
-    }
+
+    /**
+     * @param distanceSensor a Maxbotix Ultrasonic Sensor
+     * @return the distance the Maxbotix Ultrasonic Sensor in inches
+     */
     public double getDistance(AnalogInput distanceSensor) {
         //convert voltage to inches
         return distanceSensor.getVoltage()*213.45759532208388;
@@ -1479,17 +1571,12 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     {
 
     }
-    //convert a driveSignal to motor powers
-    public double[] driveSignalToPowers(DriveSignal driveSignal)
-    {
-        List<Double> vel = MecanumKinematics.robotToWheelVelocities(driveSignal.getVel(), TRACK_WIDTH, WHEEL_BASE, LATERAL_MULTIPLIER);
-        List<Double> accel = MecanumKinematics.robotToWheelAccelerations(driveSignal.getAccel(), TRACK_WIDTH, WHEEL_BASE, LATERAL_MULTIPLIER);
-        List<Double> powers = Kinematics.calculateMotorFeedforward(vel, accel, kV,kA,kStatic);
-        //convert list to array
-        return powers.stream().mapToDouble(d -> d).toArray();
-    }
-    //Get and set methods
 
+    /**
+     * @param x gamepad stick X
+     * @param y gamepad stick y
+     * @return true if the gamepad stick is moved, false if the gamepad stick is still.
+     */
     public boolean isStickMoved(double x, double y) {
         return Math.abs(x) > .3 || Math.abs(y) > .3;
     }
