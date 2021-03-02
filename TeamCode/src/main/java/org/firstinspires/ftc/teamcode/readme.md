@@ -1,5 +1,12 @@
 ## 6547 TeamCode Module
 
-This is the 6547 Code.
-Docs: https://ajmods.github.io/FTC6547-UlitmateGoal-Docs/
+### Docs
+https://ajmods.github.io/UltimateGoal6547_V2/
+
+### Libraries used:
+Road Runner by FTC team 8367 ACME Robotics
+FTC Dashboard by FTC team 8367 ACME Robotics
+FTC265 by pietroglyph
+EasyOpenCV by OpenFTC
+FTClib by Alpharetta Robotics Club
 

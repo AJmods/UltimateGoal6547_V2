@@ -1,3 +1,14 @@
+# Code Docs
+https://ajmods.github.io/UltimateGoal6547_V2/
+
+#### Libraries used:
+Road Runner by FTC team 8367 ACME Robotics
+FTC Dashboard by FTC team 8367 ACME Robotics
+FTC265 by pietroglyph
+EasyOpenCV by OpenFTC
+FTClib by Alpharetta Robotics Club
+
+
 ## NOTICE
 
 This repository contains the public FTC SDK for the Ultimate Goal (2020-2021) competition season.
