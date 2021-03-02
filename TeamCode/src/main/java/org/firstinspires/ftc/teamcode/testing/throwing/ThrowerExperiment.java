@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.testing.throwing;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -12,21 +12,21 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveSpeeds;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
 import org.firstinspires.ftc.teamcode.util.FieldConstants;
-import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 import org.firstinspires.ftc.teamcode.util.homar.ToggleBoolean;
 import org.firstinspires.ftc.teamcode.util.homar.ToggleInt;
+import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 
 /**
 A Tele-op designed to experiment with the thrower
  What was changed?  I don't know.
  */
 @Config
-@TeleOp(name = "Thrower Experiment Power Shot", group = "experiment")
+@TeleOp(name = "Thrower Experiment", group = "_teleOp")
 @Disabled
-public class ThrowerExperimentPowerShot extends LinearOpMode {
+public class ThrowerExperiment extends LinearOpMode {
 
     public static double REV_PER_SEC = 44;
-    public static double TARGET_HEIGHT = FieldConstants.POWER_SHOT_HEIGHT;
+    public static double TARGET_HEIGHT = FieldConstants.RED_GOAL_HEIGHT;
 
     public static boolean LOCK_BOT_TO_POS = true;
     public static double ROBOT_X = 0;
@@ -35,7 +35,9 @@ public class ThrowerExperimentPowerShot extends LinearOpMode {
 
     public static boolean TURN_ON_THROWER = false;
 
-    private final double POWER_SHOT_X = FieldConstants.TOP_OF_FIELD;
+    public static double launchRing = 0;
+
+    private final double RED_GOAL_X = FieldConstants.RED_GOAL_X;
 
     private DriveTrain6547Realsense bot; //the robot class
 
@@ -54,6 +56,8 @@ public class ThrowerExperimentPowerShot extends LinearOpMode {
 
             Pose2d pos = bot.getPoseEstimate();
 
+            bot.updateGamepads();
+
             if (gamepad2.a) { bot.launchRing();
                 veloWhenLaunchedRevPerSec =  (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360);
                 RobotLog.v("Thrower motor 0 VELO when launched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
@@ -61,8 +65,8 @@ public class ThrowerExperimentPowerShot extends LinearOpMode {
 
             boolean isValidAngle = ThrowerUtil.isValidAngle(pos.getX(), pos.getY(), pos.getHeading());
 
-            double targetY = ThrowerUtil.getTargetY(pos, POWER_SHOT_X);
-            double deltaX = pos.getX() - POWER_SHOT_X;
+            double targetY = ThrowerUtil.getTargetY(pos, RED_GOAL_X);
+            double deltaX = pos.getX() - RED_GOAL_X;
             double deltaY = pos.getY() - targetY;
             double dist = Math.hypot(deltaX, deltaY);
             double vi = ThrowerUtil.getVi(0, ThrowerUtil.INITIAL_HEIGHT, dist, TARGET_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
@@ -105,16 +109,16 @@ public class ThrowerExperimentPowerShot extends LinearOpMode {
 
                 //draw target robot angle range
                 fieldOverlay.setStroke("#000000");
-                fieldOverlay.strokeLine(pos.getX(), pos.getY(), POWER_SHOT_X, ThrowerUtil.MIN_Y);
-                fieldOverlay.strokeLine(pos.getX(), pos.getY(), POWER_SHOT_X, ThrowerUtil.MAX_Y);
+                fieldOverlay.strokeLine(pos.getX(), pos.getY(), RED_GOAL_X, ThrowerUtil.MIN_Y);
+                fieldOverlay.strokeLine(pos.getX(), pos.getY(), RED_GOAL_X, ThrowerUtil.MAX_Y);
 
                 //mark middle launch goal with circle
-                fieldOverlay.strokeCircle(POWER_SHOT_X, targetY, 1);
+                fieldOverlay.strokeCircle(RED_GOAL_X, targetY, 1);
 
                 //draw robot launch goal position
                 fieldOverlay.setStrokeWidth(3);
                 fieldOverlay.setStroke("FF0000");
-                fieldOverlay.strokeLine(POWER_SHOT_X, ThrowerUtil.MIN_Y, POWER_SHOT_X, ThrowerUtil.MAX_Y);
+                fieldOverlay.strokeLine(RED_GOAL_X, ThrowerUtil.MIN_Y, RED_GOAL_X, ThrowerUtil.MAX_Y);
 
             });
 

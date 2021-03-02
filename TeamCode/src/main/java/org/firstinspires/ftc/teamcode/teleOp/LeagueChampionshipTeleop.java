@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.teleOp;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -24,8 +24,8 @@ import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
  * @see DriveTrain6547Realsense
  */
 @Config
-@TeleOp(name = "Meet 3 Tele-op", group = "_teleOp")
-public class Meet3Teleop extends LinearOpMode {
+@TeleOp(name = "League Championship Tele-op", group = "_teleOp")
+public class LeagueChampionshipTeleop extends LinearOpMode {
 
     public static boolean USE_CALCULATED_VELOCITY = false;
     public static double REV_PER_SEC = 48;
@@ -44,7 +44,7 @@ public class Meet3Teleop extends LinearOpMode {
     private final ToggleBoolean fieldRelative = new ToggleBoolean(true);
     ToggleBoolean grab = new ToggleBoolean(false);
     ToggleBoolean lowerWobvator = new ToggleBoolean(false);
-    ToggleInt powerShot = new ToggleInt(3);
+    //ToggleInt powerShot = new ToggleInt(3);
 
     private DriveTrain6547Realsense bot; //the robot class
 
@@ -66,8 +66,8 @@ public class Meet3Teleop extends LinearOpMode {
 
     OpMode opMode;
 
-    public Meet3Teleop() { }
-    public Meet3Teleop(OpMode opMode, DriveTrain6547Realsense bot) {
+    public LeagueChampionshipTeleop() { }
+    public LeagueChampionshipTeleop(OpMode opMode, DriveTrain6547Realsense bot) {
         this.opMode=opMode;
         this.bot=bot;
     }
@@ -77,7 +77,7 @@ public class Meet3Teleop extends LinearOpMode {
        // telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()); //makes telemetry output to the FTC Dashboard
         bot = new DriveTrain6547Realsense(this, false);
 
-        Meet3Teleop meet3Teleop = new Meet3Teleop(this, bot);
+        LeagueChampionshipTeleop leagueChampionshipTeleop = new LeagueChampionshipTeleop(this, bot);
 
         DriveTrain6547Realsense.INTERRUPT_TRAJECTORIES_WITH_GAMEPAD = true;
         telemetry.log().add("Initing Vuforia");
@@ -114,7 +114,7 @@ public class Meet3Teleop extends LinearOpMode {
 
 
         while (opModeIsActive()) {
-            meet3Teleop.doTeleOp();
+            leagueChampionshipTeleop.doTeleOp();
 
             if (bot.intake.getCurrentAlert(CurrentUnit.AMPS) > 7) {
                 //RobotLog.setGlobalWarningMessage("INTAKE JAMMED");
@@ -207,6 +207,12 @@ public class Meet3Teleop extends LinearOpMode {
         bot.stopVuforia();
         bot.stopRobot();
     }
+
+    /**
+     * Does the robot's tele-op.
+     * Features: Field Relative Driving, Auto High Goal and Power Shots,
+     * and movement of any attachments on the robot.
+     */
     public void doTeleOp() {
         Pose2d pos = bot.getPoseEstimate();
 
@@ -360,11 +366,21 @@ public class Meet3Teleop extends LinearOpMode {
             bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
         }
     }
+
+    /**
+     * @param x gamepad stick X
+     * @param y gamepad stick Y
+     * @return weather the gamepad stick is moving
+     */
     public boolean isStickMoved(double x, double y) {
         boolean val = Math.abs(x) > .3 || Math.abs(y) > .3;
         return val;
     }
 
+    /**
+     * Does the High Goal shots.  Can be interrupted by moving gamepad stick
+     * @param CurrentPos current Robot Position
+     */
     public void doRegularShots(Pose2d currentPos) {
         bot.stopIntake();
         double angleToTurnTo = bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), currentPos);
@@ -385,6 +401,10 @@ public class Meet3Teleop extends LinearOpMode {
         }
     }
 
+    /**
+     * Does 3 power shots, can be interrupted by moving gamepad stick
+     * @param currentPos The current Robot position
+     */
     public void doPowerShots(Pose2d currentPos) {
         bot.stopIntake();
        // Vector2d launchPos = new Vector2d(0,-14);
@@ -441,6 +461,7 @@ public class Meet3Teleop extends LinearOpMode {
 
 //        telemetry.log().add("Launched Rings");
     }
+
 
     public void setThrowerToTarget(Vector2d startPos, double angle) {
         setThrowerToTarget(startPos, angle, true);

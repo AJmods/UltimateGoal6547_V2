@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.testing;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
+import org.firstinspires.ftc.teamcode.teleOp.LeagueChampionshipTeleop;
 import org.firstinspires.ftc.teamcode.util.UltraSonicServo;
 
 @TeleOp
@@ -15,7 +16,7 @@ import org.firstinspires.ftc.teamcode.util.UltraSonicServo;
 public class testUltraSonicServos extends LinearOpMode {
 
     DriveTrain6547Realsense bot;
-    Meet3Teleop meet3Teleop;
+    LeagueChampionshipTeleop leagueChampionshipTeleop;
 
     UltraSonicServo ultraSonicServoX;
     UltraSonicServo ultraSonicServoY;
@@ -26,7 +27,7 @@ public class testUltraSonicServos extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         bot = new DriveTrain6547Realsense(this);
 
-        meet3Teleop = new Meet3Teleop(this, bot);
+        leagueChampionshipTeleop = new LeagueChampionshipTeleop(this, bot);
 
         ultraSonicServoX = new UltraSonicServo(bot.distanceSensorServoX, bot.distanceSensorX, new Pose2d(-5.5,0,Math.toRadians(0)));
         ultraSonicServoY = new UltraSonicServo(bot.distanceSensorServoY, bot.distanceSensorY, new Pose2d(5.5,0,Math.toRadians(0)));
@@ -45,7 +46,7 @@ public class testUltraSonicServos extends LinearOpMode {
             telemetry.addData("new POSE: ", newPose.toString());
             bot.setPoseEstimate(newPose);
             telemetry.update();
-            meet3Teleop.doTeleOp();
+            leagueChampionshipTeleop.doTeleOp();
             bot.update();
         }
     }

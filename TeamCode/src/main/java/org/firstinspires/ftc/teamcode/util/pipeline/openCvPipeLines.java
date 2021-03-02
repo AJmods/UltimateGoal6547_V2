@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Pipelines for use with OpenCV
+ * Custom made openCV pipelines by Team 6547 Cobalt Colts
  */
 @Config
 public class openCvPipeLines {

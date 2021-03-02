@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.testing;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
+import org.firstinspires.ftc.teamcode.teleOp.LeagueChampionshipTeleop;
 
 @TeleOp
 @Config
@@ -26,12 +27,12 @@ public class testAnalogGyro extends LinearOpMode {
     double gyroZeroVal = 0;
 
     DriveTrain6547Realsense bot;
-    Meet3Teleop meet3Teleop;
+    LeagueChampionshipTeleop leagueChampionshipTeleop;
     @Override
     public void runOpMode() throws InterruptedException {
 
         bot = new DriveTrain6547Realsense(this);
-        meet3Teleop = new Meet3Teleop(this, bot);
+        leagueChampionshipTeleop = new LeagueChampionshipTeleop(this, bot);
         gyroSensor = hardwareMap.get(AnalogInput.class, "gyro");
         gyroSensor2 =  hardwareMap.get(AnalogInput.class, "gyro2");
        // MULTIPLER = gyroSensor.getMaxVoltage()/(2*Math.PI);
@@ -46,7 +47,7 @@ public class testAnalogGyro extends LinearOpMode {
         elapsedTime.reset();
         gyroTime.reset();
         while (opModeIsActive()) {
-            meet3Teleop.doTeleOp();
+            leagueChampionshipTeleop.doTeleOp();
             double gyroVolt = gyroSensor.getVoltage();
             if (gyroVolt != lastVolt) {
                 lastVolt = gyroVolt;
