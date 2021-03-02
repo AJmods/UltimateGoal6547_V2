@@ -29,27 +29,14 @@ import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
 @Autonomous(name = "Red Left Auton", group = "test")
 public class RedLeftAutonTest extends LinearOpMode {
 
-    DriveTrain6547Realsense bot;
+    DriveTrain6547Realsense bot; //the robot
+
+    //this defaults to no rings detected
     openCvPipeLines.RingCount ringCount = openCvPipeLines.RingCount.NONE;
-
-    public static int enumRing = 0;
-
-    public static double x_dist_add = -5.5;
-
+    //robot starting position
     private static Pose2d startPos = new Pose2d(-56,-25);
+    //location where robot launches powershots
     private static Vector2d launchPos = new Vector2d(0,-14);
-
-    enum BotStartColor{
-        RED, BLUE
-    }
-    enum BotStartDirection {
-        LEFT, RIGHT
-    }
-
-    //breaks dashboard
-//    public static BotStartColor botStartColor;
-//    public static BotStartDirection botStartDirection;
-
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -61,8 +48,6 @@ public class RedLeftAutonTest extends LinearOpMode {
         bot.startOpenCV();
 
         bot.grabWobbleGoal();
-
-        ringCount = openCvPipeLines.RingCount.values()[enumRing];
 
         bot.update();
         telemetry.log().add("Ready to Start");
@@ -318,6 +303,7 @@ public class RedLeftAutonTest extends LinearOpMode {
 
     public double getRobotX() {
         double dist = 24 - bot.getDistance(bot.distanceSensorX);
+        double x_dist_add = -5.5;
         return x_dist_add + dist;
     }
 
