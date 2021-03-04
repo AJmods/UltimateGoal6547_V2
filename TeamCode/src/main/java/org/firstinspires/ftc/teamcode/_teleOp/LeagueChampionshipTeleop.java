@@ -511,7 +511,7 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
             double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITIAL_HEIGHT, dist, FieldConstants.POWER_SHOT_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
             double targetRevPerSec = vi / ThrowerUtil.inchesPerRev;
             bot.setThrowerVelocity(targetRevPerSec * 360 * ThrowerUtil.POWER_SHOT_CONSTANT_TELE_OP, AngleUnit.DEGREES);
-            RobotLog.v("Set speed to " + (targetRevPerSec*360) + "Rev/s");
+            RobotLog.v("Set power shot speed to " + (targetRevPerSec*360) + "Rev/s, dist (in): " + dist + ", distX: " + (startPos.getX() - FieldConstants.TOP_OF_FIELD) + ", distY: " + (startPos.getY() - targetY) + " targetY: " + targetY);
         }
         else {
             double vi = ThrowerUtil.getVi(startPos.getX(), ThrowerUtil.INITIAL_HEIGHT, dist, FieldConstants.RED_GOAL_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
