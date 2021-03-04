@@ -32,6 +32,8 @@ public class T265LocalizerRR implements Localizer {
 
     public static boolean makeCameraCenter = true;
 
+    private static T265Camera.PoseConfidence poseConfidence;
+
     public T265LocalizerRR(HardwareMap hardwareMap) {
         new T265LocalizerRR(hardwareMap, true);
     }
@@ -54,9 +56,9 @@ public class T265LocalizerRR implements Localizer {
                 slamra.setPose(new com.arcrobotics.ftclib.geometry.Pose2d(0,0, new Rotation2d(0)));
             }
         }
-//        if (slamra.getLastReceivedCameraUpdate().confidence == T265Camera.PoseConfidence.Failed) {
-//            RobotLog.setGlobalWarningMessage("Realsense Failed");
-//        }
+        if (slamra.getLastReceivedCameraUpdate().confidence == T265Camera.PoseConfidence.Failed) {
+            RobotLog.e("Realsense Failed to get Position");
+        }
     }
 
     /**
@@ -116,6 +118,10 @@ public class T265LocalizerRR implements Localizer {
 //        }
     }
 
+    public static T265Camera.PoseConfidence getConfidence() {
+        return poseConfidence;
+    }
+
     /**
      * @return the heading of the robot (in radains)
      */
@@ -130,6 +136,7 @@ public class T265LocalizerRR implements Localizer {
     @Override
     public void update() {
         up = slamra.getLastReceivedCameraUpdate();
+        poseConfidence = up.confidence;
     }
 
     /**
@@ -161,6 +168,7 @@ public class T265LocalizerRR implements Localizer {
     /**
      * DO NOT USE THiS
      */
+    @Deprecated
     @SuppressWarnings("SpellCheckingInspection")
     private Pose2d adjustPosbyCameraPos()
     {

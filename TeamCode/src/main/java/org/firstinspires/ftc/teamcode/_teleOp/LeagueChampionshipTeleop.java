@@ -8,11 +8,14 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
+import com.spartronics4915.lib.T265Camera;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.auton.RedLeftAutonTest;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveSpeeds;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
+import org.firstinspires.ftc.teamcode.drivetrain.localizer.T265LocalizerRR;
 import org.firstinspires.ftc.teamcode.util.FieldConstants;
 import org.firstinspires.ftc.teamcode.util.homar.ToggleBoolean;
 import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
@@ -25,6 +28,17 @@ import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 @Config
 @TeleOp(name = "League Championship Tele-op", group = "_teleOp")
 public class LeagueChampionshipTeleop extends LinearOpMode {
+
+    public static double RED_POWERSHOT_X1 = FieldConstants.RED_POWER_SHOT_1X;
+    public static double RED_POWERSHOT_Y1 = FieldConstants.RED_POWER_SHOT_1Y;
+    public static double RED_POWERSHOT_X2 = FieldConstants.RED_POWER_SHOT_2X;
+    public static double RED_POWERSHOT_Y2 = FieldConstants.RED_POWER_SHOT_2Y;
+    public static double RED_POWERSHOT_X3 = FieldConstants.RED_POWER_SHOT_3X;
+    public static double RED_POWERSHOT_Y3 = FieldConstants.RED_POWER_SHOT_3Y;
+
+    public static double PowerShot1Modifer = 1;
+    public static double PowerShot2Modifer = 1;
+    public static double PowerShot3Modifer = 1;
 
     public static boolean USE_CALCULATED_VELOCITY = false;
     public static double REV_PER_SEC = 48;
@@ -65,7 +79,6 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
 
     OpMode opMode;
 
-    public LeagueChampionshipTeleop() { }
     public LeagueChampionshipTeleop(OpMode opMode, DriveTrain6547Realsense bot) {
         this.opMode=opMode;
         this.bot=bot;
@@ -127,6 +140,8 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
                 messageDisplayed = false;
             }
 
+            T265Camera.PoseConfidence confidence = T265LocalizerRR.getConfidence();
+
             boolean isValidAngle = ThrowerUtil.isValidAngle(pos.getX(), pos.getY(), pos.getHeading());
 
             double targetY = ThrowerUtil.getTargetY(pos, RED_GOAL_X);
@@ -143,6 +158,8 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
                 } else {
                     packet.addLine("USING CALCULATED VELOCITY");
                 }
+
+                packet.addLine("Realsense Confidence: " + confidence.name());
 
                 double drawsConstant = REV_PER_SEC/targetRev;
                 packet.addLine("Current Motor Rev/s)/(Target Rev/s): " + drawsConstant + " (Danda's Constant)");
@@ -189,14 +206,23 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
                 fieldOverlay.setStroke("FF0000");
                 fieldOverlay.strokeLine(RED_GOAL_X, ThrowerUtil.MIN_Y, RED_GOAL_X, ThrowerUtil.MAX_Y);
 
+                fieldOverlay.setStroke("#0069fc");
+                fieldOverlay.strokeCircle(RED_POWERSHOT_X1, RED_POWERSHOT_Y1,3);
+                fieldOverlay.strokeCircle(RED_POWERSHOT_X2, RED_POWERSHOT_Y2,3);
+                fieldOverlay.strokeCircle(RED_POWERSHOT_X3, RED_POWERSHOT_Y3,3);
+
             });
 
-            telemetry.addData("Target VELO: ", REV_PER_SEC);
-            telemetry.addData("CURRENT THROWER 0 VELO:", bot.getThrowerVelocity(AngleUnit.DEGREES)[0]/360);
-            telemetry.addData("CURRENT THROWER 1 VELO: ", bot.getThrowerVelocity(AngleUnit.DEGREES)[1]/360);
-            telemetry.addData("IS LAUNCHED: ", bot.isReadyToThrow());
+            telemetry.addData("REALSENSE ANGLE (deg) ", Math.toDegrees(bot.getRawExternalHeading()));
+            telemetry.addData("IMU ANGLE (deg)", Math.toDegrees(bot.getRawIMUangle()));
+            telemetry.addData("ANALOG GYRO ANGLE (deg) ", bot.getAnalogGyroSensor().getAngle(AngleUnit.DEGREES));
+            telemetry.addData("Realsense confidence", confidence.name());
+            telemetry.addData("Target VELO (rev/s): ", bot.getTargetVelocity()/360); //convert to rev/Sec
+            telemetry.addData("CURRENT THROWER 0 VELO (rev/s):", bot.getThrowerVelocity(AngleUnit.DEGREES)[0]/360);
+            telemetry.addData("CURRENT THROWER 1 VELO (rev/s): ", bot.getThrowerVelocity(AngleUnit.DEGREES)[1]/360);
+            telemetry.addData("Is launched: ", bot.isReadyToThrow());
             telemetry.addData("Intake AMPS:", bot.intake.getCurrent(CurrentUnit.AMPS));
-            telemetry.addData("Intake AMPS ALEART", bot.intake.getCurrent(CurrentUnit.AMPS));
+            telemetry.addData("Intake AMPS ALEART", bot.intake.getCurrentAlert(CurrentUnit.AMPS));
             telemetry.update();
             bot.update(); //updates robot's position
             //bot.updateLightsBasedOnThrower();
@@ -288,9 +314,14 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
             // bot.doRedPowerShots(pos);
             //bot.doPowerShotsTheClassicAndBetterWay();
             try {
+//                Vector2d launchPos = RedLeftAutonTest.getLaunchPos();
+//                bot.followTrajectorySync(bot.trajectoryBuilder()
+//                .lineToLinearHeading(new Pose2d(launchPos.getX(), launchPos.getY(), Math.toRadians(0)))
+//                        .build());
                 doPowerShots(pos);
             } catch (Exception e) {
                 RobotLog.v("PowerShot crash");
+                //RobotLog.setGlobalWarningMessage("PowerShot crashed");
             }
             bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
         }
@@ -372,13 +403,12 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
      * @return weather the gamepad stick is moving
      */
     public boolean isStickMoved(double x, double y) {
-        boolean val = Math.abs(x) > .3 || Math.abs(y) > .3;
-        return val;
+        return Math.abs(x) > .3 || Math.abs(y) > .3;
     }
 
     /**
      * Does the High Goal shots.  Can be interrupted by moving gamepad stick
-     * @param CurrentPos current Robot Position
+     * @param currentPos current Robot Position
      */
     public void doRegularShots(Pose2d currentPos) {
         bot.stopIntake();
@@ -413,7 +443,7 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
 //        bot.followTrajectory(bot.trajectoryBuilder().lineToLinearHeading(new Pose2d(launchPos.getX(), launchPos.getY(), Math.toRadians(0))).build());
 //
 //        while (!isStickMoved(gamepad1.left_stick_x, gamepad1.left_stick_y) && opModeIsActive()) { bot.update();}
-        double angleToTurnTo = bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate());
+        double angleToTurnTo = bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X3, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate());
         Pose2d pos = bot.getPoseEstimate();
         setThrowerToTarget(new Pose2d(pos.getX(), pos.getY(), angleToTurnTo));
 
@@ -421,10 +451,11 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
 
         //turn toward 3 power shots
         RobotLog.v("Launching Power Shot 1");
-        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
-        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X3, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X3, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
         //throw ring
         setThrowerToTarget(bot.getPoseEstimate());
+        bot.setThrowerVelocity(bot.getTargetVelocity() * PowerShot3Modifer, AngleUnit.DEGREES);
         //wait for launch speed to be ready
         while (!bot.isReadyToThrow() && !isStickMoved(opMode.gamepad1.left_stick_x, opMode.gamepad1.left_stick_y)) {bot.updateLightsBasedOnThrower();}
         bot.launchRing();
@@ -433,10 +464,11 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
         bot.openIndexer();
         //prepare to throw next ring
         RobotLog.v("Launching Power Shot 2");
-        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
-        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X2, RED_POWERSHOT_Y2), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X2, RED_POWERSHOT_Y2), bot.getPoseEstimate()));
         //throw ring
         setThrowerToTarget(bot.getPoseEstimate());
+        bot.setThrowerVelocity(bot.getTargetVelocity() * PowerShot2Modifer, AngleUnit.DEGREES);
         //wait for launch speed to be ready
         while (!bot.isReadyToThrow() && !isStickMoved(opMode.gamepad1.left_stick_x, opMode.gamepad1.left_stick_y)) {bot.updateLightsBasedOnThrower();}
         bot.launchRing();
@@ -445,10 +477,11 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
         bot.openIndexer();
         //prepare to throw next ring
         RobotLog.v("Launching Power Shot 3");
-        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
-        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X1, RED_POWERSHOT_Y1), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X1, RED_POWERSHOT_Y1), bot.getPoseEstimate()));
         //throw ring
         setThrowerToTarget(bot.getPoseEstimate());
+        bot.setThrowerVelocity(bot.getTargetVelocity() * PowerShot1Modifer, AngleUnit.DEGREES);
         //wait for launch speed to be ready
         while (!bot.isReadyToThrow() && !isStickMoved(opMode.gamepad1.left_stick_x, opMode.gamepad1.left_stick_y)) {bot.updateLightsBasedOnThrower();}
         bot.launchRing();

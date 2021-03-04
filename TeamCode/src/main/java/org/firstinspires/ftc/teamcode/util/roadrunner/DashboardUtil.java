@@ -90,7 +90,7 @@ public class DashboardUtil {
     }
 
     //so apparently there's this method called setStroke().......
-    //GOD FUCKING DAMMIT I SPENT HOURS ON A METHOD THAT IS ALREADY BUILT IN
+    //I spent hours on this method that turned out to be built in....
 //    public static void generateVuforiaPoints(double radius) {generateVuforiaPoints(radius, DEFAULT_RESOLUTION);}
 //    public static void generateVuforiaPoints(double radius, double res) {
 //        int circles = FieldConstants.VuforiaTargetsX.length;

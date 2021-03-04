@@ -37,6 +37,7 @@ public class RedLeftAutonTest extends LinearOpMode {
     private static Pose2d startPos = new Pose2d(-56,-25);
     //location where robot launches powershots
     private static Vector2d launchPos = new Vector2d(0,-14);
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -76,7 +77,10 @@ public class RedLeftAutonTest extends LinearOpMode {
 
                 packet.addLine("Distance");
             });
-            bot.setPoseEstimate(startPos);
+            if (!bot.isInsideField(bot.getPoseEstimate())) {
+                bot.setPoseEstimate(startPos);
+                RobotLog.clearGlobalWarningMsg();
+            }
             bot.update();
             telemetry.update();
         }
@@ -143,7 +147,7 @@ public class RedLeftAutonTest extends LinearOpMode {
 
         bot.lowerWobvatorByNotAllTheWay();
 
-        if (ringCount == openCvPipeLines.RingCount.NONE) bot.followTrajectorySync(bot.trajectoryBuilder().lineToLinearHeading(new Pose2d(23, -46, Math.toRadians(0))).build());
+        if (ringCount == openCvPipeLines.RingCount.NONE) bot.followTrajectorySync(bot.trajectoryBuilder().lineToLinearHeading(new Pose2d(22, -45, Math.toRadians(0))).build());
         else if (ringCount == openCvPipeLines.RingCount.ONE) bot.followTrajectorySync(bot.trajectoryBuilder().splineTo(new Vector2d(47,-23), Math.toRadians(0)).build());
         else if (ringCount == openCvPipeLines.RingCount.FOUR) bot.followTrajectorySync(bot.trajectoryBuilder(false, DriveSpeeds.reallyFast).splineTo(new Vector2d(69,-46), Math.toRadians(0))
                 .addDisplacementMarker(() -> {
@@ -190,7 +194,7 @@ public class RedLeftAutonTest extends LinearOpMode {
 
         //then drive  back to original square
         if (ringCount == openCvPipeLines.RingCount.NONE) {
-            bot.followTrajectorySync(bot.trajectoryBuilder().splineTo(new Vector2d(21, -41), Math.toRadians(0)).build());
+            bot.followTrajectorySync(bot.trajectoryBuilder().splineTo(new Vector2d(19, -40), Math.toRadians(0)).build());
         }
         else if (ringCount == openCvPipeLines.RingCount.ONE) {
             bot.followTrajectorySync(bot.trajectoryBuilder()
@@ -313,5 +317,13 @@ public class RedLeftAutonTest extends LinearOpMode {
 
     public static void setStartPos(Pose2d startPos) {
         RedLeftAutonTest.startPos = startPos;
+    }
+
+    public static Pose2d getStartPos() {
+        return startPos;
+    }
+
+    public static Vector2d getLaunchPos() {
+        return launchPos;
     }
 }

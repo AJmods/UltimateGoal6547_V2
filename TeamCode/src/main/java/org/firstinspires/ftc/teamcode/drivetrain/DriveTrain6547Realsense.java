@@ -52,6 +52,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+import org.firstinspires.ftc.teamcode.util.AnalogGyroSensor;
 import org.firstinspires.ftc.teamcode.util.command.PacketAction;
 import org.firstinspires.ftc.teamcode.drivetrain.localizer.T265LocalizerRR;
 import org.firstinspires.ftc.teamcode.util.FieldConstants;
@@ -149,6 +150,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     private List<DcMotorEx> motors;
 
     private BNO055IMU imu;
+    double imuZeroVal = 0;
 
     /**
      * Servo that grabs and releases the wobble goal
@@ -177,6 +179,8 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     public Servo distanceSensorServoY;
     public AnalogInput distanceSensorY;
+
+    public AnalogGyroSensor gyroSensor;
 
     /**
      * Robot lights, located on the bottom of the robot
@@ -327,6 +331,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         imu.initialize(parameters);
+        zeroIMU();
 
         // TODO: if your hub is mounted vertically, remap the IMU axes so that the z-axis points
         // upward (normal to the floor) using a command like the following:
@@ -383,6 +388,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         distanceSensorServoX = opMode.hardwareMap.get(Servo.class, "dServo");
         distanceSensorServoY = opMode.hardwareMap.get(Servo.class, "dServoY");
         distanceSensorY = opMode.hardwareMap.get(AnalogInput.class, "distanceY");
+
+        gyroSensor = new AnalogGyroSensor(opMode.hardwareMap.get(AnalogInput.class, "gyro"));
+        gyroSensor.zeroGyro();
 
         thrower1 = opMode.hardwareMap.get(DcMotorEx.class, "thrower");
         thrower2 = opMode.hardwareMap.get(DcMotorEx.class, "thrower2");
@@ -1567,6 +1575,13 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         //convert voltage to inches
         return distanceSensor.getVoltage()*213.45759532208388;
     }
+
+    /**
+     * @return target Velocity of the Robot's thrower
+     */
+    public double getTargetVelocity() {
+        return targetVelocity;
+    }
     public void runAtAllTimes() //anything in here runs at all times during auton because this method is ran during roadRunner's state machine
     {
 
@@ -1642,6 +1657,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         rightRear.setPower(0);
     }
 
+    /**
+     * @return Angle of the Intel T265 Realsense
+     * (unless boolean variable USE_REALSENSE is false, then return the IMU angle)
+     */
     @Override
     public double getRawExternalHeading() {
         if (USE_REALSENSE)
@@ -1650,6 +1669,24 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             return imu.getAngularOrientation().firstAngle;
     }
 
+    /**
+     * @return the IMU angle of the robot
+     */
+    public double getRawIMUangle() {
+        return norm(imu.getAngularOrientation().firstAngle - imuZeroVal);
+    }
+    public void zeroIMU() {
+        imuZeroVal = imu.getAngularOrientation().firstAngle;
+    }
+
+    public AnalogGyroSensor getAnalogGyroSensor() {
+        return gyroSensor;
+    }
+    private double norm(double angle) {
+        while (angle > Math.toRadians(360)) angle-=360;
+        while (angle > Math.toRadians(0)) angle+=360;
+        return angle;
+    }
     public double getCurrentHeadingA() {
         return currentHeadingA;
     }
