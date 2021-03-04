@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
-import org.firstinspires.ftc.teamcode._teleOp.LeagueChampionshipTeleop;
+import org.firstinspires.ftc.teamcode.teleOp.LeagueChampionshipTeleop;
 
 @TeleOp
 @Config
