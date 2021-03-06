@@ -194,7 +194,7 @@ public class RedLeftAutonTest extends LinearOpMode {
 
         //then drive  back to original square
         if (ringCount == openCvPipeLines.RingCount.NONE) {
-            bot.followTrajectorySync(bot.trajectoryBuilder().splineTo(new Vector2d(19, -40), Math.toRadians(0)).build());
+            bot.followTrajectorySync(bot.trajectoryBuilder().splineTo(new Vector2d(21, -40), Math.toRadians(0)).build());
         }
         else if (ringCount == openCvPipeLines.RingCount.ONE) {
             bot.followTrajectorySync(bot.trajectoryBuilder()

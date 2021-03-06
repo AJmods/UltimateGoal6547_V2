@@ -1,22 +1,25 @@
 package org.firstinspires.ftc.teamcode.util;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+@Config
 public class UltraSonicServo {
 
     Servo servo;
     AnalogInput distanceSensor;
 
-    private double posAtLowAngle = 0;
-    private double posAtHighAngle = .4;
+    public static double posAtLowAngle = .5;
+    public static double posAtHighAngle = .85;
 
-    private double lowAngle = 90;
-    private double highAngle = 0;
+    public static double lowAngle = Math.toRadians(0);
+    public static double highAngle = Math.toRadians(90);
 
     private Pose2d sensorPos;
 
@@ -34,9 +37,11 @@ public class UltraSonicServo {
     }
 
     public void adjustServoBasedOnRotation(double robotAngle) {
-        double ratio = Math.abs((lowAngle - robotAngle)/(highAngle - lowAngle));
+        if (robotAngle > Math.toRadians(180)) robotAngle-=Math.toRadians(360);
+        double ratio = -(lowAngle - robotAngle)/(highAngle - lowAngle);
         double range = posAtHighAngle - posAtLowAngle;
         double servoPos = (ratio * range) + posAtLowAngle;
+        RobotLog.v("setting ServoPos to " + servoPos + ", robot angle is " + Math.toDegrees(robotAngle));
         servo.setPosition(servoPos);
     }
 

@@ -101,6 +101,8 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     public static boolean INTERRUPT_TRAJECTORIES_WITH_GAMEPAD = false;
 
+    public static double angleModifer = 0;
+
     public enum Mode {
         IDLE,
         TURN,
@@ -674,6 +676,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
             // express the rotation of the robot in degrees.
             Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
             opMode.telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+          //  angleModifer = Math.toRadians(rotation.thirdAngle + 270 - Math.toDegrees(getRawExternalHeading())); //not entire sure if works
 
             vuforiaPos = new Vector2d(translation.get(0) / mmPerInch, translation.get(1) / mmPerInch);
 

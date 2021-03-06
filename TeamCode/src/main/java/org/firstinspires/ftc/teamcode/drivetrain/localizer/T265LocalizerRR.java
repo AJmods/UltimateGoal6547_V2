@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.spartronics4915.lib.T265Camera;
 
+import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -75,7 +76,7 @@ public class T265LocalizerRR implements Localizer {
                 Translation2d oldPose = up.pose.getTranslation();
                 Rotation2d oldRot = up.pose.getRotation();
                 //The T265's unit of measurement is meters.  dividing it by .0254 converts meters to inches.
-                rawPose = new Pose2d(oldPose.getX() / .0254, oldPose.getY() / .0254, norm(oldRot.getRadians())); //raw pos
+                rawPose = new Pose2d(oldPose.getX() / .0254, oldPose.getY() / .0254, norm(oldRot.getRadians() + DriveTrain6547Realsense.angleModifer)); //raw pos
                 mPoseEstimate = rawPose.plus(poseOffset); //offsets the pose to be what the pose estimate is;
        } else {
             RobotLog.v("NULL Camera Update");
@@ -126,7 +127,7 @@ public class T265LocalizerRR implements Localizer {
      * @return the heading of the robot (in radains)
      */
     public static double getHeading() {
-        return mPoseEstimate.getHeading();
+        return norma(mPoseEstimate.getHeading() - DriveTrain6547Realsense.angleModifer);
     }
 
     /**
@@ -159,6 +160,12 @@ public class T265LocalizerRR implements Localizer {
      * @return normiazled angle between ranges 0 to 2Pi
      */
     private double norm(double angle)
+    {
+        while (angle>Math.toRadians(360)) angle-=Math.toRadians(360);
+        while (angle<=0) angle+=Math.toRadians(360);
+        return angle;
+    }
+    private static double norma(double angle)
     {
         while (angle>Math.toRadians(360)) angle-=Math.toRadians(360);
         while (angle<=0) angle+=Math.toRadians(360);

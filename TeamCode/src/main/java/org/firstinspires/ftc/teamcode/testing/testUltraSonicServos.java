@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.testing;
 
+import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -10,6 +12,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
 import org.firstinspires.ftc.teamcode.teleOp.LeagueChampionshipTeleop;
 import org.firstinspires.ftc.teamcode.util.UltraSonicServo;
+import org.firstinspires.ftc.teamcode.util.command.PacketAction;
+import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
 
 @TeleOp
 @Config
@@ -43,8 +47,18 @@ public class testUltraSonicServos extends LinearOpMode {
 
             Pose2d newPose = calculatePositionBasedOnUltraSonicServos(ultraSonicServoX, ultraSonicServoY, pos.getHeading(), new Vector2d(realSenseX, realSenseY));
 
+            telemetry.addData("Modified Angle", (pos.getHeading()>Math.toRadians(180)) ? pos.getHeading()-Math.toRadians(360) : pos.getHeading());
             telemetry.addData("new POSE: ", newPose.toString());
-            bot.setPoseEstimate(newPose);
+            telemetry.addData("servo pos: ", ultraSonicServoX.getServo().getPosition());
+            telemetry.addData("servo Y pos: ", ultraSonicServoY.getServo().getPosition());
+            telemetry.addData("distance X (in)", ultraSonicServoX.getRawDistance(DistanceUnit.INCH));
+            telemetry.addData("distance Y (in)", ultraSonicServoY.getRawDistance(DistanceUnit.INCH));
+            telemetry.addData("Y voltage", ultraSonicServoY.getDistanceSensor().getVoltage());
+            telemetry.addData("Y voltage again", bot.distanceSensorY.getVoltage());
+            bot.setPacketAction((packet, fieldOverlay) -> {
+                fieldOverlay.setStroke("0000FF");
+                DashboardUtil.drawRobot(fieldOverlay, newPose);
+            });
             telemetry.update();
             leagueChampionshipTeleop.doTeleOp();
             bot.update();
@@ -61,8 +75,8 @@ public class testUltraSonicServos extends LinearOpMode {
         double deltaXFromRealsense = rotatedPosX - realsensePos.getX();
         double deltaYFromRealsense = rotatedPosY - realsensePos.getY();
 
-        double robotPosX = ultraSonicServoX.getRawDistance(DistanceUnit.INCH) + deltaXFromRealsense;
-        double robotPosY = ultraSonicServoY.getRawDistance(DistanceUnit.INCH) + deltaYFromRealsense;
+        double robotPosX = 24 - ultraSonicServoX.getRawDistance(DistanceUnit.INCH) + deltaXFromRealsense;
+        double robotPosY = 72 - ultraSonicServoY.getRawDistance(DistanceUnit.INCH) + deltaYFromRealsense;
         telemetry.addData("DISANCE X: ", ultraSonicServoX.getRawDistance(DistanceUnit.INCH));
         telemetry.addData("DISTNAE Y: ", ultraSonicServoY.getRawDistance(DistanceUnit.INCH));
 

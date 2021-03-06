@@ -15,8 +15,8 @@ public class ThrowerUtil {
      * Multiply the theoretical speed from getVi() by this number to make the launcher hit the powershots
      */
     public static double POWER_SHOT_CONSTANT = 2.1655;
-    public static double POWER_SHOT_CONSTANT_TELE_OP = 2.09;
-    public static double GOAL_CONSTANT = 2.36;
+    public static double POWER_SHOT_CONSTANT_TELE_OP = 2.06;
+    public static double GOAL_CONSTANT = .985;
 
 
     public static double MIN_Y = -29;

@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -16,17 +17,18 @@ import org.firstinspires.ftc.teamcode.drivetrain.DriveSpeeds;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
 import org.firstinspires.ftc.teamcode.drivetrain.localizer.T265LocalizerRR;
 import org.firstinspires.ftc.teamcode.util.FieldConstants;
+import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 import org.firstinspires.ftc.teamcode.util.homar.ToggleBoolean;
 import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
-import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 
 /**
  * This is the main tele-op the drivers use
  * @see DriveTrain6547Realsense
  */
 @Config
-@TeleOp(name = "League Championship Tele-op", group = "_teleOp")
-public class LeagueChampionshipTeleop extends LinearOpMode {
+@TeleOp(name = "League Championship Tele-op NEW", group = "_teleOp")
+@Disabled
+public class LeagueChampionshipTeleopNew extends LinearOpMode {
 
     public static double RED_POWERSHOT_X1 = FieldConstants.RED_POWER_SHOT_1X;
     public static double RED_POWERSHOT_Y1 = FieldConstants.RED_POWER_SHOT_1Y;
@@ -78,21 +80,22 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
 
     OpMode opMode;
 
-    public LeagueChampionshipTeleop() { }
-    public LeagueChampionshipTeleop(OpMode opMode, DriveTrain6547Realsense bot) {
+    public LeagueChampionshipTeleopNew(OpMode opMode, DriveTrain6547Realsense bot) {
         this.opMode=opMode;
         this.bot=bot;
     }
 
     @Override
     public void runOpMode() throws InterruptedException{
-       // telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()); //makes telemetry output to the FTC Dashboard
+        telemetry.log().add("Initing Tele-op");
+        RobotLog.v("Initing Tele-op");
+        // telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()); //makes telemetry output to the FTC Dashboard
         bot = new DriveTrain6547Realsense(this, false);
-
-        LeagueChampionshipTeleop leagueChampionshipTeleop = new LeagueChampionshipTeleop(this, bot);
+        RobotLog.v("Inited Robot");
+        LeagueChampionshipTeleopNew leagueChampionshipTeleop = new LeagueChampionshipTeleopNew(this, bot);
 
         DriveTrain6547Realsense.INTERRUPT_TRAJECTORIES_WITH_GAMEPAD = true;
-        telemetry.log().add("Initing Vuforia");
+        telemetry.log().add("Initing Vuforia (takes some time)");
         bot.initVufoira();
         bot.update();
         telemetry.update();
@@ -140,6 +143,8 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
                 messageDisplayed = false;
             }
 
+            T265Camera.PoseConfidence confidence = T265LocalizerRR.getConfidence();
+
             boolean isValidAngle = ThrowerUtil.isValidAngle(pos.getX(), pos.getY(), pos.getHeading());
 
             double targetY = ThrowerUtil.getTargetY(pos, RED_GOAL_X);
@@ -149,15 +154,15 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
             double vi = ThrowerUtil.getVi(0, ThrowerUtil.INITIAL_HEIGHT, dist + launcherDistanceFromRealsense, TARGET_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
             double targetRev = vi/ ThrowerUtil.inchesPerRev;
 
-            T265Camera.PoseConfidence confidence = T265LocalizerRR.getConfidence();
-
             bot.setPacketAction((packet, fieldOverlay) -> {
 
                 if (!USE_CALCULATED_VELOCITY) {
-                   packet.addLine("USING USER-INPUTED VELOCITY");
+                    packet.addLine("USING USER-INPUTED VELOCITY");
                 } else {
                     packet.addLine("USING CALCULATED VELOCITY");
                 }
+
+                packet.addLine("Realsense Confidence: " + confidence.name());
 
                 double drawsConstant = REV_PER_SEC/targetRev;
                 packet.addLine("Current Motor Rev/s)/(Target Rev/s): " + drawsConstant + " (Danda's Constant)");
@@ -204,16 +209,20 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
                 fieldOverlay.setStroke("FF0000");
                 fieldOverlay.strokeLine(RED_GOAL_X, ThrowerUtil.MIN_Y, RED_GOAL_X, ThrowerUtil.MAX_Y);
 
+                fieldOverlay.setStroke("#0069fc");
+                fieldOverlay.strokeCircle(RED_POWERSHOT_X1, RED_POWERSHOT_Y1,3);
+                fieldOverlay.strokeCircle(RED_POWERSHOT_X2, RED_POWERSHOT_Y2,3);
+                fieldOverlay.strokeCircle(RED_POWERSHOT_X3, RED_POWERSHOT_Y3,3);
+
             });
 
-
             telemetry.addData("REALSENSE ANGLE (deg) ", Math.toDegrees(bot.getRawExternalHeading()));
-            //telemetry.addData("IMU ANGLE (deg)", Math.toDegrees(bot.getRawIMUangle()));
-            //telemetry.addData("ANALOG GYRO ANGLE (deg) ", bot.getAnalogGyroSensor().getAngle(AngleUnit.DEGREES));
+            telemetry.addData("IMU ANGLE (deg)", Math.toDegrees(bot.getRawIMUangle()));
+            telemetry.addData("ANALOG GYRO ANGLE (deg) ", bot.getAnalogGyroSensor().getAngle(AngleUnit.DEGREES));
             telemetry.addData("Realsense confidence", confidence.name());
             telemetry.addData("Target VELO (rev/s): ", bot.getTargetVelocity()/360); //convert to rev/Sec
             telemetry.addData("CURRENT THROWER 0 VELO (rev/s):", bot.getThrowerVelocity(AngleUnit.DEGREES)[0]/360);
-            //telemetry.addData("CURRENT THROWER 1 VELO (rev/s): ", bot.getThrowerVelocity(AngleUnit.DEGREES)[1]/360);
+            telemetry.addData("CURRENT THROWER 1 VELO (rev/s): ", bot.getThrowerVelocity(AngleUnit.DEGREES)[1]/360);
             telemetry.addData("Is launched: ", bot.isReadyToThrow());
             telemetry.addData("Intake AMPS:", bot.intake.getCurrent(CurrentUnit.AMPS));
             telemetry.addData("Intake AMPS ALEART", bot.intake.getCurrentAlert(CurrentUnit.AMPS));
@@ -261,10 +270,10 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
                 leftBackPower = speed * Math.sin(LeftStickAngle - robotAngle) + rightX;
                 rightBackPower = speed * Math.cos(LeftStickAngle - robotAngle) - rightX;
 
-//                opMode.telemetry.addData("LS angle", Math.toDegrees(LeftStickAngle));
-//                opMode.telemetry.addData("driving toward", LeftStickAngle - robotAngle);
-//                opMode.telemetry.addData("ROBOT ANGLE", Math.toDegrees(robotAngle));
-//                opMode.telemetry.addData("RAW ANGLE", Math.toDegrees(bot.getRawExternalHeading()));
+                opMode.telemetry.addData("LS angle", Math.toDegrees(LeftStickAngle));
+                opMode.telemetry.addData("driving toward", LeftStickAngle - robotAngle);
+                opMode.telemetry.addData("ROBOT ANGLE", Math.toDegrees(robotAngle));
+                opMode.telemetry.addData("RAW ANGLE", Math.toDegrees(bot.getRawExternalHeading()));
             } else //regular drive (different math because this is faster than sins and cosines
             {
                 leftFrontPower = -opMode.gamepad1.left_stick_y + opMode.gamepad1.left_stick_x + opMode.gamepad1.right_stick_x;
@@ -308,9 +317,14 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
             // bot.doRedPowerShots(pos);
             //bot.doPowerShotsTheClassicAndBetterWay();
             try {
+//                Vector2d launchPos = RedLeftAutonTest.getLaunchPos();
+//                bot.followTrajectorySync(bot.trajectoryBuilder()
+//                .lineToLinearHeading(new Pose2d(launchPos.getX(), launchPos.getY(), Math.toRadians(0)))
+//                        .build());
                 doPowerShots(pos);
             } catch (Exception e) {
                 RobotLog.v("PowerShot crash");
+                //RobotLog.setGlobalWarningMessage("PowerShot crashed");
             }
             bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
         }
@@ -402,7 +416,7 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
     public void doRegularShots(Pose2d currentPos) {
         bot.stopIntake();
         double angleToTurnTo = bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), currentPos);
-        bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(new Pose2d(currentPos.getX(), currentPos.getY(), angleToTurnTo), AngleUnit.DEGREES) * ThrowerUtil.GOAL_CONSTANT, AngleUnit.DEGREES);
+        bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(new Pose2d(currentPos.getX(), currentPos.getY(), angleToTurnTo), AngleUnit.DEGREES), AngleUnit.DEGREES);
 
         bot.turnRelativeSync(angleToTurnTo);
         bot.turnRelativeSync(angleToTurnTo);
@@ -432,7 +446,7 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
 //        bot.followTrajectory(bot.trajectoryBuilder().lineToLinearHeading(new Pose2d(launchPos.getX(), launchPos.getY(), Math.toRadians(0))).build());
 //
 //        while (!isStickMoved(gamepad1.left_stick_x, gamepad1.left_stick_y) && opModeIsActive()) { bot.update();}
-        double angleToTurnTo = bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X3, RED_POWERSHOT_Y3), bot.getPoseEstimate());
+        double angleToTurnTo = bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X3, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate());
         Pose2d pos = bot.getPoseEstimate();
         setThrowerToTarget(new Pose2d(pos.getX(), pos.getY(), angleToTurnTo));
 
@@ -440,8 +454,8 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
 
         //turn toward 3 power shots
         RobotLog.v("Launching Power Shot 1");
-        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X3, RED_POWERSHOT_Y3), bot.getPoseEstimate()));
-        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X3, RED_POWERSHOT_Y3), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X3, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
+        bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(RED_POWERSHOT_X3, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
         //throw ring
         setThrowerToTarget(bot.getPoseEstimate());
         bot.setThrowerVelocity(bot.getTargetVelocity() * PowerShot3Modifer, AngleUnit.DEGREES);
@@ -509,5 +523,6 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
             RobotLog.v("Set speed to " + (targetRevPerSec*360) + "Rev/s");
         }
     }
+
 
 }
