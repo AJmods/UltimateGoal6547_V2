@@ -12,21 +12,22 @@ import com.spartronics4915.lib.T265Camera;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.drivetrain.Bot2;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveSpeeds;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
 import org.firstinspires.ftc.teamcode.drivetrain.localizer.T265LocalizerRR;
 import org.firstinspires.ftc.teamcode.util.FieldConstants;
+import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 import org.firstinspires.ftc.teamcode.util.homar.ToggleBoolean;
 import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
-import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 
 /**
  * This is the main tele-op the drivers use
  * @see DriveTrain6547Realsense
  */
 @Config
-@TeleOp(name = "League Championship Tele-op", group = "_teleOp")
-public class LeagueChampionshipTeleop extends LinearOpMode {
+@TeleOp(name = "Bot 2 Tele-op", group = "_teleOp")
+public class Bot2TeleOp extends LinearOpMode {
 
     public static double RED_POWERSHOT_X1 = FieldConstants.RED_POWER_SHOT_1X;
     public static double RED_POWERSHOT_Y1 = FieldConstants.RED_POWER_SHOT_1Y;
@@ -34,6 +35,8 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
     public static double RED_POWERSHOT_Y2 = FieldConstants.RED_POWER_SHOT_2Y;
     public static double RED_POWERSHOT_X3 = FieldConstants.RED_POWER_SHOT_3X;
     public static double RED_POWERSHOT_Y3 = FieldConstants.RED_POWER_SHOT_3Y;
+
+    public static double CONVEYOR_SPEED = .3;
 
     public static double PowerShot1Modifer = 1;
     public static double PowerShot2Modifer = 1;
@@ -58,7 +61,7 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
     ToggleBoolean lowerWobvator = new ToggleBoolean(false);
     //ToggleInt powerShot = new ToggleInt(3);
 
-    private DriveTrain6547Realsense bot; //the robot class
+    private Bot2 bot; //the robot class
 
     private double angleZeroValue = 90;
 
@@ -78,8 +81,8 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
 
     OpMode opMode;
 
-    public LeagueChampionshipTeleop() { }
-    public LeagueChampionshipTeleop(OpMode opMode, DriveTrain6547Realsense bot) {
+    public Bot2TeleOp() { }
+    public Bot2TeleOp(OpMode opMode, Bot2 bot) {
         this.opMode=opMode;
         this.bot=bot;
     }
@@ -87,9 +90,9 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException{
        // telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()); //makes telemetry output to the FTC Dashboard
-        bot = new DriveTrain6547Realsense(this);
+        bot = new Bot2(this);
 
-        LeagueChampionshipTeleop leagueChampionshipTeleop = new LeagueChampionshipTeleop(this, bot);
+        Bot2TeleOp leagueChampionshipTeleop = new Bot2TeleOp(this, bot);
 
         DriveTrain6547Realsense.INTERRUPT_TRAJECTORIES_WITH_GAMEPAD = true;
         telemetry.log().add("Initing Vuforia");
@@ -207,6 +210,8 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
             });
 
 
+            telemetry.addData("CONVEYOR AMPS: ", bot.conveyor.getCurrent(CurrentUnit.AMPS));
+            telemetry.addData("Intake AMPS:", bot.intake.getCurrent(CurrentUnit.AMPS));
             telemetry.addData("REALSENSE ANGLE (deg) ", Math.toDegrees(bot.getRawExternalHeading()));
             //telemetry.addData("IMU ANGLE (deg)", Math.toDegrees(bot.getRawIMUangle()));
             //telemetry.addData("ANALOG GYRO ANGLE (deg) ", bot.getAnalogGyroSensor().getAngle(AngleUnit.DEGREES));
@@ -215,7 +220,6 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
             telemetry.addData("CURRENT THROWER 0 VELO (rev/s):", bot.getThrowerVelocity(AngleUnit.DEGREES)[0]/360);
             //telemetry.addData("CURRENT THROWER 1 VELO (rev/s): ", bot.getThrowerVelocity(AngleUnit.DEGREES)[1]/360);
             telemetry.addData("Is launched: ", bot.isReadyToThrow());
-            telemetry.addData("Intake AMPS:", bot.intake.getCurrent(CurrentUnit.AMPS));
             telemetry.addData("Intake AMPS ALEART", bot.intake.getCurrentAlert(CurrentUnit.AMPS));
             telemetry.update();
             bot.update(); //updates robot's position
@@ -252,8 +256,8 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
             if (fieldRelative.output()) //if field relative is enabled
             {
                 double speed = Math.hypot(opMode.gamepad1.left_stick_x, opMode.gamepad1.left_stick_y); //get speed
-                double LeftStickAngle = Math.atan2(-opMode.gamepad1.left_stick_y, opMode.gamepad1.left_stick_x) - Math.PI / 4; //get angle
-                double rightX = opMode.gamepad1.right_stick_x * 2; //rotation.  Multipled by 2 to make rotation faster and smoother
+                double LeftStickAngle = Math.atan2(opMode.gamepad1.left_stick_y, -opMode.gamepad1.left_stick_x) - Math.PI / 4; //get angle
+                double rightX = -opMode.gamepad1.right_stick_x * 2; //rotation.  Multipled by 2 to make rotation faster and smoother
                 rightX *= .5; //half rotation value for better turning
                 //offset the angle by the angle of the robot to make it field relative
                 leftFrontPower = speed * Math.cos(LeftStickAngle - robotAngle) + rightX;
@@ -323,10 +327,13 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
             bot.mode = DriveTrain6547Realsense.Mode.IDLE;
         }
 
-        if (opMode.gamepad2.a) {
+        if (bot.a2.onPress()) {
             bot.launchRing();
-            RobotLog.v("Thrower motor 0 VELO when launched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
-        } else bot.openIndexer();
+           // RobotLog.v("Thrower motor 0 VELO when launched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+        }
+        if (bot.a2.onRelease()) {
+            bot.stopLaunch();
+        }
 
         if (bot.b2.onPress()) grab.toggle();
         if (bot.y2.onPress()) lowerWobvator.toggle();
@@ -339,27 +346,41 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
             bot.lowerWobvator();
         } else bot.raiseWobvator();
 
-        if (bot.leftTrigger2.onPress() && !isIntaking) {
-            bot.intake();
+        if (bot.leftTrigger2.onPress() && !isIntaking && !bot.isLaunching()) {
+            bot.outtake();
+            //bot.conveyor.setPower(CONVEYOR_SPEED);
+            bot.conveyor.setPower(0);
             isIntaking = true;
             isOuttaking = false;
-        } else if (bot.leftTrigger2.onPress() && isIntaking) {
+        } else if (bot.leftTrigger2.onPress() && isIntaking && !bot.isLaunching()) {
             bot.stopIntake();
+            //bot.conveyor.setPower(0);
             isIntaking = false;
             isOuttaking = false;
         }
 
         if (bot.rightTrigger2.onPress() && !isOuttaking) {
-            bot.outtake();
+            bot.intake();
+           // bot.conveyor.setPower(CONVEYOR_SPEED);
             isOuttaking = true;
             isIntaking = false;
-        } else if (bot.rightTrigger2.onPress() && isOuttaking) {
+        } else if (bot.rightTrigger2.onPress() && isOuttaking && !bot.isLaunching()) {
             bot.stopIntake();
+            //bot.conveyor.setPower(0);
             isIntaking = false;
             isOuttaking = false;
         }
 
+        if (bot.isRingAtConveyor()) {
+            bot.loadRingInConveyor();
+        }
+
+        if (bot.rightBumper2.isPressed()) {
+            bot.conveyor.setPower(-1);
+        }
+
         if (bot.dpadUp2.onPress()) {
+            bot.conveyor.setPower(0);
             bot.stopIntake();
         }
 

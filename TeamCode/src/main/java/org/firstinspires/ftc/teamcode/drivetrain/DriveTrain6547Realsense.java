@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.drivetrain;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -33,9 +35,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.ReadWriteFile;
@@ -184,6 +188,8 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
     public AnalogGyroSensor gyroSensor;
 
+    private VoltageSensor batteryVoltageSensor;
+
     /**
      * Robot lights, located on the bottom of the robot
      */
@@ -273,23 +279,23 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     private boolean messageDisplayed = false;
 
 
+    public DriveTrain6547Realsense(OpMode opMode, boolean initRobot) {
+        super(kV, kA, kStatic, TRACK_WIDTH, WHEEL_BASE, LATERAL_MULTIPLIER);
+        USE_REALSENSE = true;
+        this.opMode = opMode;
+        if (initRobot) initRobot();
+    }
     public DriveTrain6547Realsense(OpMode opMode) {
         super(kV, kA, kStatic, TRACK_WIDTH, WHEEL_BASE, LATERAL_MULTIPLIER);
         USE_REALSENSE = true;
         this.opMode = opMode;
         initRobot();
     }
-    public DriveTrain6547Realsense(OpMode opMode, boolean resetRealsense) {
-        super(kV, kA, kStatic, TRACK_WIDTH, WHEEL_BASE, LATERAL_MULTIPLIER);
-        //this.USE_REALSENSE = USE_REALSENSE;
-        this.opMode = opMode;
-        initRobot(resetRealsense);
-    }
 
     /**
      * Called in constructor, initialises the bot
      */
-    private void initRobot() {initRobot(true);}
+    void initRobot() {initRobot(true);}
 
     /**
      * Called in constructor, initializes the bot
@@ -376,7 +382,6 @@ public class DriveTrain6547Realsense extends MecanumDrive {
                 RobotLog.setGlobalWarningMessage("FAILED TO INIT REALSENSE", "FAILED TO INIT REALSENSE");
             }
         }
-        // for instance, setLocalizer(new ThreeTrackingWheelLocalizer(...));
 
         initOtherHardware();
         initGamepads(); //for tele-op
@@ -391,19 +396,26 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         distanceSensorServoY = opMode.hardwareMap.get(Servo.class, "dServoY");
         distanceSensorY = opMode.hardwareMap.get(AnalogInput.class, "distanceY");
 
-        gyroSensor = new AnalogGyroSensor(opMode.hardwareMap.get(AnalogInput.class, "gyro"));
-        gyroSensor.zeroGyro();
+        //convert analog input into gyroSensor
+        AnalogInput tempGyroSensor = opMode.hardwareMap.get(AnalogInput.class, "gyro");
+        if (tempGyroSensor instanceof AnalogGyroSensor) {
+            gyroSensor = (AnalogGyroSensor) tempGyroSensor;
+        } else {
+            RobotLog.setGlobalWarningMessage("Analog gyro sensor not working");
+        }
 
         thrower1 = opMode.hardwareMap.get(DcMotorEx.class, "thrower");
         thrower2 = opMode.hardwareMap.get(DcMotorEx.class, "thrower2");
-        try {
-            intake = opMode.hardwareMap.get(DcMotorEx.class, "intake");
-        } catch (Exception e) {
-            RobotLog.setGlobalWarningMsg((RobotCoreException) e, "WILL CONTINUE AS NORMAL");
-        }
+        intake = opMode.hardwareMap.get(DcMotorEx.class, "intake");
 
         lights = opMode.hardwareMap.get(RevBlinkinLedDriver.class, "lights");
         lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK); //turn off lights
+
+//        try {
+//            batteryVoltageSensor = opMode.hardwareMap.voltageSensor.iterator().next();
+//        } catch (Exception e) {
+//            RobotLog.e("Can't find voltage sensor");
+//        }
 
         raiseWobvator();
         openIndexer();
@@ -411,6 +423,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 
         thrower1.setDirection(DcMotorSimple.Direction.REVERSE);
         thrower2.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        thrower1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        thrower2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         thrower1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         thrower1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -1626,6 +1641,31 @@ public class DriveTrain6547Realsense extends MecanumDrive {
                     coefficients.kP, coefficients.kI, coefficients.kD, getMotorVelocityF()
             ));
         }
+    }
+
+//    void setPIDCoefficients(DcMotorEx motor, PIDCoefficients coefficients) {
+//        if(!RUN_USING_ENCODER) {
+//            Log.i("config", "skipping RUE");
+//            return;
+//        }
+//
+//        Log.i("config", "setting custom gains");
+//        motor.setPIDCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
+//                coefficients.p, coefficients.i, coefficients.d, coefficients.f * 12 / batteryVoltageSensor.getVoltage()
+//        ));
+//    }
+
+
+    void setPIDFCoefficients(DcMotorEx motor, PIDFCoefficients coefficients) {
+        if(!RUN_USING_ENCODER) {
+            Log.i("config", "skipping RUE");
+            return;
+        }
+
+            Log.i("config", "setting custom gains");
+            motor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
+                    coefficients.p, coefficients.i, coefficients.d, coefficients.f * 12 / batteryVoltageSensor.getVoltage()
+            ));
     }
 
     @NonNull

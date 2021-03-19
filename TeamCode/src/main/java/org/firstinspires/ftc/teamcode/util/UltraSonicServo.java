@@ -15,8 +15,8 @@ public class UltraSonicServo {
     Servo servo;
     AnalogInput distanceSensor;
 
-    public static double posAtLowAngle = .5;
-    public static double posAtHighAngle = .85;
+    private double posAtLowAngle = .5;
+    private double posAtHighAngle = .85;
 
     public static double lowAngle = Math.toRadians(0);
     public static double highAngle = Math.toRadians(90);
@@ -24,6 +24,15 @@ public class UltraSonicServo {
     private Pose2d sensorPos;
 
     private double lastVoltage = 0;
+
+    public UltraSonicServo(Servo servo, AnalogInput distanceSensor, double posAtLowAngle, double posAtHighAngle, Pose2d sensorPos) {
+        this.servo = servo;
+        this.distanceSensor = distanceSensor;
+        this.posAtLowAngle = posAtLowAngle;
+        this.posAtHighAngle = posAtHighAngle;
+        this.sensorPos = sensorPos;
+    }
+
     public UltraSonicServo(Servo servo, AnalogInput distanceSensor, Pose2d sensorPos) {
         this.servo = servo;
         this.distanceSensor = distanceSensor;
@@ -36,6 +45,10 @@ public class UltraSonicServo {
         sensorPos = new Pose2d();
     }
 
+    /**
+     * Adjust the servo position so the ultrasonic is facing the wall.
+     * @param robotAngle Angle of the robot
+     */
     public void adjustServoBasedOnRotation(double robotAngle) {
         if (robotAngle > Math.toRadians(180)) robotAngle-=Math.toRadians(360);
         double ratio = -(lowAngle - robotAngle)/(highAngle - lowAngle);
@@ -115,7 +128,7 @@ public class UltraSonicServo {
     }
 
     public void setLowAngle(double lowAngle) {
-        this.lowAngle = lowAngle;
+        UltraSonicServo.lowAngle = lowAngle;
     }
 
     public double getHighAngle() {
@@ -123,6 +136,6 @@ public class UltraSonicServo {
     }
 
     public void setHighAngle(double highAngle) {
-        this.highAngle = highAngle;
+        UltraSonicServo.highAngle = highAngle;
     }
 }

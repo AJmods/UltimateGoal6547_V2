@@ -12,10 +12,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
 
 @TeleOp
 @Config
-@Disabled
 public class TestVelo extends LinearOpMode {
     public static double revPerSec = 1;
     public static double minLaunchAMPS = 3;
@@ -37,8 +37,10 @@ public class TestVelo extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
+
+        DriveTrain6547Realsense bot = new DriveTrain6547Realsense(this);
         motor = hardwareMap.get(DcMotorEx.class, "thrower");
-        motor2 = hardwareMap.get(DcMotorEx.class, "thrower1");
+        motor2 = hardwareMap.get(DcMotorEx.class, "thrower2");
 
         motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -56,6 +58,10 @@ public class TestVelo extends LinearOpMode {
             motor2.setVelocity(revPerSec*360, AngleUnit.DEGREES);
 
             launched = motor.getCurrent(CurrentUnit.AMPS) > minLaunchAMPS;
+
+            if (gamepad1.a) {
+                bot.launchRing();
+            } else bot.openIndexer();
 
             telemetry.addData("LAUNCHED", launched);
             telemetry.addData("Target V: ", vTicks);

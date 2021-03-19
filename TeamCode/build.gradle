@@ -51,5 +51,7 @@ dependencies {
     implementation 'org.openftc:easyopencv:1.4.1'
 
     implementation 'com.jakewharton:process-phoenix:2.0.0'
+    implementation "com.noahbres.jotai:jotai:1.0.2"
+
 
 }
