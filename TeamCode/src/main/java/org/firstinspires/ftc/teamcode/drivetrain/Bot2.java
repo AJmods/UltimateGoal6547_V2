@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.drivetrain;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -15,9 +17,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.util.PID.VelocityPIDFController;
 import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 
+@Config
 public class Bot2 extends DriveTrain6547Realsense {
 
-    public static double CONVEYOR_TARGET_POS = 900;
+    public static double CONVEYOR_TARGET_POS = 700;
 
     public static PIDCoefficients X_PID = new PIDCoefficients(3, 0, 0);
     public static PIDCoefficients Y_PID = new PIDCoefficients(4, 0, 0);
@@ -47,6 +50,7 @@ public class Bot2 extends DriveTrain6547Realsense {
 
     public DcMotorEx conveyor;
     private ColorSensor colorSensor;
+    public Servo rightArm;
 
     private OpMode opMode;
 
@@ -69,9 +73,16 @@ public class Bot2 extends DriveTrain6547Realsense {
         conveyor = opMode.hardwareMap.get(DcMotorEx.class, "conveyor");
         conveyor.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        rightArm = opMode.hardwareMap.get(Servo.class, "rightArm");
+
         colorSensor = opMode.hardwareMap.get(ColorSensor.class, "color2");
 
         //conveyor.setPower(1);
+
+
+        raiseWobvator();
+        openIndexer();
+        grabWobbleGoal();
     }
 
     private void initThrowerMotors() {
@@ -134,6 +145,13 @@ public class Bot2 extends DriveTrain6547Realsense {
 
     public boolean isRingAtConveyor() {
         return colorSensor.red() > 16;
+    }
+
+    public void lowerArms() {
+        //rightArm.setPosition(0);
+    }
+    public void raiseArms() {
+        //rightArm.setPosition(1);
     }
 
 //    @Override
@@ -214,32 +232,32 @@ public class Bot2 extends DriveTrain6547Realsense {
 
     @Override
     public void grabWobbleGoal() {
-        super.grabWobbleGoal();
+        wobbleGoalGrabber.setPosition(.57);
     }
 
     @Override
     public void openWobbleGrabberHalfway() {
-        super.openWobbleGrabberHalfway();
+        wobbleGoalElevator.setPosition(.45);
     }
 
     @Override
     public void releaseWobbleGoal() {
-        super.releaseWobbleGoal();
+       wobbleGoalGrabber.setPosition(.3);
     }
 
     @Override
     public void lowerWobvator() {
-        super.lowerWobvator();
+        wobbleGoalElevator.setPosition(.14);
     }
 
     @Override
     public void lowerWobvatorByNotAllTheWay() {
-        super.lowerWobvatorByNotAllTheWay();
+        wobbleGoalElevator.setPosition(.18);
     }
 
     @Override
     public void raiseWobvator() {
-        super.raiseWobvator();
+        wobbleGoalElevator.setPosition(.33);
     }
 
     public static double getMotorVelocityF() {

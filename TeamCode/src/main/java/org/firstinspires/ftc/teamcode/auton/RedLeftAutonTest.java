@@ -45,6 +45,11 @@ public class RedLeftAutonTest extends LinearOpMode {
         T265LocalizerRR.slamra.setPose(new com.arcrobotics.ftclib.geometry.Pose2d(new Translation2d(startPos.getX(), startPos.getY()), new Rotation2d(startPos.getHeading())));
         bot.setPoseEstimate(startPos);
 
+        //init bot
+        bot.raiseWobvator();
+        bot.openIndexer();
+        bot.grabWobbleGoal();
+
         bot.initOpenCV();
         bot.startOpenCV();
 

@@ -91,6 +91,11 @@ public class LeagueChampionshipTeleop extends LinearOpMode {
 
         LeagueChampionshipTeleop leagueChampionshipTeleop = new LeagueChampionshipTeleop(this, bot);
 
+        //init bot
+        bot.raiseWobvator();
+        bot.openIndexer();
+        bot.grabWobbleGoal();
+
         DriveTrain6547Realsense.INTERRUPT_TRAJECTORIES_WITH_GAMEPAD = true;
         telemetry.log().add("Initing Vuforia");
         bot.initVufoira();

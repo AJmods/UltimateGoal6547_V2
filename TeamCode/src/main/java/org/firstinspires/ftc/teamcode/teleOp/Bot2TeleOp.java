@@ -7,6 +7,7 @@ import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.spartronics4915.lib.T265Camera;
 
@@ -28,6 +29,8 @@ import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
 @Config
 @TeleOp(name = "Bot 2 Tele-op", group = "_teleOp")
 public class Bot2TeleOp extends LinearOpMode {
+
+    public static double TIME_TO_CONVEY=.25;
 
     public static double RED_POWERSHOT_X1 = FieldConstants.RED_POWER_SHOT_1X;
     public static double RED_POWERSHOT_Y1 = FieldConstants.RED_POWER_SHOT_1Y;
@@ -78,6 +81,8 @@ public class Bot2TeleOp extends LinearOpMode {
     double speedModifier=1;
 
     ToggleBoolean TurnOnThrower = new ToggleBoolean(false);
+
+    private ElapsedTime conveyTime = new ElapsedTime();
 
     OpMode opMode;
 
@@ -385,6 +390,7 @@ public class Bot2TeleOp extends LinearOpMode {
         }
 
         if (bot.leftBumper2.onPress()) {
+            conveyTime.reset();
             TurnOnThrower.toggle();
         }
         if (bot.dpadDown2.isPressed()) {
@@ -395,8 +401,17 @@ public class Bot2TeleOp extends LinearOpMode {
         }
 
         if (TurnOnThrower.output() && !USE_CALCULATED_VELOCITY) {
-            bot.setThrowerVelocity(REV_PER_SEC * 360, AngleUnit.DEGREES);
-            bot.updateLightsBasedOnThrower();
+            if (conveyTime.seconds() > TIME_TO_CONVEY) {
+                if (bot.conveyor.getPower() < 0) {
+                    bot.stopConveyor();
+                    bot.stopIntake();
+                }
+                bot.setThrowerVelocity(REV_PER_SEC * 360, AngleUnit.DEGREES);
+                bot.updateLightsBasedOnThrower();
+            } else {
+                bot.conveyor.setPower(-1);
+                bot.outtake();
+            }
         } else if (TurnOnThrower.output() && USE_CALCULATED_VELOCITY) {
             bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(pos, AngleUnit.DEGREES)*VELO_MUTIPLIER, AngleUnit.DEGREES);
             bot.updateLightsBasedOnThrower();

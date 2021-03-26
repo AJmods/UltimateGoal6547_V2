@@ -417,9 +417,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
 //            RobotLog.e("Can't find voltage sensor");
 //        }
 
-        raiseWobvator();
-        openIndexer();
-        grabWobbleGoal();
+//
+//        raiseWobvator();
+//        openIndexer();
+//        grabWobbleGoal();
 
         thrower1.setDirection(DcMotorSimple.Direction.REVERSE);
         thrower2.setDirection(DcMotorSimple.Direction.REVERSE);

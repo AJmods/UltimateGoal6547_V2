@@ -26,6 +26,9 @@ public class ServoTuner extends LinearOpMode {
         while (opModeIsActive()) {
             wobbleGrabber.setPosition(WOB_GRABBER_POS);
             wobvator.setPosition(WOBVATOR_POS);
+
+            telemetry.addData("POS", WOB_GRABBER_POS);
+            telemetry.update();
         }
 
     }
