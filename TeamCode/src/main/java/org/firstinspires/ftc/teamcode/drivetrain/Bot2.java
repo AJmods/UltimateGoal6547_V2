@@ -51,6 +51,7 @@ public class Bot2 extends DriveTrain6547Realsense {
     public DcMotorEx conveyor;
     private ColorSensor colorSensor;
     public Servo rightArm;
+    public Servo leftArm;
 
     private OpMode opMode;
 
@@ -74,6 +75,7 @@ public class Bot2 extends DriveTrain6547Realsense {
         conveyor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         rightArm = opMode.hardwareMap.get(Servo.class, "rightArm");
+        leftArm = opMode.hardwareMap.get(Servo.class, "leftArm");
 
         colorSensor = opMode.hardwareMap.get(ColorSensor.class, "color2");
 
@@ -149,9 +151,11 @@ public class Bot2 extends DriveTrain6547Realsense {
 
     public void lowerArms() {
         //rightArm.setPosition(0);
+        //leftArm.setPosition(1);
     }
     public void raiseArms() {
         //rightArm.setPosition(1);
+        //leftArm.setPosition(0)
     }
 
 //    @Override
@@ -216,7 +220,7 @@ public class Bot2 extends DriveTrain6547Realsense {
     @Override
     public void launchRing() {
         conveyor.setPower(1);
-        intake();
+        //intake();
         isLaunching = true;
     }
 

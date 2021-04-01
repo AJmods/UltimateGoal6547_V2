@@ -46,7 +46,7 @@ public class Bot2TeleOp extends LinearOpMode {
     public static double PowerShot3Modifer = 1;
 
     public static boolean USE_CALCULATED_VELOCITY = false;
-    public static double REV_PER_SEC = 48;
+    public static double REV_PER_SEC = -48;
     public static double VELO_MUTIPLIER = 1;
     public static double TARGET_HEIGHT = FieldConstants.RED_GOAL_HEIGHT;
 
@@ -161,6 +161,8 @@ public class Bot2TeleOp extends LinearOpMode {
 
             bot.setPacketAction((packet, fieldOverlay) -> {
 
+                packet.addLine("Ready to Throw: " + bot.isReadyToThrow());
+
                 if (!USE_CALCULATED_VELOCITY) {
                    packet.addLine("USING USER-INPUTED VELOCITY");
                 } else {
@@ -215,6 +217,7 @@ public class Bot2TeleOp extends LinearOpMode {
             });
 
 
+            telemetry.addData("Ready to Throw", bot.isReadyToThrow());
             telemetry.addData("CONVEYOR AMPS: ", bot.conveyor.getCurrent(CurrentUnit.AMPS));
             telemetry.addData("Intake AMPS:", bot.intake.getCurrent(CurrentUnit.AMPS));
             telemetry.addData("REALSENSE ANGLE (deg) ", Math.toDegrees(bot.getRawExternalHeading()));
@@ -333,7 +336,7 @@ public class Bot2TeleOp extends LinearOpMode {
         }
 
         if (bot.a2.onPress()) {
-            bot.launchRing();
+           bot.launchRing();
            // RobotLog.v("Thrower motor 0 VELO when launched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
         }
         if (bot.a2.onRelease()) {
@@ -376,7 +379,7 @@ public class Bot2TeleOp extends LinearOpMode {
             isOuttaking = false;
         }
 
-        if (bot.isRingAtConveyor()) {
+        if (bot.isRingAtConveyor() && !bot.isLaunching()) {
             bot.loadRingInConveyor();
         }
 

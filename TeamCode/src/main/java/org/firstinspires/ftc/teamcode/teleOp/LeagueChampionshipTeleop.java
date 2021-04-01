@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -26,6 +27,7 @@ import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
  */
 @Config
 @TeleOp(name = "League Championship Tele-op", group = "_teleOp")
+@Disabled
 public class LeagueChampionshipTeleop extends LinearOpMode {
 
     public static double RED_POWERSHOT_X1 = FieldConstants.RED_POWER_SHOT_1X;
