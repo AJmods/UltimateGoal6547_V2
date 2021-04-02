@@ -428,10 +428,10 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         thrower1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         thrower2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        thrower1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        thrower1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        thrower2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        thrower2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        thrower1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        thrower1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        thrower2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        thrower2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     /**
@@ -858,6 +858,37 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         String[] nums = posString.split(",");
         Pose2d pos = new Pose2d(Double.parseDouble(nums[0]), Double.parseDouble(nums[1]), Double.parseDouble(nums[2]));
         return pos;
+    }
+
+    public void savePoseHistroy(List<Pose2d> poseHistory, List<Double> times) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < poseHistory.size(); i++) {
+            stringBuilder.append(poseHistory.get(i).getX()).append(",").append(poseHistory.get(i).getY()).append(",").append(poseHistory.get(i).getHeading()).append(",").append(times.get(i)).append("\n");
+            writeFile("poseHistory.txt", stringBuilder.toString());
+        }
+    }
+
+    public void savePoseHistroy(List<Pose2d> poseHistory) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Pose2d pose2d : poseHistory) {
+            stringBuilder.append(pose2d.getX()).append(",").append(pose2d.getY()).append(",").append(pose2d.getHeading()).append(",").append("\n");
+            writeFile("poseHistory.txt", stringBuilder.toString());
+        }
+    }
+
+    public List<Pose2d> readPoseHistory() {
+        String poseHistoryString = readFileString("poseHistory.txt");
+        String[] poses = poseHistoryString.split("\n");
+        List<Pose2d> poseHHistory = new ArrayList<>();
+        for (String pose : poses) {
+            String[] poseData = pose.split(",");
+            double x = Double.parseDouble(poseData[0]);
+            double y = Double.parseDouble(poseData[1]);
+            double heading = Double.parseDouble(poseData[2]);
+            Pose2d pose2d = new Pose2d(x, y, heading);
+            poseHHistory.add(pose2d);
+        }
+        return poseHHistory;
     }
     public TrajectoryBuilder trajectoryBuilder() {
         return new TrajectoryBuilder(getPoseEstimate(), constraints);
@@ -1738,6 +1769,11 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     public double getCurrentHeadingV() {
         return currentHeadingV;
     }
+
+    public List<Pose2d> getPoseHistory() {
+        return poseHistory;
+    }
+
 
     public void setPacketAction(PacketAction packetAction) {
         this.packetAction = packetAction;

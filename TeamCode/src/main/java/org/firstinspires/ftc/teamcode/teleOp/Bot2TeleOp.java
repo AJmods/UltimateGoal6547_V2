@@ -162,6 +162,7 @@ public class Bot2TeleOp extends LinearOpMode {
             bot.setPacketAction((packet, fieldOverlay) -> {
 
                 packet.addLine("Ready to Throw: " + bot.isReadyToThrow());
+                packet.addLine("Target Velocity: " + bot.getTargetVelocity());
 
                 if (!USE_CALCULATED_VELOCITY) {
                    packet.addLine("USING USER-INPUTED VELOCITY");
@@ -335,7 +336,7 @@ public class Bot2TeleOp extends LinearOpMode {
             bot.mode = DriveTrain6547Realsense.Mode.IDLE;
         }
 
-        if (bot.a2.onPress()) {
+        if (bot.a2.onPress() && bot.isReadyToThrow()) {
            bot.launchRing();
            // RobotLog.v("Thrower motor 0 VELO when launched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
         }
@@ -419,8 +420,7 @@ public class Bot2TeleOp extends LinearOpMode {
             bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(pos, AngleUnit.DEGREES)*VELO_MUTIPLIER, AngleUnit.DEGREES);
             bot.updateLightsBasedOnThrower();
         } else {
-            bot.thrower1.setPower(0);
-            bot.thrower2.setPower(0);
+            bot.setThrowerVelocity(0, AngleUnit.DEGREES);
             bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
         }
     }
