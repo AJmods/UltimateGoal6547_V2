@@ -313,7 +313,7 @@ public class Bot2TeleOp extends LinearOpMode {
         }
 
         if (opMode.gamepad1.right_stick_button && bot.mode == DriveTrain6547Realsense.Mode.IDLE) {
-            bot.followTrajectory(bot.trajectoryBuilder(false, DriveSpeeds.fast).lineToLinearHeading(new Pose2d(0,-39, Math.toRadians(0))).build());
+            bot.followTrajectory(bot.trajectoryBuilder(false, DriveSpeeds.fast).lineToLinearHeading(new Pose2d(0, -39, Math.toRadians(0))).build());
         }
 
         if (bot.leftTrigger1.onPress()) {
@@ -370,7 +370,7 @@ public class Bot2TeleOp extends LinearOpMode {
 
         if (bot.rightTrigger2.onPress() && !isOuttaking) {
             bot.intake();
-           // bot.conveyor.setPower(CONVEYOR_SPEED);
+            // bot.conveyor.setPower(CONVEYOR_SPEED);
             isOuttaking = true;
             isIntaking = false;
         } else if (bot.rightTrigger2.onPress() && isOuttaking && !bot.isLaunching()) {
@@ -378,6 +378,11 @@ public class Bot2TeleOp extends LinearOpMode {
             //bot.conveyor.setPower(0);
             isIntaking = false;
             isOuttaking = false;
+        }
+
+        if (bot.dpadUp2.onPress()) {
+            bot.conveyor.setPower(0);
+            bot.stopIntake();
         }
 
         if (bot.isRingAtConveyor() && !bot.isLaunching()) {
@@ -424,6 +429,55 @@ public class Bot2TeleOp extends LinearOpMode {
             bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
         }
     }
+    public void doThrower() {
+        if (bot.a2.onPress()) {
+            bot.launchRing();
+            // RobotLog.v("Thrower motor 0 VELO when launched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
+        }
+        if (bot.a2.onRelease()) {
+            bot.stopLaunch();
+        }
+        Pose2d pos = bot.getPoseEstimate();
+        if (bot.isRingAtConveyor()) {
+            bot.loadRingInConveyor();
+        }
+
+        if (bot.rightBumper2.isPressed()) {
+            bot.conveyor.setPower(-1);
+        }
+
+        if (bot.leftBumper2.onPress()) {
+            conveyTime.reset();
+            TurnOnThrower.toggle();
+        }
+        if (bot.dpadDown2.isPressed()) {
+            bot.setThrowerVelocity(20 * -360, AngleUnit.DEGREES);
+        }
+        else if (bot.dpadDown2.onRelease() && !TurnOnThrower.output()) {
+            bot.stopThrower();
+        }
+
+        if (TurnOnThrower.output() && !USE_CALCULATED_VELOCITY) {
+            if (conveyTime.seconds() > TIME_TO_CONVEY) {
+                if (bot.conveyor.getPower() < 0) {
+                    bot.stopConveyor();
+                    bot.stopIntake();
+                }
+                bot.setThrowerVelocity(REV_PER_SEC * 360, AngleUnit.DEGREES);
+                bot.updateLightsBasedOnThrower();
+            } else {
+                bot.conveyor.setPower(-1);
+                bot.outtake();
+            }
+        } else if (TurnOnThrower.output() && USE_CALCULATED_VELOCITY) {
+            bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(pos, AngleUnit.DEGREES)*VELO_MUTIPLIER, AngleUnit.DEGREES);
+            bot.updateLightsBasedOnThrower();
+        } else {
+            bot.thrower1.setPower(0);
+            bot.thrower2.setPower(0);
+            bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+        }
+    }
 
     /**
      * @param x gamepad stick X
@@ -441,7 +495,7 @@ public class Bot2TeleOp extends LinearOpMode {
     public void doRegularShots(Pose2d currentPos) {
         bot.stopIntake();
         double angleToTurnTo = bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), currentPos);
-        bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(new Pose2d(currentPos.getX(), currentPos.getY(), angleToTurnTo), AngleUnit.DEGREES) * ThrowerUtil.GOAL_CONSTANT, AngleUnit.DEGREES);
+        bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(new Pose2d(currentPos.getX(), currentPos.getY(), angleToTurnTo)) * ThrowerUtil.GOAL_CONSTANT, AngleUnit.DEGREES);
 
         bot.turnRelativeSync(angleToTurnTo);
         bot.turnRelativeSync(angleToTurnTo);

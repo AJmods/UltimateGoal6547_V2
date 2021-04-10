@@ -15,8 +15,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.util.FieldConstants;
 import org.firstinspires.ftc.teamcode.util.PID.VelocityPIDFController;
 import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
+
+import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS;
 
 @Config
 public class Bot2 extends DriveTrain6547Realsense {
@@ -69,6 +73,7 @@ public class Bot2 extends DriveTrain6547Realsense {
         DriveTrain6547Realsense.Y_PID = Y_PID;
         DriveTrain6547Realsense.HEADING_PID = HEADING_PID;
         opMode.telemetry.log().add("Initing Bot 2");
+
         initRobot();
         initBot2Hardware();
         initThrowerMotors();
@@ -164,14 +169,13 @@ public class Bot2 extends DriveTrain6547Realsense {
     }
     public void raiseArms() {
         //rightArm.setPosition(1);
-        //leftArm.setPosition(0)
     }
 
-    @Override
-    public void setThrowerVelocity(double ticksPerSecond) {
-        targetVelo = ticksPerSecond;
-       // updateThrower();
-    }
+    //    @Override
+//    public void setThrowerVelocity(double ticksPerSecond) {
+//        targetVelo = ticksPerSecond;
+//        updateThrower();
+//    }
 
     @Override
     public void setThrowerVelocity(double angularRate, AngleUnit angleUnit) {
@@ -197,22 +201,31 @@ public class Bot2 extends DriveTrain6547Realsense {
 
     @Override
     public double getThrowerVelocityFromPosition(Pose2d currentPos) {
-        return super.getThrowerVelocityFromPosition(currentPos);
+        //get distance based
+        double targetY = ThrowerUtil.getTargetY(currentPos, FieldConstants.RED_GOAL_X);
+        double dist = Math.hypot(currentPos.getX() - FieldConstants.RED_GOAL_X, currentPos.getY() - targetY);
+        double ticksPerSec = getThrowerVelocityFromPosition(dist);
+        return ticksPerSec;
     }
 
-    @Override
-    public double getThrowerVelocityFromPosition(Pose2d currentPos, AngleUnit angleUnit) {
-        return super.getThrowerVelocityFromPosition(currentPos, angleUnit);
-    }
-
-    @Override
-    public double getThrowerVelocityFromPosition(double dist, AngleUnit angleUnit) {
-        return super.getThrowerVelocityFromPosition(dist, angleUnit);
-    }
+//    @Override
+//    public double getThrowerVelocityFromPosition(Pose2d currentPos, AngleUnit angleUnit) {
+//        double targetY = ThrowerUtil.getTargetY(currentPos, FieldConstants.RED_GOAL_X);
+//        double dist = Math.hypot(currentPos.getX() - FieldConstants.RED_GOAL_X, currentPos.getY() - targetY);
+//        double unitsPerSec = getThrowerVelocityFromPosition(dist, angleUnit);
+//        RobotLog.v("TARGET Y: " + targetY + ", DIST: " + dist + ", UNITS PER SEC: " + unitsPerSec);
+//        return unitsPerSec;
+//    }
+//
+//    @Override
+//    public double getThrowerVelocityFromPosition(double dist, AngleUnit angleUnit) {
+//        return super.getThrowerVelocityFromPosition(dist, angleUnit);
+//    }
 
     @Override
     public double getThrowerVelocityFromPosition(double dist) {
-        return super.getThrowerVelocityFromPosition(dist);
+        double ticksPerSec = 35.8219*Math.pow(1.0036,dist);
+        return ticksPerSec;
     }
 
     @Override
@@ -252,35 +265,35 @@ public class Bot2 extends DriveTrain6547Realsense {
         //super.midIndexer();
     }
 
-    @Override
-    public void grabWobbleGoal() {
-        wobbleGoalGrabber.setPosition(.57);
-    }
-
-    @Override
-    public void openWobbleGrabberHalfway() {
-        wobbleGoalElevator.setPosition(.45);
-    }
-
-    @Override
-    public void releaseWobbleGoal() {
-       wobbleGoalGrabber.setPosition(.3);
-    }
-
-    @Override
-    public void lowerWobvator() {
-        wobbleGoalElevator.setPosition(.14);
-    }
-
-    @Override
-    public void lowerWobvatorByNotAllTheWay() {
-        wobbleGoalElevator.setPosition(.18);
-    }
-
-    @Override
-    public void raiseWobvator() {
-        wobbleGoalElevator.setPosition(.33);
-    }
+//    @Override
+//    public void grabWobbleGoal() {
+//        wobbleGoalGrabber.setPosition(.57);
+//    }
+//
+//    @Override
+//    public void openWobbleGrabberHalfway() {
+//        wobbleGoalElevator.setPosition(.45);
+//    }
+//
+//    @Override
+//    public void releaseWobbleGoal() {
+//       wobbleGoalGrabber.setPosition(.3);
+//    }
+//
+//    @Override
+//    public void lowerWobvator() {
+//        wobbleGoalElevator.setPosition(.14);
+//    }
+//
+//    @Override
+//    public void lowerWobvatorByNotAllTheWay() {
+//        wobbleGoalElevator.setPosition(.18);
+//    }
+//
+//    @Override
+//    public void raiseWobvator() {
+//        wobbleGoalElevator.setPosition(.33);
+//    }
 
     public static double getMotorVelocityF() {
         // see https://docs.google.com/document/d/1tyWrXDfMidwYyP_5H4mZyVgaEswhOC35gvdmP-V-5hA/edit#heading=h.61g9ixenznbx
@@ -293,6 +306,7 @@ public class Bot2 extends DriveTrain6547Realsense {
     public void stopLaunch() {
         isLaunching = false;
         stopConveyor();
+        stopIntake();
     }
 
     public double throwerTicksToRev(double ticks, DcMotorEx motor) {

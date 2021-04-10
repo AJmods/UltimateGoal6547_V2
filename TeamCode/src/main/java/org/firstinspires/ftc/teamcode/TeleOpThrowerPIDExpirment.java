@@ -1,34 +1,38 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.drivetrain.Bot2;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveSpeeds;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
 import org.firstinspires.ftc.teamcode.teleOp.Bot2TeleOp;
+import org.firstinspires.ftc.teamcode.util.FieldConstants;
 import org.firstinspires.ftc.teamcode.util.PID.TuningController;
 import org.firstinspires.ftc.teamcode.util.PID.VelocityPIDFController;
+import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 import org.firstinspires.ftc.teamcode.util.homar.Button;
 import org.firstinspires.ftc.teamcode.util.homar.ToggleBoolean;
 
+import static org.firstinspires.ftc.teamcode.testing.throwing.ThrowerExperiment.TARGET_HEIGHT;
+
 @Config
 @TeleOp(group = "_teleOp")
-public class TeleOpThrowerPID extends LinearOpMode {
+public class TeleOpThrowerPIDExpirment extends LinearOpMode {
 
+    public static boolean move = false;
+    public static double X=0;
+    public static double Y=0;
+    public static double Heading=0;
     public static double TIME_TO_CONVEY = .25;
     // Copy your PID Coefficients here
     public static PIDCoefficients MOTOR_VELO_PID = new PIDCoefficients(0.001, 0, 0.0001);
@@ -39,7 +43,7 @@ public class TeleOpThrowerPID extends LinearOpMode {
     public static double kA = 0.0005;
     public static double kStatic = 0;
 
-    public static double targetTicksPerSec=1200;
+    public static double targetTicksPerSec=1400;
     public static double leeway=28;
 
     // Timer for calculating desired acceleration
@@ -103,6 +107,8 @@ public class TeleOpThrowerPID extends LinearOpMode {
 
         while (!isStopRequested()) {
             ///// Run the velocity controller ////
+
+            Pose2d pos = bot.getPoseEstimate();
             bot.updateGamepads();
             rightBumpeer2.input(gamepad2.right_bumper);
 
@@ -112,85 +118,77 @@ public class TeleOpThrowerPID extends LinearOpMode {
                 telemetry.log().add("thing pressed");
             }
 
-            if (bot.a2.isPressed()) {
-                if (isReadyToThrow()) bot.launchRing();
-                else bot.stopConveyor();
-            } else if (bot.a2.onRelease()){
-                bot.stopLaunch();
+            if (gamepad1.a && isReadyToThrow()) {
+                bot.conveyor.setPower(1);
+                bot.intake();
+            } else {
+                bot.conveyor.setPower(0);
+                bot.stopIntake();
             }
 
-            if (turnOnThrower.output() && conveyTime.seconds() > TIME_TO_CONVEY) {
-                updateThrower(targetTicksPerSec);
-                if (!bot.isLaunching()) bot.stopConveyor();
-            } else if (turnOnThrower.output() && conveyTime.seconds() < TIME_TO_CONVEY){
-                bot.conveyor.setPower(-1);
-                updateThrower(0);
-            } else {
-                updateThrower(0);
-            }
+            updateThrower(targetTicksPerSec);
 
             //updateThrower(targetTicksPerSec);
 
-            if (!turnOnThrower.output() && !bot.isLaunching() && bot.isRingAtConveyor()) {
-                bot.loadRingInConveyor();
-            } else if (!turnOnThrower.output() && !bot.isLaunching() && !bot.isRingAtConveyor()) {
-                bot.stopConveyor();
-                //bot.stopIntake();
+            if (bot.mode == DriveTrain6547Realsense.Mode.IDLE && move) {
+                try {
+                    bot.followTrajectory(bot.trajectoryBuilder(false, DriveSpeeds.slow).lineToLinearHeading(new Pose2d(X, Y, Heading)).build());
+                } catch (Exception e){
+
+                }
             }
-            bot2TeleOp.doTeleOp();
-            bot.update();
-            // Target velocity in ticks per second
 
-            // Update the controller and set the power for each motor
-//            if (targetVelo != 0 && bot2TeleOp.conveyTime.seconds() > Bot2TeleOp.TIME_TO_CONVEY) {
-//                double power = -veloController.update(motorPos, motorVelo);
-//                myMotor1.setPower(power);
-//                myMotor2.setPower(power);
-//                if (bot.conveyor.getPower() < 0) bot.stopConveyor();
-//            } else {
-//                myMotor1.setPower(0);
-//                myMotor2.setPower(0);
-//            }
+            boolean isValidAngle = ThrowerUtil.isValidAngle(pos.getX(), pos.getY(), pos.getHeading());
 
-//            if (bot2TeleOp.conveyTime.seconds() > Bot2TeleOp.TIME_TO_CONVEY) {
-//                if (bot.conveyor.getPower() < 0) {
-//                    bot.stopConveyor();
-//                    bot.stopIntake();
-//                }
-//                double power = -veloController.update(motorPos, motorVelo);
-//                myMotor1.setPower(power);
-//                myMotor2.setPower(power);
-//                bot.updateLightsBasedOnThrower();
-//            } else {
-//                bot.conveyor.setPower(-1);
-//                bot.outtake();
-//            }
+            double targetY = ThrowerUtil.getTargetY(pos, FieldConstants.RED_GOAL_X);
+            double deltaX = pos.getX() - FieldConstants.RED_GOAL_X;
+            double deltaY = pos.getY() - targetY;
+            double dist = Math.hypot(deltaX, deltaY);
+            double vi = ThrowerUtil.getVi(0, ThrowerUtil.INITIAL_HEIGHT, dist, TARGET_HEIGHT, ThrowerUtil.INITIAL_ANGLE);
+            double targetRev = vi/ ThrowerUtil.inchesPerRev;
 
+            bot.setPacketAction((packet, fieldOverlay) -> {
 
+                packet.addLine("DISTANCE: " + dist);
+                packet.addLine("TARGET ticks/S: " + targetTicksPerSec);
 
-//            if (gamepad1.a && isReadyToThrow()) {
-//                intake();
-//                forwardConveyBelt();
-//            } else if (gamepad1.b) {
-//                outtake();
-//                backConveyVelt();
-//            } else {
-//                stopIntake();
-//                stopConveyVelt();
-//            }
+                //add data.
+                packet.addLine("Theoretical Ring Velocity: " + targetRev + " ticks/s");
 
+                packet.addLine("INITIAL ANGLE: " + ThrowerUtil.INITIAL_ANGLE);
+                packet.addLine("INITIAL HEIGHT: " + ThrowerUtil.INITIAL_HEIGHT);
+                //draw robot
+                //  DashboardUtil.drawRobot(fieldOverlay, pos);
+                //draw launcherPos
+                //draw line in the direction of where the robot is facing
+                //DashboardUtil.drawLine(fieldOverlay, pos);
+
+                //draw target robot angle range
+                fieldOverlay.setStroke("#000000");
+                fieldOverlay.strokeLine(pos.getX(), pos.getY(), FieldConstants.RED_GOAL_X, ThrowerUtil.MIN_Y);
+                fieldOverlay.strokeLine(pos.getX(), pos.getY(), FieldConstants.RED_GOAL_X, ThrowerUtil.MAX_Y);
+
+                //mark middle launch goal with circle
+                fieldOverlay.strokeCircle(FieldConstants.RED_GOAL_X, targetY, 1);
+
+                //draw robot launch goal position
+                fieldOverlay.setStrokeWidth(3);
+                fieldOverlay.setStroke("FF0000");
+                fieldOverlay.strokeLine(FieldConstants.RED_GOAL_X, ThrowerUtil.MIN_Y, FieldConstants.RED_GOAL_X, ThrowerUtil.MAX_Y);
+
+            });
+
+            telemetry.addData("Target VELO: ", targetTicksPerSec);
+            telemetry.addData("CURRENT THROWER 0 VELO:", bot.getThrowerVelocity(AngleUnit.DEGREES)[0]/360);
+            telemetry.addData("CURRENT THROWER 1 VELO: ", bot.getThrowerVelocity(AngleUnit.DEGREES)[1]/360);
+            telemetry.addData("IS LAUNCHED: ", bot.isReadyToThrow());
             telemetry.addData("sees Ring", bot.isRingAtConveyor());
             telemetry.addData("is thrower on", turnOnThrower.output());
             telemetry.addData("IS READY TO THROW", isReadyToThrow());
-            telemetry.addData("RPM", myMotor1.getVelocity(AngleUnit.DEGREES)/360);
-            telemetry.addData("Target Velocity", targetTicksPerSec);
-            telemetry.addData("Thrower Velocity 1", myMotor1.getVelocity());
-            telemetry.addData("Thrower Velocity 2", myMotor2.getVelocity());
-            telemetry.addData("current pos:", myMotor1.getCurrentPosition());
-            telemetry.addData("upperBound", TuningController.rpmToTicksPerSecond(TuningController.TESTING_MAX_SPEED * 1.15));
-            telemetry.addData("lowerBound", 0);
             telemetry.update();
 
+            bot.update(); //updates robot's position
+            bot.updateLightsBasedOnThrower();
             // Do your opmode stuff
         }
     }

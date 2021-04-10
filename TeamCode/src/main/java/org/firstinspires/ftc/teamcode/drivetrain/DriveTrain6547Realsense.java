@@ -224,7 +224,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
      * Robot's thrower target velocity.
      */
     double targetVelocity = 0;
-    double leewayVelo = 360;
+    double leewayVelo = 28;
 
 
     //Vuforia Stuff
@@ -370,8 +370,11 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         }
 
        // Reverse motors
-        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
+//        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+//        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
         //set the Realsense as the localizer
         if (USE_REALSENSE) {
@@ -1257,6 +1260,8 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         turnRelativeSync(angleToTurnTo);
     }
 
+
+
     /**
      * Sets both of the throwing motors to a desired ticks per second.
      * @param ticksPerSecond ticks per second to set the motor
@@ -1332,7 +1337,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
      * @return determines if the thrower is at the targetVelocity.  Must use degrees at the moment
      */
     public boolean isReadyToThrow() {
-        double[] velocities = getThrowerVelocity(AngleUnit.DEGREES);
+        double[] velocities = getThrowerVelocity();
         double minVelo = targetVelocity - leewayVelo;
         double maxVelo = targetVelocity + leewayVelo;
         boolean isMotor0AtTarget = velocities[0] > minVelo && velocities[0] < maxVelo;
@@ -1631,6 +1636,9 @@ public class DriveTrain6547Realsense extends MecanumDrive {
      */
     public double getTargetVelocity() {
         return targetVelocity;
+    }
+    public void setTargetVelocity(double targetVelocity) {
+        this.targetVelocity = targetVelocity;
     }
     public void runAtAllTimes() //anything in here runs at all times during auton because this method is ran during roadRunner's state machine
     {
