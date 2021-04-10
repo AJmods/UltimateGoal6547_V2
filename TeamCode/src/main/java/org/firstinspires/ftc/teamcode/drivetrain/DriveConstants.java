@@ -32,14 +32,14 @@ public class DriveConstants {
    // private static final MotorConfigurationType MOTOR_CONFIG =
      //       MotorConfigurationType.getMotorType(GoBILDA1150RPM.class);
 
-    public static final double TICKS_PER_REV = 145.6;
-    public static final double MAX_RPM = 1150;
+    public static final double TICKS_PER_REV = 384.5;
+    public static final double MAX_RPM = 435;
     /*
      * Set the first flag appropriately. If using the built-in motor velocity PID, update
      * MOTOR_VELO_PID with the tuned coefficients from DriveVelocityPIDTuner.
      */
     public static final boolean RUN_USING_ENCODER = true;
-    public static final PIDCoefficients MOTOR_VELO_PID = new PIDCoefficients(20,0,10);
+    public static final PIDCoefficients MOTOR_VELO_PID = new PIDCoefficients(4,0,0);
 
     /*
      * These are physical constants that can be determined from your robot (including the track
@@ -50,7 +50,7 @@ public class DriveConstants {
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
     public static double WHEEL_RADIUS = 2; //1.9685; //2 in
-    public static double GEAR_RATIO = .345;//.5 //.345 // output (wheel) speed / input (motor) speed
+    public static double GEAR_RATIO = 1;//.5 //.345 // output (wheel) speed / input (motor) speed
     public static double TRACK_WIDTH = 30; //15; //9.7;//28 //14;
 
     /*
@@ -59,7 +59,7 @@ public class DriveConstants {
      * motor encoders or have elected not to use them for velocity control, these values should be
      * empirically tuned.
      */
-    public static double kV =.016;// 0.01465;//0.01175;//1.0 / rpmToVelocity(1150);
+    public static double kV =.0135;// 0.01465;//0.01175;//1.0 / rpmToVelocity(1150);
     public static double kA = 0; //0
     public static double kStatic = 0; //0
     public static double WHEEL_BASE = 0;

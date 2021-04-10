@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -20,8 +21,10 @@ import org.firstinspires.ftc.teamcode.drivetrain.Bot2;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveSpeeds;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
 import org.firstinspires.ftc.teamcode.teleOp.Bot2TeleOp;
+import org.firstinspires.ftc.teamcode.util.FieldConstants;
 import org.firstinspires.ftc.teamcode.util.PID.TuningController;
 import org.firstinspires.ftc.teamcode.util.PID.VelocityPIDFController;
+import org.firstinspires.ftc.teamcode.util.ThrowerUtil;
 import org.firstinspires.ftc.teamcode.util.homar.Button;
 import org.firstinspires.ftc.teamcode.util.homar.ToggleBoolean;
 
@@ -39,7 +42,7 @@ public class TeleOpThrowerPID extends LinearOpMode {
     public static double kA = 0.0005;
     public static double kStatic = 0;
 
-    public static double targetTicksPerSec=1200;
+    public static double targetTicksPerSec=1400;
     public static double leeway=28;
 
     // Timer for calculating desired acceleration
@@ -103,10 +106,12 @@ public class TeleOpThrowerPID extends LinearOpMode {
 
         while (!isStopRequested()) {
             ///// Run the velocity controller ////
+
+            Pose2d robotPos = bot.getPoseEstimate();
             bot.updateGamepads();
             rightBumpeer2.input(gamepad2.right_bumper);
 
-            if (rightBumpeer2.onPress()) {
+            if (bot.rightBumper2.onPress()) {
                 turnOnThrower.toggle();
                 conveyTime.reset();
                 telemetry.log().add("thing pressed");
@@ -131,11 +136,15 @@ public class TeleOpThrowerPID extends LinearOpMode {
 
             //updateThrower(targetTicksPerSec);
 
-            if (!turnOnThrower.output() && !bot.isLaunching() && bot.isRingAtConveyor()) {
-                bot.loadRingInConveyor();
-            } else if (!turnOnThrower.output() && !bot.isLaunching() && !bot.isRingAtConveyor()) {
-                bot.stopConveyor();
-                //bot.stopIntake();
+//            if (!turnOnThrower.output() && !bot.isLaunching() && bot.isRingAtConveyor()) {
+//                bot.loadRingInConveyor();
+//            } else if (!turnOnThrower.output() && !bot.isLaunching() && !bot.isRingAtConveyor()) {
+//                bot.stopConveyor();
+//                //bot.stopIntake();
+//            }
+            if (bot.dpadDown1.onPress()) {
+                doRegularShots(robotPos);
+                bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
             }
             bot2TeleOp.doTeleOp();
             bot.update();
@@ -219,6 +228,39 @@ public class TeleOpThrowerPID extends LinearOpMode {
         }
 
 
+    }
+
+    public void doRegularShots() {
+        doRegularShots(bot.getPoseEstimate());
+    }
+    public void doRegularShots(Pose2d robotPos) {
+        bot.stopIntake();
+        double angleToTurnTo = bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_GOAL_X, FieldConstants.RED_GOAL_Y), robotPos);
+        //bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(new Pose2d(robotPos.getX(), robotPos.getY(), angleToTurnTo)) * ThrowerUtil.GOAL_CONSTANT, AngleUnit.DEGREES);
+
+        bot.turnRelative(angleToTurnTo);
+        while (bot.mode!= DriveTrain6547Realsense.Mode.IDLE) {
+            bot.update();
+        }
+        bot.turnRelative(angleToTurnTo);
+        while (bot.mode!= DriveTrain6547Realsense.Mode.IDLE) {
+            bot.update();
+        }
+        //bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(currentPos, AngleUnit.DEGREES) * VELO_MUTIPLIER, AngleUnit.DEGREES);
+
+        RobotLog.v("STARTING TO DO REGLUAR SHOTS");
+        for (int i = 0; i < 3 && !bot.isStickMoved(gamepad1.left_stick_x, gamepad1.left_stick_y); i++) {
+            while (!isReadyToThrow() && !bot.isStickMoved(gamepad1.left_stick_x, gamepad1.left_stick_y)) {
+                bot.updateThrower();
+                bot.updateLightsBasedOnThrower();
+            }
+            bot.launchRing();
+            RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity()[0] / 360) + "REV/s");
+            if (!bot.isStickMoved(gamepad1.left_stick_x, gamepad1.left_stick_y)) sleep(100);
+        }
+
+        updateThrower(0);
+        turnOnThrower.input(false);
     }
 
     public void intake() {

@@ -265,35 +265,35 @@ public class Bot2 extends DriveTrain6547Realsense {
         //super.midIndexer();
     }
 
-//    @Override
-//    public void grabWobbleGoal() {
-//        wobbleGoalGrabber.setPosition(.57);
-//    }
-//
-//    @Override
-//    public void openWobbleGrabberHalfway() {
-//        wobbleGoalElevator.setPosition(.45);
-//    }
-//
-//    @Override
-//    public void releaseWobbleGoal() {
-//       wobbleGoalGrabber.setPosition(.3);
-//    }
-//
-//    @Override
-//    public void lowerWobvator() {
-//        wobbleGoalElevator.setPosition(.14);
-//    }
-//
-//    @Override
-//    public void lowerWobvatorByNotAllTheWay() {
-//        wobbleGoalElevator.setPosition(.18);
-//    }
-//
-//    @Override
-//    public void raiseWobvator() {
-//        wobbleGoalElevator.setPosition(.33);
-//    }
+    @Override
+    public void grabWobbleGoal() {
+        wobbleGoalGrabber.setPosition(.1);
+    }
+
+    @Override
+    public void openWobbleGrabberHalfway() {
+        wobbleGoalGrabber.setPosition(.5);
+    }
+
+    @Override
+    public void releaseWobbleGoal() {
+       wobbleGoalGrabber.setPosition(.7);
+    }
+
+    @Override
+    public void lowerWobvator() {
+        wobbleGoalElevator.setPosition(.3);
+    }
+
+    @Override
+    public void lowerWobvatorByNotAllTheWay() {
+        wobbleGoalElevator.setPosition(.4);
+    }
+
+    @Override
+    public void raiseWobvator() {
+        wobbleGoalElevator.setPosition(.7);
+    }
 
     public static double getMotorVelocityF() {
         // see https://docs.google.com/document/d/1tyWrXDfMidwYyP_5H4mZyVgaEswhOC35gvdmP-V-5hA/edit#heading=h.61g9ixenznbx

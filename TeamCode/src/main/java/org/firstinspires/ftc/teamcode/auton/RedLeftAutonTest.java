@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.drivetrain.Bot2;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
 import org.firstinspires.ftc.teamcode.drivetrain.DriveSpeeds;
 import org.firstinspires.ftc.teamcode.drivetrain.localizer.T265LocalizerRR;
@@ -29,7 +30,7 @@ import org.firstinspires.ftc.teamcode.util.roadrunner.DashboardUtil;
 @Autonomous(name = "Red Left Auton", group = "test")
 public class RedLeftAutonTest extends LinearOpMode {
 
-    DriveTrain6547Realsense bot; //the robot
+    Bot2 bot; //the robot
 
     //this defaults to no rings detected
     openCvPipeLines.RingCount ringCount = openCvPipeLines.RingCount.NONE;
@@ -41,7 +42,7 @@ public class RedLeftAutonTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        bot = new DriveTrain6547Realsense(this);
+        bot = new Bot2(this);
         T265LocalizerRR.slamra.setPose(new com.arcrobotics.ftclib.geometry.Pose2d(new Translation2d(startPos.getX(), startPos.getY()), new Rotation2d(startPos.getHeading())));
         bot.setPoseEstimate(startPos);
 
@@ -99,7 +100,7 @@ public class RedLeftAutonTest extends LinearOpMode {
 
         //drive to middle, and face first power shot goal, prepare to launch.
         bot.followTrajectorySync(bot.trajectoryBuilder().lineTo(launchPos).build());
-        setThrowerToTarget(bot.getPoseEstimate());
+       // setThrowerToTarget(bot.getPoseEstimate());
         sleep(500);
 
         telemetry.log().add("Drive to PowerShot");
@@ -109,42 +110,42 @@ public class RedLeftAutonTest extends LinearOpMode {
         bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
         bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_3X, FieldConstants.RED_POWER_SHOT_3Y), bot.getPoseEstimate()));
         //throw ring
-        bot.setThrowerVelocity(bot.getThrowerVelocityFromPositionPowerShot(bot.getDistanceFromPowerShot(bot.redPowerShots[0], bot.getPoseEstimate()), AngleUnit.DEGREES), AngleUnit.DEGREES);
+        bot.setThrowerVelocity(-bot.getThrowerVelocityFromPositionPowerShot(bot.getDistanceFromPowerShot(bot.redPowerShots[0], bot.getPoseEstimate()), AngleUnit.DEGREES), AngleUnit.DEGREES);
         //setThrowerToTarget(bot.getPoseEstimate());
         //wait for launch speed to be ready
-        while (!bot.isReadyToThrow() && opModeIsActive()) {bot.updateLightsBasedOnThrower();}
+        //while (!bot.isReadyToThrow() && opModeIsActive()) {bot.updateLightsBasedOnThrower();}
         bot.launchRing();
         RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + " REV/s");
         sleep(750);
-        bot.openIndexer();
+        bot.stopLaunch();
         //prepare to throw next ring
         RobotLog.v("Launching Power Shot 2");
         bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
         bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_2X, FieldConstants.RED_POWER_SHOT_2Y), bot.getPoseEstimate()));
         //throw ring
-        bot.setThrowerVelocity(bot.getThrowerVelocityFromPositionPowerShot(bot.getDistanceFromPowerShot(bot.redPowerShots[1], bot.getPoseEstimate()), AngleUnit.DEGREES), AngleUnit.DEGREES);
+        bot.setThrowerVelocity(-bot.getThrowerVelocityFromPositionPowerShot(bot.getDistanceFromPowerShot(bot.redPowerShots[1], bot.getPoseEstimate()), AngleUnit.DEGREES), AngleUnit.DEGREES);
         //setThrowerToTarget(bot.getPoseEstimate());
         //wait for launch speed to be ready
         sleep(250);
-        while (!bot.isReadyToThrow() && opModeIsActive()) {bot.updateLightsBasedOnThrower();}
+        //while (!bot.isReadyToThrow() && opModeIsActive()) {bot.updateLightsBasedOnThrower();}
         bot.launchRing();
         RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + " REV/s");
         sleep(500);
-        bot.openIndexer();
+        bot.stopLaunch();
         //prepare to throw next ring
         RobotLog.v("Launching Power Shot 3");
         bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
         bot.turnRelativeSync(bot.turnTowardsAngle(new Vector2d(FieldConstants.RED_POWER_SHOT_1X, FieldConstants.RED_POWER_SHOT_1Y), bot.getPoseEstimate()));
         //throw ring
         //setThrowerToTarget(bot.getPoseEstimate());
-        bot.setThrowerVelocity(bot.getThrowerVelocityFromPositionPowerShot(bot.getDistanceFromPowerShot(bot.redPowerShots[2], bot.getPoseEstimate()), AngleUnit.DEGREES), AngleUnit.DEGREES);
+        bot.setThrowerVelocity(-bot.getThrowerVelocityFromPositionPowerShot(bot.getDistanceFromPowerShot(bot.redPowerShots[2], bot.getPoseEstimate()), AngleUnit.DEGREES), AngleUnit.DEGREES);
         //wait for launch speed to be ready
-        while (!bot.isReadyToThrow() && opModeIsActive()) {bot.updateLightsBasedOnThrower();}
+        //while (!bot.isReadyToThrow() && opModeIsActive()) {bot.updateLightsBasedOnThrower();}
         sleep(250);
         bot.launchRing();
         RobotLog.v("Thrower motor 0 VELO (when launched): " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + " REV/s");
         sleep(700);
-        bot.openIndexer();
+        bot.stopLaunch();
         //stop thrower
         bot.setThrowerVelocity(0);
 

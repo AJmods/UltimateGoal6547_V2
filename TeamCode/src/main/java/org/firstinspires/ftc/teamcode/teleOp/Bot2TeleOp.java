@@ -327,10 +327,10 @@ public class Bot2TeleOp extends LinearOpMode {
             }
             bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
         }
-        if (bot.dpadDown1.onPress()) {
-            doRegularShots(pos);
-            bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
-        }
+//        if (bot.dpadDown1.onPress()) {
+//            //doRegularShots(pos);
+//            bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+//        }
 
         if (isStickMoved(opMode.gamepad1.left_stick_x, opMode.gamepad1.left_stick_y) || isStickMoved(opMode.gamepad1.right_stick_x, opMode.gamepad1.right_stick_y)) {
             bot.mode = DriveTrain6547Realsense.Mode.IDLE;
@@ -344,12 +344,18 @@ public class Bot2TeleOp extends LinearOpMode {
             bot.stopLaunch();
         }
 
-        if (bot.b2.onPress()) grab.toggle();
+        if (bot.b2.onPress()) {
+            grab.toggle();
+            opMode.telemetry.log().add("B onPress");
+        }
         if (bot.y2.onPress()) lowerWobvator.toggle();
 
         if (grab.output()) {
+            opMode.telemetry.log().add("grabinggg");
             bot.grabWobbleGoal();
-        } else bot.openWobbleGrabberHalfway();
+        } else{
+            bot.openWobbleGrabberHalfway();
+        }
 
         if (lowerWobvator.output()) {
             bot.lowerWobvator();
@@ -357,12 +363,13 @@ public class Bot2TeleOp extends LinearOpMode {
 
         if (bot.leftTrigger2.onPress() && !isIntaking && !bot.isLaunching()) {
             bot.outtake();
+            bot.conveyor.setPower(-1);
             //bot.conveyor.setPower(CONVEYOR_SPEED);
-            bot.conveyor.setPower(0);
             isIntaking = true;
             isOuttaking = false;
         } else if (bot.leftTrigger2.onPress() && isIntaking && !bot.isLaunching()) {
             bot.stopIntake();
+            bot.stopConveyor();
             //bot.conveyor.setPower(0);
             isIntaking = false;
             isOuttaking = false;
@@ -370,11 +377,13 @@ public class Bot2TeleOp extends LinearOpMode {
 
         if (bot.rightTrigger2.onPress() && !isOuttaking) {
             bot.intake();
+            bot.conveyor.setPower(1);
             // bot.conveyor.setPower(CONVEYOR_SPEED);
             isOuttaking = true;
             isIntaking = false;
         } else if (bot.rightTrigger2.onPress() && isOuttaking && !bot.isLaunching()) {
             bot.stopIntake();
+            bot.stopConveyor();
             //bot.conveyor.setPower(0);
             isIntaking = false;
             isOuttaking = false;
