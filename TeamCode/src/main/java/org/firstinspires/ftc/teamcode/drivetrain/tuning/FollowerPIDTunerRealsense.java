@@ -13,7 +13,6 @@ import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
  */
 @Config
 @Autonomous(group = "drive")
-@Disabled
 public class FollowerPIDTunerRealsense extends LinearOpMode {
     public static double DISTANCE = 48;
 

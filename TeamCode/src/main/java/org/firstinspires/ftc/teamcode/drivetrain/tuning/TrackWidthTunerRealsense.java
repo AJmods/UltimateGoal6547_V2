@@ -25,7 +25,6 @@ import org.firstinspires.ftc.teamcode.drivetrain.DriveConstants;
  */
 @Config
 @Autonomous(group = "drive")
-@Disabled
 public class TrackWidthTunerRealsense extends LinearOpMode {
     public static double ANGLE = 180; // deg
     public static int NUM_TRIALS = 5;

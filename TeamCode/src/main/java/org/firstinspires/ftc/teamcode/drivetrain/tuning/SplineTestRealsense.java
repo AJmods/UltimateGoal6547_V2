@@ -15,7 +15,6 @@ import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
  */
 @Autonomous(group = "drive")
 @Config
-@Disabled
 public class SplineTestRealsense extends LinearOpMode {
 
     public static double X = 30;

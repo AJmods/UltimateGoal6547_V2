@@ -14,7 +14,6 @@ import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
  */
 @Config
 @Autonomous(group = "drive")
-@Disabled
 public class StraightTestRealsense extends LinearOpMode {
     public static double DISTANCE = 24;
 
@@ -24,13 +23,13 @@ public class StraightTestRealsense extends LinearOpMode {
 
         telemetry.log().add("POSE ESTIMATE: " + bot.getPoseEstimate().toString());
 
-        bot.setPoseEstimate(new Pose2d(-68,-24,0));
-
-        telemetry.log().add("POSE ESTIMATE 2: " + bot.getPoseEstimate().toString());
-
-        bot.setPoseEstimate(new Pose2d(-68,-24,0));
-
-        telemetry.log().add("POSE ESTIMATE 3: " + bot.getPoseEstimate().toString());
+//        bot.setPoseEstimate(new Pose2d(-68,-24,0));
+//
+//        telemetry.log().add("POSE ESTIMATE 2: " + bot.getPoseEstimate().toString());
+//
+//        bot.setPoseEstimate(new Pose2d(-68,-24,0));
+//
+//        telemetry.log().add("POSE ESTIMATE 3: " + bot.getPoseEstimate().toString());
 
         Trajectory trajectory = bot.trajectoryBuilder(bot.getPoseEstimate())
                 .forward(DISTANCE)

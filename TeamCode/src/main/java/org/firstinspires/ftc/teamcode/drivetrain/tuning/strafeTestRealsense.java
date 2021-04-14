@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
 
 @Autonomous
 @Config
-@Disabled
 public class strafeTestRealsense extends LinearOpMode {
 
     public static double DISTANCE=24;

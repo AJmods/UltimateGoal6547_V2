@@ -38,7 +38,6 @@ import static org.firstinspires.ftc.teamcode.drivetrain.DriveConstants.kV;
  */
 @Config
 @Autonomous(group = "drive")
-@Disabled
 public class DriveVelocityPIDTunerRealsense extends LinearOpMode {
     public static double DISTANCE = 12;
 

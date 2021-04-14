@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.drivetrain.DriveTrain6547Realsense;
  */
 @Config
 @Autonomous(group = "drive")
-@Disabled
 public class TurnTestRealsense extends LinearOpMode {
     public static double ANGLE = 90; // deg
     public static double LOOPS = 1;
