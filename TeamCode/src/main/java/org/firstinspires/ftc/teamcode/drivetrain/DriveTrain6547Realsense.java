@@ -152,7 +152,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
     /**
      * Drive train motors
      */
-    private DcMotorEx leftFront, leftRear, rightRear, rightFront;
+    DcMotorEx leftFront, leftRear, rightRear, rightFront;
     private List<DcMotorEx> motors;
 
     private BNO055IMU imu;
@@ -1037,7 +1037,7 @@ public class DriveTrain6547Realsense extends MecanumDrive {
         Pose2d currentPose = getPoseEstimate();
 
         if (!isInsideField(currentPose)) {
-            RobotLog.setGlobalWarningMessage("BOT IS OUTSIDE FIELD AT POSITION %s", currentPose.toString());
+           // RobotLog.setGlobalWarningMessage("BOT IS OUTSIDE FIELD AT POSITION %s", currentPose.toString());
             messageDisplayed = true;
         } else if (messageDisplayed) {
             RobotLog.clearGlobalWarningMsg();
