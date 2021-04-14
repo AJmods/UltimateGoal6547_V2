@@ -35,13 +35,11 @@ public class Bot2 extends DriveTrain6547Realsense {
     public static double MOTOR_MAX_RPM = 5400;
     public static double MOTOR_GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
 
-    public static PIDCoefficients MOTOR_VELO_PID = new PIDCoefficients(0.003, 0, 0.000000);
-
     // Copy your feedforward gains here
-    public static double kV = 0.00051; //1 / TuningController.rpmToTicksPerSecond(TuningController.MOTOR_MAX_RPM);
-    public static double kA = 0.0001;
+    public static double kV = 0.000565; //1 / TuningController.rpmToTicksPerSecond(TuningController.MOTOR_MAX_RPM);
+    public static double kA = 0.0007;
     public static double kStatic = 0;
-
+    public static PIDCoefficients MOTOR_VELO_PID = new PIDCoefficients(.001, 0, 0.0005);
 
     private final VelocityPIDFController veloController = new VelocityPIDFController(MOTOR_VELO_PID, kV, kA, kStatic);
 
@@ -59,7 +57,6 @@ public class Bot2 extends DriveTrain6547Realsense {
     private ColorSensor colorSensor;
     private ColorSensor colorSensor2;
     public Servo rightArm;
-    public Servo leftArm;
 
     private OpMode opMode;
 
@@ -77,7 +74,6 @@ public class Bot2 extends DriveTrain6547Realsense {
 
         initRobot();
         initBot2Hardware();
-        initThrowerMotors();
     }
 
     private void initBot2Hardware() {
@@ -85,12 +81,12 @@ public class Bot2 extends DriveTrain6547Realsense {
         conveyor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         rightArm = opMode.hardwareMap.get(Servo.class, "rightArm");
-        leftArm = opMode.hardwareMap.get(Servo.class, "leftArm");
 
         colorSensor = opMode.hardwareMap.get(ColorSensor.class, "color3");
         colorSensor2 = opMode.hardwareMap.get(ColorSensor.class, "color4");
 
         //conveyor.setPower(1);
+
 
         raiseWobvator();
         openIndexer();
@@ -117,12 +113,6 @@ public class Bot2 extends DriveTrain6547Realsense {
         veloController.setTargetVelocity(targetVelo);
         veloController.setTargetAcceleration((targetVelo - lastTargetVelo) / veloTimer.seconds());
         veloTimer.reset();
-
-        if (targetVelo == 0) {
-            thrower1.setPower(0);
-            thrower2.setPower(0);
-            return;
-        }
 
         lastTargetVelo = targetVelo;
 
@@ -170,7 +160,6 @@ public class Bot2 extends DriveTrain6547Realsense {
 
     public void lowerArms() {
         //rightArm.setPosition(0);
-        //leftArm.setPosition(1);
     }
     public void raiseArms() {
         //rightArm.setPosition(1);
@@ -190,27 +179,19 @@ public class Bot2 extends DriveTrain6547Realsense {
 //        updateThrower();
 //    }
 
-    @Override
-    public void setThrowerVelocity(double angularRate, AngleUnit angleUnit) {
-        if (angleUnit == AngleUnit.RADIANS) {
-            targetVelo = (Math.toDegrees(angularRate)/360) * 28;
-            targetVelocity = Math.toDegrees(angularRate);
-        } else {
-            targetVelo = angularRate/360 * 28;
-            targetVelocity = angularRate;
-        }
-        RobotLog.v("Set Target Velc to " + targetVelo);
-        //super.setThrowerVelocity(angularRate, angleUnit);
-//        if (angleUnit == AngleUnit.DEGREES) {
-//            angularRate/=360; //convert to REV/s
-//            angularRate*=28; //convert to ticksPerSec
-//        } else if (angleUnit == AngleUnit.RADIANS) {
-//            angularRate/=Math.toRadians(360); //convert to REV/s
-//            angularRate*=28; //convert to ticksPerSec
-//        }
-//
-//        setThrowerVelocity(angularRate);
-    }
+//    @Override
+//    public void setThrowerVelocity(double angularRate, AngleUnit angleUnit) {
+//        super.setThrowerVelocity(angularRate, angleUnit);
+////        if (angleUnit == AngleUnit.DEGREES) {
+////            angularRate/=360; //convert to REV/s
+////            angularRate*=28; //convert to ticksPerSec
+////        } else if (angleUnit == AngleUnit.RADIANS) {
+////            angularRate/=Math.toRadians(360); //convert to REV/s
+////            angularRate*=28; //convert to ticksPerSec
+////        }
+////
+////        setThrowerVelocity(angularRate);
+//    }
 
     @Override
     public double getThrowerVelocityFromPosition(Pose2d currentPos) {
@@ -254,17 +235,13 @@ public class Bot2 extends DriveTrain6547Realsense {
     @Override
     public void update() {
         super.update();
-        updateThrower();
-        if (!isLaunching() && conveyor.getCurrentPosition() > CONVEYOR_TARGET_POS) {
-            stopConveyor();
-            zeroConveyor();
-        }
+
     }
 
     @Override
     public void launchRing() {
         conveyor.setPower(1);
-        //intake();
+        intake();
         isLaunching = true;
     }
 
