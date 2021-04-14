@@ -20,6 +20,7 @@ public class RevCOlorSensorV3Test extends LinearOpMode {
     public static double targetPos = 1000;
 
     private ColorSensor colorSensor;
+    private ColorSensor colorSensor2;
 
     Bot2 bot;
     @Override
@@ -27,7 +28,8 @@ public class RevCOlorSensorV3Test extends LinearOpMode {
 
         bot = new Bot2(this);
 
-        colorSensor = hardwareMap.get(ColorSensor.class, "color2");
+        colorSensor = hardwareMap.get(ColorSensor.class, "color3");
+        colorSensor2 = hardwareMap.get(ColorSensor.class, "color4");
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
@@ -50,24 +52,29 @@ public class RevCOlorSensorV3Test extends LinearOpMode {
                 bot.intake.setPower(0);
             }
 
-            if (isRingAtConveyor() && bot.intake.getPower() >= 0) {
+            if (isRingAtConveyor() && bot.conveyor.getPower() >=0) {
                 bot.conveyor.setPower(1);
                 bot.intake();
-            }
-
-            if (bot.conveyor.getCurrentPosition() > targetPos) {
+            } else {
                 bot.stopConveyor();
-                zeroConveyor();
             }
 
             double r = colorSensor.red();
             double g = colorSensor.green();
             double b = colorSensor.blue();
-            telemetry.addData("is ring at conveyor", isRingAtConveyor());
+
+            double r2 = colorSensor2.red();
+            double g2 = colorSensor2.green();
+            double b2 = colorSensor2.blue();
+            telemetry.addData("Color1: Does See Ring at conveyor", isRingAtConveyor(colorSensor));
+            telemetry.addData("Color2: Does See Ring at conveyor", isRingAtConveyor(colorSensor2));
             telemetry.addData("Conveyor Pos", bot.conveyor.getCurrentPosition());
             telemetry.addData("R", r);
             telemetry.addData("G", g);
             telemetry.addData("B", b);
+            telemetry.addData("R2", r2);
+            telemetry.addData("G2", g2);
+            telemetry.addData("B2", b2);
             //telemetry.addData("R 2", colorSensor.getNormalizedColors().red);
             telemetry.update();
 
@@ -88,6 +95,10 @@ public class RevCOlorSensorV3Test extends LinearOpMode {
     }
 
     public boolean isRingAtConveyor() {
-        return colorSensor.red() > 16;
+        return isRingAtConveyor(colorSensor) || isRingAtConveyor(colorSensor2);
+    }
+
+    public boolean isRingAtConveyor(ColorSensor colorSensor) {
+        return colorSensor.blue() < 200;
     }
 }

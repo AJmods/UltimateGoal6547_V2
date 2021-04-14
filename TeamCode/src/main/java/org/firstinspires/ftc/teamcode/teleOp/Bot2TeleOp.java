@@ -46,7 +46,7 @@ public class Bot2TeleOp extends LinearOpMode {
     public static double PowerShot3Modifer = 1;
 
     public static boolean USE_CALCULATED_VELOCITY = false;
-    public static double REV_PER_SEC = -48;
+    public static double REV_PER_SEC = 48;
     public static double VELO_MUTIPLIER = 1;
     public static double TARGET_HEIGHT = FieldConstants.RED_GOAL_HEIGHT;
 
@@ -161,9 +161,6 @@ public class Bot2TeleOp extends LinearOpMode {
 
             bot.setPacketAction((packet, fieldOverlay) -> {
 
-                packet.addLine("Ready to Throw: " + bot.isReadyToThrow());
-                packet.addLine("Target Velocity: " + bot.getTargetVelocity());
-
                 if (!USE_CALCULATED_VELOCITY) {
                    packet.addLine("USING USER-INPUTED VELOCITY");
                 } else {
@@ -218,7 +215,6 @@ public class Bot2TeleOp extends LinearOpMode {
             });
 
 
-            telemetry.addData("Ready to Throw", bot.isReadyToThrow());
             telemetry.addData("CONVEYOR AMPS: ", bot.conveyor.getCurrent(CurrentUnit.AMPS));
             telemetry.addData("Intake AMPS:", bot.intake.getCurrent(CurrentUnit.AMPS));
             telemetry.addData("REALSENSE ANGLE (deg) ", Math.toDegrees(bot.getRawExternalHeading()));
@@ -336,14 +332,6 @@ public class Bot2TeleOp extends LinearOpMode {
             bot.mode = DriveTrain6547Realsense.Mode.IDLE;
         }
 
-        if (bot.a2.onPress() && bot.isReadyToThrow()) {
-           bot.launchRing();
-           // RobotLog.v("Thrower motor 0 VELO when launched: " + (bot.getThrowerVelocity(AngleUnit.DEGREES)[0] / 360) + "REV/s");
-        }
-        if (bot.a2.onRelease()) {
-            bot.stopLaunch();
-        }
-
         if (bot.b2.onPress()) {
             grab.toggle();
             opMode.telemetry.log().add("B onPress");
@@ -351,7 +339,7 @@ public class Bot2TeleOp extends LinearOpMode {
         if (bot.y2.onPress()) lowerWobvator.toggle();
 
         if (grab.output()) {
-            opMode.telemetry.log().add("grabinggg");
+            opMode.telemetry.log().add("grabing");
             bot.grabWobbleGoal();
         } else{
             bot.openWobbleGrabberHalfway();
@@ -363,13 +351,12 @@ public class Bot2TeleOp extends LinearOpMode {
 
         if (bot.leftTrigger2.onPress() && !isIntaking && !bot.isLaunching()) {
             bot.outtake();
-            bot.conveyor.setPower(-1);
+        //    bot.conveyor.setPower(-1);
             //bot.conveyor.setPower(CONVEYOR_SPEED);
             isIntaking = true;
             isOuttaking = false;
         } else if (bot.leftTrigger2.onPress() && isIntaking && !bot.isLaunching()) {
             bot.stopIntake();
-            bot.stopConveyor();
             //bot.conveyor.setPower(0);
             isIntaking = false;
             isOuttaking = false;
@@ -377,13 +364,14 @@ public class Bot2TeleOp extends LinearOpMode {
 
         if (bot.rightTrigger2.onPress() && !isOuttaking) {
             bot.intake();
-            bot.conveyor.setPower(1);
+            if (!bot.isRingAtConveyor()) bot.stopConveyor();
+           // bot.conveyor.setPower(1);
             // bot.conveyor.setPower(CONVEYOR_SPEED);
             isOuttaking = true;
             isIntaking = false;
         } else if (bot.rightTrigger2.onPress() && isOuttaking && !bot.isLaunching()) {
             bot.stopIntake();
-            bot.stopConveyor();
+           // bot.stopConveyor();
             //bot.conveyor.setPower(0);
             isIntaking = false;
             isOuttaking = false;
@@ -394,49 +382,6 @@ public class Bot2TeleOp extends LinearOpMode {
             bot.stopIntake();
         }
 
-        if (bot.isRingAtConveyor() && !bot.isLaunching()) {
-            bot.loadRingInConveyor();
-        }
-
-        if (bot.rightBumper2.isPressed()) {
-            bot.conveyor.setPower(-1);
-        }
-
-        if (bot.dpadUp2.onPress()) {
-            bot.conveyor.setPower(0);
-            bot.stopIntake();
-        }
-
-        if (bot.leftBumper2.onPress()) {
-            conveyTime.reset();
-            TurnOnThrower.toggle();
-        }
-        if (bot.dpadDown2.isPressed()) {
-            bot.setThrowerVelocity(20 * -360, AngleUnit.DEGREES);
-        }
-        else if (bot.dpadDown2.onRelease() && !TurnOnThrower.output()) {
-            bot.stopThrower();
-        }
-
-        if (TurnOnThrower.output() && !USE_CALCULATED_VELOCITY) {
-            if (conveyTime.seconds() > TIME_TO_CONVEY) {
-                if (bot.conveyor.getPower() < 0) {
-                    bot.stopConveyor();
-                    bot.stopIntake();
-                }
-                bot.setThrowerVelocity(REV_PER_SEC * 360, AngleUnit.DEGREES);
-                bot.updateLightsBasedOnThrower();
-            } else {
-                bot.conveyor.setPower(-1);
-                bot.outtake();
-            }
-        } else if (TurnOnThrower.output() && USE_CALCULATED_VELOCITY) {
-            bot.setThrowerVelocity(bot.getThrowerVelocityFromPosition(pos, AngleUnit.DEGREES)*VELO_MUTIPLIER, AngleUnit.DEGREES);
-            bot.updateLightsBasedOnThrower();
-        } else {
-            bot.setThrowerVelocity(0, AngleUnit.DEGREES);
-            bot.lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
-        }
     }
     public void doThrower() {
         if (bot.a2.onPress()) {
@@ -447,7 +392,7 @@ public class Bot2TeleOp extends LinearOpMode {
             bot.stopLaunch();
         }
         Pose2d pos = bot.getPoseEstimate();
-        if (bot.isRingAtConveyor()) {
+        if (bot.isRingAtConveyor() && bot.intake.getPower() >=0) {
             bot.loadRingInConveyor();
         }
 

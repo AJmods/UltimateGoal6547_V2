@@ -42,7 +42,7 @@ public class TeleOpThrowerPID extends LinearOpMode {
     public static double kA = 0.0005;
     public static double kStatic = 0;
 
-    public static double targetTicksPerSec=1400;
+    public static double targetTicksPerSec=1500;
     public static double leeway=28;
 
     // Timer for calculating desired acceleration
@@ -117,16 +117,22 @@ public class TeleOpThrowerPID extends LinearOpMode {
                 telemetry.log().add("thing pressed");
             }
 
+            if (bot.isRingAtConveyor() && bot.intake.getPower() >=0) {
+                bot.loadRingInConveyor();
+            } else if (!bot.isLaunching()) {
+                bot.stopConveyor();
+            }
+
             if (bot.a2.isPressed()) {
                 if (isReadyToThrow()) bot.launchRing();
                 else bot.stopConveyor();
-            } else if (bot.a2.onRelease()){
+            } else if (bot.a2.onRelease() && !bot.isRingAtConveyor()){
                 bot.stopLaunch();
             }
 
             if (turnOnThrower.output() && conveyTime.seconds() > TIME_TO_CONVEY) {
                 updateThrower(targetTicksPerSec);
-                if (!bot.isLaunching()) bot.stopConveyor();
+                if (!bot.isLaunching() && !bot.isRingAtConveyor()) bot.stopConveyor();
             } else if (turnOnThrower.output() && conveyTime.seconds() < TIME_TO_CONVEY){
                 bot.conveyor.setPower(-1);
                 updateThrower(0);
